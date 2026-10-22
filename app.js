@@ -22,6 +22,7 @@
       $('panel-' + name).hidden = !selected;
     }
     window.renderShamirHand?.();
+    window.renderShamirExtra?.();
   }
   tabs.forEach((name, index) => {
     const tab = $('tab-' + name);
@@ -111,7 +112,9 @@
   $('share-count').addEventListener('change',()=>{s.n=Number($('share-count').value);resetReal();controls();render();});
   $('secret').addEventListener('change',()=>{const v=Number($('secret').value);if(!Number.isInteger(v)||v<0||v>=s.p){$('hand-status').textContent=t('invalidInput');$('secret').value=String(s.c[0]);return;}s.c[0]=v;$('hand-status').textContent='';resetReal();render();});
   $('coefficient-inputs').addEventListener('change',e=>{const i=Number(e.target.dataset.coefficient),v=Number(e.target.value);if(!i)return;if(!Number.isInteger(v)||v<0||v>=s.p){$('hand-status').textContent=t('invalidInput');e.target.value=String(s.c[i]);return;}s.c[i]=v;$('hand-status').textContent='';resetReal();render();});
-  $('random-coefficients').addEventListener('click',()=>{const b=new Uint8Array(s.k-1);crypto.getRandomValues(b);for(let i=1;i<s.k;i++)s.c[i]=b[i-1]%s.p;s.moved='';resetReal();controls();render();});
+  $('random-coefficients').addEventListener('click',()=>{const limit=256-256%s.p;
+    for(let i=1;i<s.k;i++){let value;do{const b=new Uint8Array(1);crypto.getRandomValues(b);value=b[0];}while(value>=limit);s.c[i]=value%s.p;}
+    s.moved='';resetReal();controls();render();});
   $('reset-hand').addEventListener('click',()=>{Object.assign(s,{p:13,k:3,n:5,c:[5,4,2],selected:[1,2,3],candidate:5,all:false,leading:false,moved:''});resetReal();controls();render();});
   $('share-picks').addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;const x=Number(b.dataset.pick);s.selected=s.selected.includes(x)?s.selected.filter(v=>v!==x):s.selected.length<s.k?[...s.selected,x].sort((a,b)=>a-b):s.selected;s.moved='';render();});
   $('select-k').addEventListener('click',()=>{s.selected=Array.from({length:s.k},(_,i)=>i+1);render();});
@@ -129,4 +132,90 @@
   realSvg.addEventListener('pointerup',e=>{if(s.realDrag===undefined)return;const x=s.realDrag;s.realDrag=undefined;const r=realSvg.getBoundingClientRect(),y=Math.max(0,Math.min(s.p-1,Math.round((280-(e.clientY-r.top)*300/r.height)*(s.p-1)/250)));if(x===0)s.realZero=y;else s.realY[x]=y;real();});
   realSvg.addEventListener('keydown',e=>{const point=e.target.closest('[data-real-x]');if(!point||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const x=Number(point.dataset.realX),delta=e.key==='ArrowUp'?1:-1;if(x===0)s.realZero=Math.max(0,Math.min(s.p-1,s.realZero+delta));else s.realY[x]=Math.max(0,Math.min(s.p-1,s.realY[x]+delta));real();realSvg.querySelector(`[data-real-x="${x}"]`)?.focus();});
   resetReal();controls();render();
+}());
+
+/* Bytes, fixed pitfall demos, and the reading section. */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id), G = ShamirGF, P = ShamirPitfalls;
+  const t = key => ShamirMessages[document.documentElement.lang][key] || key;
+  const E = (tag, value, cls) => { const el=document.createElement(tag);if(value!==undefined)el.textContent=String(value);if(cls)el.className=cls;return el; };
+  const state = { message:'MEET AT DAWN', k:3, n:5, shares:[], selected:[1,2,3], error:'', composing:false };
+  const toHex = value => value.toString(16).toUpperCase().padStart(2,'0');
+  function choices(id, from, to, value) { $(id).replaceChildren(...Array.from({length:to-from+1},(_,i)=>{const o=E('option',from+i);o.value=String(from+i);o.selected=from+i===value;return o;})); }
+  function table(parent, headings, rows) { const el=E('table'),head=E('thead'),top=E('tr'),body=E('tbody');
+    headings.forEach(value=>top.append(E('th',value)));head.append(top);
+    rows.forEach(cells=>{const row=E('tr');cells.forEach(value=>row.append(E('td',value)));body.append(row);});el.append(head,body);parent.replaceChildren(el); }
+  function split() {
+    state.message=$('byte-message').value;
+    const bytes=new TextEncoder().encode(state.message);
+    state.error=!bytes.length?'byteEmpty':bytes.length>32?'byteTooLong':'';
+    if(state.error){state.shares=[];renderBytes();return;}
+    try { state.shares=G.split256(bytes,state.k,state.n,count=>{const out=new Uint8Array(count);crypto.getRandomValues(out);return out;}); }
+    catch (_) { state.error='byteRandomError';state.shares=[]; }
+    state.selected=Array.from({length:state.k},(_,i)=>i+1);renderBytes();
+  }
+  function readable(bytes) {
+    try { const decoded=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+      return decoded.replace(/[\u0000-\u001f\u007f-\u009f]/g,char=>`\\x${char.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0')}`);
+    } catch (_) { return t('byteInvalidUtf8'); }
+  }
+  function renderBytes(){
+    $('byte-error').textContent=state.error?t(state.error):'';
+    if(!state.shares.length){$('byte-table').replaceChildren();$('byte-secret-hex').textContent='';$('byte-picks').replaceChildren();$('byte-weights').replaceChildren();$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';return;}
+    const secret=new TextEncoder().encode(state.message),head=['x',...Array.from({length:secret.length},(_,i)=>String(i))];
+    const rows=[[t('byteSecret'),...Array.from(secret,toHex)],...state.shares.map(share=>[`#${share.x}`,...Array.from(share.y,toHex)])];
+    table($('byte-table'),head,rows);
+    $('byte-secret-hex').textContent=`${t('byteSecret')}: ${P.hex(secret)} (${secret.length} bytes)`;
+    $('byte-picks').replaceChildren(...state.shares.map(share=>{const button=E('button',`#${share.x}`);button.type='button';button.dataset.bytePick=String(share.x);button.setAttribute('aria-pressed',String(state.selected.includes(share.x)));return button;}));
+    if(state.selected.length<state.k){$('byte-weights').replaceChildren();$('byte-restored-hex').textContent=`${t('needShares')}: ${state.k-state.selected.length}`;$('byte-restored-text').textContent='';return;}
+    const chosen=state.selected.map(x=>state.shares[x-1]),result=G.combine256(chosen,state.k);
+    table($('byte-weights'),[t('byteShare'),t('byteWeight')],result.terms.map(row=>[`#${row.x}`,toHex(row.lambda)]));
+    $('byte-restored-hex').textContent=`${t('restoredHex')}: ${P.hex(result.out)}`;
+    $('byte-restored-text').textContent=`${t('restoredText')}: ${readable(result.out)}`;
+  }
+  function multiplication(){let a=0x57,b=0x13,result=0;const rows=[];
+    for(let step=0;step<8;step++){const added=b&1?a:0;result^=added;const carry=a>>>7;
+      const next=((a<<1)&255)^(carry?0x1b:0);rows.push([step+1,toHex(a),toHex(b),toHex(added),toHex(next)]);a=next;b>>>=1;}
+    table($('multiply-steps'),[t('multiplyStep'),t('multiplyA'),t('multiplyB'),t('multiplyAdd'),t('multiplyReduce')],rows);
+    $('multiply-log').textContent=`${t('multiplyLog')} log₀₃(57)=${G.LOG[0x57]}, log₀₃(13)=${G.LOG[0x13]}, exp₀₃[${G.LOG[0x57]+G.LOG[0x13]}]={${toHex(G.mul256Table(0x57,0x13))}}. ${t('sum')}: {${toHex(result)}}.`;
+  }
+  const demo=P.demo();
+  function demoCard(id, entries){const holder=$(id);holder.replaceChildren();
+    for(const [label,value] of entries){const item=E('div',undefined,'demo-step');item.append(E('strong',t(label)),E('p',value));holder.append(item);}
+  }
+  function renderPitfalls(){const layer=$('tamper-layer').value;
+    const original=demo.originalCrcs[1].toString(16).toUpperCase().padStart(8,'0'),changed=demo.changedCrc.toString(16).toUpperCase().padStart(8,'0');
+    const guarded=layer==='none'?t('tamperNone'):layer==='crc'?`${t('tamperCrc')} ${original} → ${changed}`:`${t('tamperDigest')} ${P.hex(demo.reconstructed.slice(-4))} ≠ ${P.hex(P.fingerprint(demo.reconstructed.slice(0,-4)))}`;
+    demoCard('tamper-output',[['what',`${t('tamperWhat')} E=${P.hex(demo.error)}; λ₂=${toHex(G.combine256(demo.shares.slice(0,3),3).terms[1].lambda)}`],
+      ['unsafe',`${t('tamperUnsafe')} ${P.hex(demo.changed.y)}; {2,4,5} → ${P.hex(demo.reconstructed245.slice(0,12))}`],['guarded',guarded],['lesson',t('tamperLesson')]]);
+    demoCard('zero-output',[['what',t('zeroWhat')],['unsafe',t('zeroUnsafe')],['guarded',t('zeroGuard')],['lesson',t('zeroLesson')]]);
+    demoCard('short-output',[['what',t('shortWhat')],['unsafe',`${t('shortUnsafe')} ${P.hex(demo.missing)}`],['guarded',t('shortGuard')],['lesson',t('shortLesson')]]);
+  }
+  const sources=[
+    [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf']],
+    [['secondary','https://cacr.uwaterloo.ca/hac/about/chap12.pdf']],
+    [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf'],['secondary','https://cacr.uwaterloo.ca/hac/about/chap12.pdf']],
+    [['primary','https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf'],['primary','https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf']],
+    [['primary','https://research.ibm.com/publications/how-to-share-a-secret-with-cheaters'],['primary','https://www.cs.umd.edu/~gasarch/TOPICS/secretsharing/feldmanVSS.pdf'],['primary','https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF']],
+    [['primary','https://osv.dev/vulnerability/GO-2023-1709'],['primary','https://www.ledger.com/blog/extracting-seeds'],['secondary','https://en.bitcoin.it/wiki/Shamir_Secret_Snakeoil'],['primary','https://github.com/bitcoin/bips/blob/master/bip-0093.mediawiki']],
+    [['primary','https://github.com/satoshilabs/slips/blob/master/slip-0039.md'],['primary','https://github.com/bitcoin/bips/blob/master/bip-0093.mediawiki']],
+    [['primary','https://github.com/ipusiron/visual-cryptography-cipherlab'],['primary','https://github.com/ipusiron/sha256-byte-inspector'],['primary','https://github.com/ipusiron/otp-animation']]
+  ];
+  function lessons(){const holder=$('lessons');holder.replaceChildren();for(let i=1;i<=8;i++){
+    const section=E('section',undefined,'lesson-card');section.append(E('h3',t(`lesson${i}`)),E('p',t(`lesson${i}Text`)));
+    const frame=E('div',undefined,'table-frame');table(frame,[t('lesson'),t('byteShare')],[[String(i),t(`lesson${i}Row`)]]);section.append(frame);
+    const links=E('p',undefined,'source-links');for(const [type,url] of sources[i-1]){const a=E('a',`${t(type)}: ${new URL(url).hostname}`);a.href=url;a.target='_blank';a.rel='noopener noreferrer';links.append(a,E('span',' · '));}section.append(links);holder.append(section);
+  }}
+  window.renderShamirExtra=()=>{renderBytes();multiplication();renderPitfalls();lessons();};
+  choices('byte-k',2,8,state.k);choices('byte-n',state.k,8,state.n);
+  $('byte-message').addEventListener('compositionstart',()=>{state.composing=true;});
+  $('byte-message').addEventListener('compositionend',()=>{state.composing=false;split();});
+  $('byte-message').addEventListener('input',()=>{if(!state.composing)split();});
+  $('byte-k').addEventListener('change',()=>{state.k=Number($('byte-k').value);state.n=Math.max(state.k,state.n);choices('byte-n',state.k,8,state.n);split();});
+  $('byte-n').addEventListener('change',()=>{state.n=Number($('byte-n').value);split();});
+  $('byte-picks').addEventListener('click',event=>{const button=event.target.closest('[data-byte-pick]');if(!button)return;const x=Number(button.dataset.bytePick);
+    state.selected=state.selected.includes(x)?state.selected.filter(value=>value!==x):state.selected.length<state.k?[...state.selected,x].sort((a,b)=>a-b):state.selected;renderBytes();});
+  $('tamper-layer').addEventListener('change',renderPitfalls);
+  split();multiplication();renderPitfalls();lessons();
 }());

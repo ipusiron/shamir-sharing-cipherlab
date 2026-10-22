@@ -57,9 +57,25 @@
       <p id="real-result" class="result"></p><div id="real-picks" class="actions"></div>
       <h3 data-i18n="integerTitle"></h3><p data-i18n="integerIntro"></p><div class="table-frame"><table><thead><tr><th>x</th><th>f(x) ℤ</th><th>f(x) mod x</th></tr></thead><tbody id="integer-table"></tbody></table></div><p id="integer-result"></p>
     </section>
-    <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden><h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p></section>
-    <section id="panel-pitfalls" class="panel" role="tabpanel" aria-labelledby="tab-pitfalls" hidden><h2 data-i18n="pitfalls"></h2><p data-i18n="pitfallsIntro"></p></section>
-    <details class="panel"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p></details>
+    <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden>
+      <h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p>
+      <p data-i18n="fieldRule"></p>
+      <div class="settings-grid"><label><span data-i18n="byteInput"></span><input id="byte-message" type="text" value="MEET AT DAWN" autocomplete="off" spellcheck="false"></label>
+        <label><span>k</span><select id="byte-k"></select></label><label><span>n</span><select id="byte-n"></select></label></div>
+      <p class="caution" data-i18n="educational"></p><p id="byte-error" role="status"></p>
+      <h3 data-i18n="byteDistribute"></h3><p id="byte-secret-hex" class="result"></p><div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
+      <h3 data-i18n="byteRestore"></h3><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
+      <p id="byte-restored-hex" class="result"></p><p id="byte-restored-text" class="result"></p>
+      <h3 data-i18n="multiplication"></h3><p data-i18n="multiplyIntro"></p><div id="multiply-steps" class="table-frame"></div>
+      <p id="multiply-log"></p>
+    </section>
+    <section id="panel-pitfalls" class="panel" role="tabpanel" aria-labelledby="tab-pitfalls" hidden>
+      <h2 data-i18n="pitfalls"></h2><p data-i18n="pitfallsIntro"></p><p data-i18n="demoOnly"></p>
+      <div class="pitfall-card"><h3 data-i18n="tamperTitle"></h3><label><span data-i18n="checkLayer"></span><select id="tamper-layer"><option value="none" data-i18n="noCheck"></option><option value="crc" data-i18n="crcCheck"></option><option value="fingerprint" data-i18n="fingerprintCheck"></option></select></label><div id="tamper-output"></div></div>
+      <div class="pitfall-card"><h3 data-i18n="zeroTitle"></h3><div id="zero-output"></div></div>
+      <div class="pitfall-card"><h3 data-i18n="shortTitle"></h3><div id="short-output"></div></div>
+    </section>
+    <details class="panel"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p><div id="lessons"></div></details>
   </main>
   <footer><p data-i18n="privacy"></p><a href="https://github.com/ipusiron/shamir-sharing-cipherlab" data-i18n="source"></a></footer>
   <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title" data-i18n="help"></h2><p data-i18n="helpText"></p><button id="close-help" type="button" data-i18n="close"></button></dialog>
