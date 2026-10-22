@@ -10,9 +10,15 @@ English · [日本語](README.md)
 
 **Day123 - 200 Security Tools with Generative AI**
 
-ShamirSharing CipherLab is a hands-on teaching tool for Shamir secret sharing, using a grid, byte tables, and deliberately unsafe models. With k shares, one polynomial is fixed and the secret returns. With k−1 shares, exactly one polynomial fits every possible secret, so those shares reveal nothing about it.
+ShamirSharing CipherLab is a hands-on teaching tool for Shamir secret sharing, using a grid, byte tables, and deliberately unsafe models. Shamir and Blakley independently proposed secret sharing in 1979. This tool implements Shamir’s polynomial scheme with Lagrange interpolation; it does not implement Blakley’s geometric scheme.
 
-Use an invented number for S in “Trace by hand” and a practice phrase in “Bytes”. Do not use this teaching tool to split or store passwords, seed phrases, or keys that you actually use. This tool does not provide share formats, printing, QR codes, or storage advice.
+In Shamir’s (k,n) threshold scheme, n shares are made from secret s and given to n participants, one each. It has two conditions.
+
+① Any k of the n participants can combine their shares to recover s.
+
+② With only k−1 participants, s cannot be recovered, and their shares reveal no information about it. The grid shows how a polynomial fits every possible secret.
+
+Use an invented number for s in “Trace by hand” and a practice phrase in “Bytes”. Do not use this teaching tool to split or store passwords, seed phrases, or keys that you actually use. This tool does not provide share formats, printing, QR codes, or storage advice.
 
 ---
 
@@ -40,39 +46,63 @@ The same four states in Japanese appear in the [Japanese README](README.md).
 | Step | Action | What you can see |
 |---|---|---|
 | Trace by hand | Distribute in GF(p), reconstruct with k shares, overlay k−1 candidates | Lagrange weights and one polynomial per candidate secret |
-| Bytes | Split a short UTF-8 phrase in GF(2⁸) and recover with k shares | XOR, eight shift/reduce steps, and a display-only log/exp table |
+| Bytes | Split a short UTF-8 phrase in GF(2⁸) and recover with k shares | A polynomial per byte, XOR, and eight shift/reduce steps |
 | Pitfalls | Compare tampering, x=0, and too few shares | The differences among no check, CRC-32, and an embedded fingerprint |
 
-In `(n,k)`, n shares are created, and at least k of them are needed to reconstruct the secret. `p` is the prime used for arithmetic. Lagrange interpolation of k shares gives a polynomial of degree at most k−1: degree 0 for k=1, degree 1 for k=2, and degree 2 for k=3. With the default `k=3`, the shares come from `f(x)=f(0)+a₁x+a₂x² (mod p)`, and interpolation recovers `f(0)` from three selected points.
+Following the book’s notation, `D` is the dealer, `s` the secret, and `vᵢ=f(i)` share number `i`. The `(k,n)` threshold scheme creates n shares and recovers s from any k of them. Choose a prime `p>max(s,n)` for arithmetic. The polynomial has degree at most k−1: degree 0 for k=1, degree 1 for k=2, and degree 2 for k=3. The default `k=3` uses `f(x)=s+a₁x+a₂x² (mod p)` and recovers `s=f(0)` by Lagrange interpolation.
 
-On a share button labeled `#i (x,y)`, `#i` is the share number and `(x,y)` is its point. Here `x=i` and `y=f(x)` is the share value. The earlier `(n,k)` gives the total number of shares and the reconstruction threshold, not point coordinates. For example, `n=7` creates seven shares numbered `#1` through `#7`.
+In the book, the share is the value `vᵢ`. On this tool’s `#i (i,vᵢ)` button, `#i` is its identifier and the parentheses contain the identifier and value used for reconstruction. The earlier `(k,n)` gives the threshold and total number of shares, not point coordinates. For example, `n=7` creates seven shares numbered `#1` through `#7`.
 
-Below the “① Distribute” table, each share is written as `(i, f(i)) = (i, substituted expression mod p) = (i, share value)`. Choosing `n=7` shows seven lines; changing the coefficients or `p` updates each expression and value.
+Below the “① Distribute” table, each line shows share value `vᵢ=f(i)` and the reconstruction pair `(i,vᵢ)=(i,f(i))=(i, substituted expression mod p)`. Choosing `n=7` shows seven lines; changing coefficients or `p` updates them.
 
-The default GF(13) example is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its shares are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the reconstruction weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes the candidate `S=1`.
+The tool’s default GF(13) example is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its reconstruction pairs are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes candidate `s=1`.
 
 Coefficients are allowed to be zero, so the polynomial has degree *at most* k−1. With `k=1`, every share is simply the secret: copying instead of splitting.
 
+## 📚 Follow 『暗号技術のすべて』 alongside the tool
+
+Section 9.2 (pp. 652–661) and the “Trace by hand” tab make a useful pair. Follow the definition, interpolation, reconstruction, and the reason fewer than k shares leave the secret undetermined. Lagrange interpolation is Shamir’s reconstruction calculation, not a separate secret-sharing scheme.
+
+| Book pages | Try in the tool |
+|---|---|
+| 652–654 | Check the `(k,n)` threshold, dealer `D`, secret `s`, and shares `vᵢ=f(i)` in the introduction and “① Distribute”. |
+| 655–657 | Compare the book’s three points `(a,A),(b,B),(c,C)` with the selected `(xᵢ,yᵢ)` and weights `λᵢ(0)` under “② Reconstruct”. Select only two shares and overlay the remaining candidates on the grid. |
+| 658–659 | Enter the book’s example: `p=17, k=3, n=5, s=13, a₁=10, a₂=2`. The shares are `f(1)…f(5)=8,7,10,0,11`. Select `#1, #3, #5` and recover `s=13`. |
+| 660–661 | Use “Pitfalls” to explore incorrect shares and verification. The book’s VSS extensions have different capabilities from this tool’s CRC and fingerprint models. |
+
+The tool starts with a smaller GF(13) example. Use “Reset example” after trying the values from the book.
+
 ## 📖 How to use it
 
-1. In “Trace by hand”, vary `p, k, n, S, a₁…` and read the distribution and reconstruction tables. Enter coefficients or draw them with cryptographic randomness.
+1. In “Trace by hand”, vary `p, k, n, s, a₁…` and read the distribution and reconstruction tables. Enter coefficients or draw them with cryptographic randomness.
 2. Select `k−1 shares`. Advance one candidate at a time or overlay all of them. Toggle the red nonzero-leading-coefficient switch to see a candidate vanish.
-3. Drag a grid point, or select it and tap another cell in the same column. Clicking a point focuses it, and up and down arrow keys move it one cell. With k shares, the table and `ΔS=λᵢ·Δ (mod p)` update together. With fewer than k−1 shares, the curve is not unique; faint points show one example from the current polynomial.
-4. Drag points on the real-number curve to change its y-intercept. With k−1 points, you can move the intercept and still pass through them. Ordinary integers and real numbers leak remainders; compare with the finite-field grid.
+3. Drag a grid point, or select it and tap another cell in the same column. Clicking a point focuses it, and up and down arrow keys move it one cell. With k shares, the table and `Δs=λᵢ(0)·Δ (mod p)` update together. With fewer than k−1 shares, the curve is not unique; faint points show one example from the current polynomial.
+4. Drag points on the real-number curve to change its y-intercept. With k−1 points, you can move the intercept and still pass through them. After using the curve to see the relationship between points and intercept, use the integer table to observe leaked remainders, then compare with the finite-field grid.
 5. In “Bytes”, enter up to 32 UTF-8 bytes. Split with `2≤k≤n≤8`, select k shares, and recover. Hex is always shown; text appears only for valid UTF-8, with controls escaped.
 6. In “Pitfalls”, switch the checking layer. All three cards use fixed `MEET AT DAWN` data rather than your input.
 
 Open “?” at the top right for instructions, use cases, and input and storage information. The theory sections and sources are in a collapsible section of Help.
 
+### Processing added in “Bytes”
+
+The book explains Shamir’s scheme through numbers in GF(p). “Bytes” extends the idea to a short string on a computer. The tab explains each stage on screen.
+
+1. Convert the input to UTF-8. A Japanese character can occupy several bytes, so the 32-byte limit counts bytes rather than characters.
+2. Treat each byte as a separate secret `s` and build a polynomial over GF(2⁸). Draw coefficients with `crypto.getRandomValues`. Share `#i` is the sequence of results at identifier `i` across all byte positions. The table shows each byte in hex.
+3. Select k shares with distinct identifiers. At each byte position, multiply a share byte by its `λᵢ(0)` weight in GF(2⁸), then XOR the products to recover that byte. Reconstruction stops with fewer than k shares.
+4. Read the recovered bytes in hex first. Display them as text only if they form valid UTF-8, and escape control characters, so the text view does not hide the byte result.
+
+GF(2⁸) addition is XOR. Multiplication uses the irreducible polynomial `x⁸+x⁴+x³+x+1`. Compare the eight-step multiplication with the display-only log/exp table further down the tab. This teaching tool does not specify a share file format or a way to store and transfer shares.
+
 ## 🔬 Method and limits
 
-In GF(p), `λᵢ = Πⱼ≠ᵢ xⱼ/(xⱼ−xᵢ)` and `S = Σᵢ λᵢyᵢ`. GF(2⁸) uses the same interpolation with XOR for addition and subtraction. Its irreducible polynomial is `x⁸+x⁴+x³+x+1`; `0x11B` is the code notation. The display-only log/exp table uses generator `{03}`, as in the SLIP-39 reference implementation. The bundled tests check that `{03}` has order 255 and `{02}` has order 51.
+In GF(p), `λᵢ(0) = Πⱼ≠ᵢ xⱼ/(xⱼ−xᵢ)` and `s = Σᵢ λᵢ(0)yᵢ`. GF(2⁸) uses the same interpolation with XOR for addition and subtraction. Its irreducible polynomial is `x⁸+x⁴+x³+x+1`; `0x11B` is the code notation. The display-only log/exp table uses generator `{03}`, as in the SLIP-39 reference implementation. The bundled tests check that `{03}` has order 255 and `{02}` has order 51.
 
 Actual splitting and reconstruction use eight shifts and masks, without table lookups. [CVE-2023-25000](https://osv.dev/vulnerability/GO-2023-1709) is an example where table lookup timing mattered. JavaScript execution does not guarantee constant time. This browser implementation is for teaching, not operational secret sharing.
 
 CRC-32 detects transcription errors, but a participant who changes a share can recompute its CRC. A four-byte prefix of SHA-256 included in the shared secret detects an incorrect reconstruction with high probability, but cannot identify the bad share. Without knowing the original secret, a cheater can choose an offset but cannot target an arbitrary replacement phrase. The model can show `DAWN→DUSK` because the original phrase is visible to the audience.
 
-Each theory section in the interface separates primary and secondary sources. Shamir’s paper appeared in *Communications of the ACM* 22(11), 612–613 (1979), [DOI:10.1145/359168.359176](https://doi.org/10.1145/359168.359176). For Lagrange interpolation, see [HAC 12.71](https://cacr.uwaterloo.ca/hac/about/chap12.pdf) and IPUSIRON’s Japanese-language book 『暗号技術のすべて』, p.654. Tompa and Woll’s full text was not checked; bibliographies disagree between 1988 1(2) and 1989 1(3).
+Each theory section in the interface separates primary and secondary sources. Shamir’s paper appeared in *Communications of the ACM* 22(11), 612–613 (1979), [DOI:10.1145/359168.359176](https://doi.org/10.1145/359168.359176). Blakley’s original paper is [*Safeguarding Cryptographic Keys* (1979)](https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf). For interpolation, see [HAC 12.71](https://cacr.uwaterloo.ca/hac/about/chap12.pdf) and IPUSIRON’s Japanese-language book 『暗号技術のすべて』, section 9.2 (pp. 652–661). Tompa and Woll’s full text was not checked; bibliographies disagree between 1988 1(2) and 1989 1(3).
 
 ## 🔄 Day070 and prior work
 
@@ -98,11 +128,11 @@ Ways of using this tool in particular:
 
 - Mathematics class: students fix `(1,11)` and `(2,8)` and overlay 13 candidates. They can see why no candidate gets priority.
 - Introduction to finite fields: compare integer values `21,35` of `f(x)=5+4x+2x²` with GF(13) values `8,9`. Students see when remainders disclose the secret.
-- Code review exercise: a reviewer toggles the nonzero-leading-coefficient rule, watches `S=1` disappear, and checks the coefficient generation policy.
+- Code review exercise: a reviewer toggles the nonzero-leading-coefficient rule, watches `s=1` disappear, and checks the coefficient generation policy.
 - Puzzle or CTF design: an author makes a puzzle with public sample values; participants compute secret `5` from `λ=(3,10,1)`. No real credentials are used.
 - Programming lesson: passing two shares to the unsafe function returns wrong bytes beginning `2DB1…`. Students can design threshold and UTF-8 checks.
 
-It also works as a companion to p.654 of 『暗号技術のすべて』 (Japanese-language book), a comparison with Day070’s visual cryptography, an entry to fingerprinting through [Day118 SHA-256 Byte Inspector](https://github.com/ipusiron/sha256-byte-inspector), and a bridge to information-theoretic secrecy in [Day029 OTP Animation](https://github.com/ipusiron/otp-animation).
+It also works as a companion to section 9.2 (pp. 652–661) of 『暗号技術のすべて』, a comparison with Day070’s visual cryptography, an entry to fingerprinting through [Day118 SHA-256 Byte Inspector](https://github.com/ipusiron/sha256-byte-inspector), and a bridge to information-theoretic secrecy in [Day029 OTP Animation](https://github.com/ipusiron/otp-animation).
 
 ## 🔒 Inputs and implementation cautions
 
@@ -119,7 +149,7 @@ Run `npm test` with Node.js 22 or later. No package installation is required. Gi
 | Area | Main checks |
 |---|---|
 | A GF(2⁸) | All 65,536 multiplication pairs, two FIPS 197 examples, 255 inverses, generator orders |
-| B GF(p) | Five default shares, three λ sets, 13 candidates, removed `S=1`, integer values, `λᵢ·Δ`, k=1 |
+| B GF(p) | Five default shares, three λ sets, 13 candidates, removed `s=1`, integer values, `λᵢ(0)·Δ`, k=1 |
 | C Split and combine | Known shares from fixed test randomness, all ten 3-of-5 subsets, random round trips |
 | D Pitfalls | Tampering, CRC, fingerprint, x=0, too few shares, every fixed vector field |
 | E Static and UI | CSP, storage keys, forbidden APIs, bilingual dictionary, SHA-256 copy, viewport and interactions |

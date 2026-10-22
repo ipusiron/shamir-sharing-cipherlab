@@ -33,16 +33,18 @@
       <h2 data-i18n="hand"></h2><p data-i18n="handIntro"></p>
       <div class="hand-primer">
         <p data-i18n="handParameters"></p>
+        <p data-i18n="thresholdCondition1"></p>
+        <p data-i18n="thresholdCondition2"></p>
         <p data-i18n="handDegree"></p>
         <p data-i18n="handPolynomial"></p>
-        <p class="hand-formula">f(x) = f(0) + a₁x + a₂x² (mod p)</p>
+        <p class="hand-formula">f(x) = s + a₁x + a₂x² (mod p)</p>
         <p data-i18n="handInterpolation"></p>
       </div>
       <div class="settings-grid">
         <label><span>p</span><select id="prime"><option>7</option><option>11</option><option selected>13</option><option>17</option><option>19</option><option>23</option></select></label>
         <label><span>k</span><select id="threshold"></select></label>
         <label><span>n</span><select id="share-count"></select></label>
-        <label><span>S = f(0)</span><input id="secret" type="number" min="0" value="5" inputmode="numeric"></label>
+        <label><span>s = f(0)</span><input id="secret" type="number" min="0" value="5" inputmode="numeric"></label>
       </div>
       <div id="coefficient-inputs" class="settings-grid"></div>
       <div class="actions"><button id="random-coefficients" type="button" data-i18n="randomCoefficients"></button><button id="reset-hand" type="button" data-i18n="reset"></button></div>
@@ -52,7 +54,7 @@
       <div id="share-data" class="share-data"></div>
       <h3 data-i18n="reconstruct"></h3><p data-i18n="chooseShares"></p><p id="share-notation" data-i18n="shareNotation"></p><div id="share-picks" class="actions"></div>
       <div class="actions"><button id="select-k" type="button" data-i18n="selectK"></button><button id="select-kminus" type="button" data-i18n="selectKMinus"></button></div>
-      <div id="reconstruction-section"><div class="table-frame"><table><thead><tr><th>xᵢ</th><th>yᵢ</th><th>Πxⱼ</th><th>Π(xⱼ−xᵢ)</th><th data-i18n="inverse"></th><th>λᵢ</th><th>λᵢyᵢ</th></tr></thead><tbody id="reconstruction-table"></tbody></table></div><p id="reconstruction-result" class="result"></p></div>
+      <div id="reconstruction-section"><div class="table-frame"><table><thead><tr><th>xᵢ</th><th>yᵢ</th><th>Πxⱼ</th><th>Π(xⱼ−xᵢ)</th><th data-i18n="inverse"></th><th>λᵢ(0)</th><th>λᵢ(0)yᵢ</th></tr></thead><tbody id="reconstruction-table"></tbody></table></div><p id="reconstruction-result" class="result"></p></div>
       <div id="candidate-section" hidden><h3 data-i18n="candidateTitle"></h3><p id="candidate-result"></p>
         <div class="actions"><button id="previous-candidate" type="button" data-i18n="previous"></button><button id="next-candidate" type="button" data-i18n="next"></button>
           <button id="all-candidates" type="button" aria-pressed="false" data-i18n="showAll"></button></div>
@@ -65,14 +67,14 @@
       <h3 data-i18n="integerTitle"></h3><p data-i18n="integerIntro"></p><div class="table-frame"><table><thead><tr><th>x</th><th>f(x) ℤ</th><th>f(x) mod x</th></tr></thead><tbody id="integer-table"></tbody></table></div><p id="integer-result"></p>
     </section>
     <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden>
-      <h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p>
+      <h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p><p data-i18n="byteMethod"></p>
       <p data-i18n="fieldRule"></p>
       <div class="settings-grid"><label><span data-i18n="byteInput"></span><input id="byte-message" type="text" value="MEET AT DAWN" autocomplete="off" spellcheck="false"></label>
         <label><span>k</span><select id="byte-k"></select></label><label><span>n</span><select id="byte-n"></select></label></div>
       <p id="byte-error" role="status"></p>
-      <h3 data-i18n="byteDistribute"></h3><p id="byte-secret-hex" class="result"></p><div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
-      <h3 data-i18n="byteRestore"></h3><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
-      <p id="byte-restored-hex" class="result"></p><p id="byte-restored-text" class="result"></p>
+      <h3 data-i18n="byteDistribute"></h3><p data-i18n="byteTableHelp"></p><p id="byte-secret-hex" class="result"></p><div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
+      <h3 data-i18n="byteRestore"></h3><p data-i18n="byteRestoreHelp"></p><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
+      <p id="byte-restored-hex" class="result"></p><p id="byte-restored-text" class="result"></p><p data-i18n="byteOutputHelp"></p>
       <h3 data-i18n="multiplication"></h3><p data-i18n="multiplyIntro"></p><div id="multiply-steps" class="table-frame"></div>
       <p id="multiply-log"></p>
     </section>
