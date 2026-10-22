@@ -280,6 +280,10 @@ def test_help(page, width):
     assert "保存するのは表示言語と明暗の設定だけ" in dialog.inner_text()
     assert "実数で計算した曲線の違い" in dialog.inner_text()
     assert "CTF・謎解き" in dialog.inner_text()
+    assert dialog.locator("[data-i18n='multiplication']").inner_text() == "GF(2⁸) の掛け算"
+    assert "固定例{57}×{13}={FE}" in dialog.locator("[data-i18n='multiplyIntro']").inner_text()
+    assert dialog.locator("#multiply-steps tbody tr").count() == 8
+    assert "「バイトで見る」の復元計算には使っていません" in dialog.locator("#multiply-log").inner_text()
     theory = page.locator("#help-theory")
     assert theory.get_attribute("open") is None
     assert page.locator("#lessons .lesson-card").count() == 8
@@ -312,6 +316,8 @@ def test_help(page, width):
     page.locator("#help").click()
     assert page.locator("#help-title").inner_text() == "Help"
     assert "Ways to use this tool" in dialog.inner_text()
+    assert "This example does not change with the shares" in dialog.locator("[data-i18n='multiplyIntro']").inner_text()
+    assert "This table is not used for reconstruction in “Bytes”" in dialog.locator("#multiply-log").inner_text()
     assert "Only the language and theme settings are saved" in dialog.inner_text()
     page.keyboard.press("Escape")
     assert not dialog.is_visible()
@@ -489,8 +495,7 @@ def test_tabs_and_localization(page):
     page.locator("[data-byte-pick='4']").click()
     assert any(value != "01" for value in page.locator("#byte-weights tbody tr td:nth-child(7)").all_inner_texts())
     assert "MEET AT DAWN" in page.locator("#byte-restored-text").inner_text()
-    assert "固定例{57}×{13}={FE}" in page.locator("[data-i18n='multiplyIntro']").inner_text()
-    assert "上の復元計算には使っていません" in page.locator("#multiply-log").inner_text()
+    assert page.locator("#panel-bytes [data-i18n='multiplication']").count() == 0
     assert "0x11B" in page.locator("[data-i18n='fieldRule']").inner_text()
     assert "シェアを作る式Fⱼ(X)" in page.locator("[data-i18n='byteFieldReason']").inner_text()
     formula = page.locator("#byte-formula")
