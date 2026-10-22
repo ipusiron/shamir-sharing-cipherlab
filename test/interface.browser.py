@@ -32,20 +32,22 @@ def first_y(page):
 def test_distributed_share_data(page):
     lines = page.locator("#share-data p")
     assert lines.count() == 5
-    assert lines.first.inner_text() == "#1 の共有データは (1, f(1)) = (1, (5 + 4×1 + 2×1^2) mod 13) = (1,11)"
+    assert "v₁ = f(1) = 11" in lines.first.inner_text()
+    assert "復元用の組： (1,v₁) = (1,f(1)) = (1,(5 + 4×1 + 2×1^2) mod 13) = (1,11)" in lines.first.inner_text()
     assert page.locator("#share-data").bounding_box()["y"] > page.locator("#distribution-table").bounding_box()["y"]
     page.locator("#share-count").select_option("7")
     assert lines.count() == 7
-    assert lines.last.inner_text().startswith("#7 の共有データは (7, f(7)) = (7, (5 + 4×7 + 2×7^2) mod 13)")
+    assert lines.last.inner_text().startswith("#7 のシェア： v₇ = f(7) =")
+    assert "(7,(5 + 4×7 + 2×7^2) mod 13)" in lines.last.inner_text()
     page.locator("[data-coefficient='1']").fill("6")
     page.locator("[data-coefficient='1']").dispatch_event("change")
-    assert lines.first.inner_text().endswith("(1, (5 + 6×1 + 2×1^2) mod 13) = (1,0)")
+    assert lines.first.inner_text().endswith("(1,(5 + 6×1 + 2×1^2) mod 13) = (1,0)")
     page.locator("#prime").select_option("17")
     assert lines.first.inner_text().endswith("mod 17) = (1,13)")
     page.locator("#threshold").select_option("1")
-    assert lines.first.inner_text() == "#1 の共有データは (1, f(1)) = (1, (5) mod 17) = (1,5)"
+    assert lines.first.inner_text().endswith("(1,(5) mod 17) = (1,5)")
     page.locator("#language").click()
-    assert lines.first.inner_text().startswith("Share #1: (1, f(1))")
+    assert lines.first.inner_text().startswith("Share #1: v₁ = f(1) = 5")
     page.locator("#language").click()
     page.locator("#reset-hand").click()
 
@@ -82,9 +84,11 @@ def test_help(page, width):
     assert box["x"] >= 0 and box["x"] + box["width"] <= width
     theory.locator("summary").click()
     assert theory.get_attribute("open") is not None
+    assert help_body.evaluate("el => el.scrollWidth <= el.clientWidth")
     assert page.locator("#lessons .source-links a").first.is_visible()
     assert page.locator("#lessons table").count() == 0
-    assert "λ=(3,10,1)" in page.locator("#lessons .lesson-card").nth(1).inner_text()
+    assert "(3,10,1)" in page.locator("#lessons .lesson-card").nth(1).inner_text()
+    assert page.locator("#lessons .lesson-card p:not(.source-links)").count() >= 24
     help_body.evaluate("el => el.scrollTop = el.scrollHeight")
     header_box = page.locator(".help-header").bounding_box()
     body_box = help_body.bounding_box()
@@ -111,30 +115,35 @@ def test_hand_primer(page):
     primer = page.locator("#panel-hand .hand-primer")
     assert primer.is_visible()
     assert primer.bounding_box()["y"] < page.locator("#panel-hand .settings-grid").first.bounding_box()["y"]
-    assert "(n,k) は n 個の共有情報を作り、そのうち k 個以上を揃えることで秘密を復元する設定を意味します。" in primer.inner_text()
+    assert "(k,n) しきい値法" in primer.inner_text()
+    assert "n 個のシェア" in primer.inner_text()
+    assert "① n 人のうち k 人" in primer.inner_text()
+    assert "② k−1人" in primer.inner_text()
+    assert "情報は一切わかりません" in primer.inner_text()
     assert "最大 k−1" in primer.inner_text()
     assert "k=1：0次、k=2：1次、k=3：2次" in primer.inner_text()
     assert "k=3" in primer.inner_text()
     assert "ラグランジュ補間" in primer.inner_text()
-    assert page.locator(".hand-formula").inner_text() == "f(x) = f(0) + a₁x + a₂x² (mod p)"
+    assert page.locator(".hand-formula").inner_text() == "f(x) = s + a₁x + a₂x² (mod p)"
     assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     notation = page.locator("#share-notation")
     assert notation.is_visible()
     assert notation.bounding_box()["y"] < page.locator("#share-picks").bounding_box()["y"]
-    assert "#i は共有番号" in notation.inner_text()
-    assert "x=i、y=f(x)" in notation.inner_text()
-    assert "(n,k)" in notation.inner_text() and "座標ではありません" in notation.inner_text()
-    assert "n=7 なら共有情報は7個で、共有番号は #1～#7" in notation.inner_text()
+    assert "#i はシェア番号" in notation.inner_text()
+    assert "vᵢ=f(i) はシェアの値" in notation.inner_text()
+    assert "(k,n)" in notation.inner_text() and "座標ではありません" in notation.inner_text()
+    assert "n=7 ならシェアは7個で、番号は #1～#7" in notation.inner_text()
     page.locator("#language").click()
-    assert "at least k of them are needed" in primer.inner_text()
+    assert "Any k of the n participants" in primer.inner_text()
+    assert "reveal no information" in primer.inner_text()
     assert "degree at most k−1" in primer.inner_text()
-    assert "k=1: degree 0; k=2: degree 1; k=3: degree 2" in primer.inner_text()
+    assert "degree 0 for k=1, degree 1 for k=2, and degree 2 for k=3" in primer.inner_text()
     assert "Lagrange interpolation" in primer.inner_text()
     assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     assert "#i is the share number" in notation.inner_text()
-    assert "x=i and y=f(x)" in notation.inner_text()
+    assert "vᵢ=f(i) is the share value" in notation.inner_text()
     assert "not point coordinates" in notation.inner_text()
-    assert "n=7 creates seven shares numbered #1 through #7" in notation.inner_text()
+    assert "n=7, there are seven shares numbered #1 through #7" in notation.inner_text()
     page.locator("#theme").click()
     assert primer.is_visible()
     page.locator("#theme").click()
@@ -167,7 +176,7 @@ def test_interactions(page):
             page.mouse.up()
         assert first_y(page) == "12", method
         assert "≡ 8" in page.locator("#reconstruction-result").inner_text(), method
-        assert "ΔS=3" in page.locator("#tweak-result").inner_text(), method
+        assert "Δs=3" in page.locator("#tweak-result").inner_text(), method
         assert page.locator('#field-grid [data-share-x="1"]').get_attribute("aria-label").endswith("1, 12")
     page.locator("#reset-hand").click()
     page.locator("#threshold").select_option("1")
@@ -248,12 +257,32 @@ def test_single_selected_share(page):
     assert page.locator("[data-coefficient]").count() == 2
 
 
+def test_book_example(page):
+    page.locator("#reset-hand").click()
+    page.locator("#prime").select_option("17")
+    page.locator("#secret").fill("13")
+    for index, value in ((1, "10"), (2, "2")):
+        coefficient = page.locator(f'[data-coefficient="{index}"]')
+        coefficient.fill(value)
+        coefficient.press("Tab")
+    assert [first.inner_text() for first in page.locator("#distribution-table tr td:last-child").all()] == ["8", "7", "10", "0", "11"]
+    page.locator('[data-pick="2"]').click()
+    page.locator('[data-pick="5"]').click()
+    assert "≡ 13" in page.locator("#reconstruction-result").inner_text()
+    page.locator("#reset-hand").click()
+
+
 def test_tabs_and_localization(page):
     assert page.locator("#panel-hand").is_visible()
     assert not page.locator("#panel-bytes").is_visible()
     page.locator("#tab-hand").focus()
     page.keyboard.press("ArrowRight")
     assert page.locator("#panel-bytes").is_visible()
+    byte_text = page.locator("#panel-bytes").inner_text()
+    assert "UTF-8 のバイト列" in byte_text
+    assert "各バイトを別々の秘密情報 s" in byte_text
+    assert "λᵢ(0)" in byte_text and "XOR" in byte_text
+    assert "復元値はまず16進で確かめます" in byte_text
     assert not page.locator("#panel-hand").is_visible()
     assert "MEET AT DAWN" in page.locator("#byte-restored-text").inner_text()
     before = page.locator("#byte-secret-hex").inner_text()
@@ -315,6 +344,7 @@ def main():
                     assert byte_width["table"] > byte_width["frame"] and byte_width["page"] == width, byte_width
                     page.locator("#tab-hand").click()
                 if width == 390:
+                    test_book_example(page)
                     test_interactions(page)
                     assert page.locator(".field-value").first.evaluate("el => getComputedStyle(el).animationName") == "none"
                     test_single_selected_share(page)

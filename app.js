@@ -65,7 +65,11 @@
     table('distribution-table',shares().map(([x,y])=>{const terms=s.c.map((c,i)=>c*x**i);return [x,terms.join(' + '),terms.reduce((a,b)=>a+b,0),y];}));
     $('share-data').replaceChildren(...shares().map(([x,y])=>{
       const expression=s.c.map((c,i)=>i?`${c}×${x}${i>1?`^${i}`:''}`:String(c)).join(' + ');
-      return E('p',`${t('shareData').replace('{i}',x)} (${x}, f(${x})) = (${x}, (${expression}) mod ${s.p}) = (${x},${y})`);
+      const vi=`v${'₀₁₂₃₄₅₆₇₈₉'[x]}`;
+      const line=E('p');
+      line.append(E('strong',t('shareData').replace('{i}',x)),E('span',` ${vi} = f(${x}) = ${y}`),E('br'),
+        E('span',`${t('sharePair')} (${x},${vi}) = (${x},f(${x})) = (${x},(${expression}) mod ${s.p}) = (${x},${y})`));
+      return line;
     }));
     table('integer-table',Array.from({length:s.n},(_,i)=>{const x=i+1,y=s.c.reduce((a,c,j)=>a+c*x**j,0);return [x,y,y%x];}));
     const x2=s.c.reduce((a,c,i)=>a+c*2**i,0),x3=s.c.reduce((a,c,i)=>a+c*3**i,0);
@@ -112,7 +116,7 @@
   function move(x,y){if(x===0){s.candidate=y;render();return;}
     const selected=points(),before=shares()[x-1][1],chosen=selected.map(pt=>pt[0]===x?[x,y]:pt);
     if(s.selected.length===s.k){const lambda=G.lagrangeP(selected,s.k,s.p).terms.find(r=>r.x===x).lambda,old=s.c[0],delta=G.mod(y-before,s.p);
-      s.c=G.polynomialP(chosen,s.p);s.candidate=s.c[0];s.moved=`Δ=${delta}, λ${x}=${lambda}, ΔS=${G.mod(lambda*delta,s.p)}; ${old}→${s.c[0]} (mod ${s.p})`;
+      s.c=G.polynomialP(chosen,s.p);s.candidate=s.c[0];s.moved=`Δ=${delta}, λ${x}(0)=${lambda}, Δs=${G.mod(lambda*delta,s.p)}; ${old}→${s.c[0]} (mod ${s.p})`;
     }else{
       const base=s.candidate===s.c[0]?s.c:G.polynomialP([[0,s.candidate],...selected],s.p);
       const delta=G.mod(y-before,s.p);
@@ -222,7 +226,7 @@
     demoCard('short-output',[['what',t('shortWhat')],['unsafe',`${t('shortUnsafe')} ${P.hex(demo.missing)}`],['guarded',t('shortGuard')],['lesson',t('shortLesson')]]);
   }
   const sources=[
-    [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf']],
+    [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf'],['primary','https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf']],
     [['secondary','https://cacr.uwaterloo.ca/hac/about/chap12.pdf']],
     [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf'],['secondary','https://cacr.uwaterloo.ca/hac/about/chap12.pdf']],
     [['primary','https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf'],['primary','https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf']],
@@ -232,7 +236,8 @@
     [['primary','https://github.com/ipusiron/visual-cryptography-cipherlab'],['primary','https://github.com/ipusiron/sha256-byte-inspector'],['primary','https://github.com/ipusiron/otp-animation']]
   ];
   function lessons(){const holder=$('lessons');holder.replaceChildren();for(let i=1;i<=8;i++){
-    const section=E('section',undefined,'lesson-card');section.append(E('h3',t(`lesson${i}`)),E('p',t(`lesson${i}Text`)));
+    const section=E('section',undefined,'lesson-card');section.append(E('h3',t(`lesson${i}`)));
+    for(const paragraph of t(`lesson${i}Text`).split('\n\n'))section.append(E('p',paragraph));
     const links=E('p',undefined,'source-links');for(const [type,url] of sources[i-1]){const a=E('a',`${t(type)}: ${new URL(url).hostname}`);a.href=url;a.target='_blank';a.rel='noopener noreferrer';links.append(a,E('span',' · '));}section.append(links);holder.append(section);
   }}
   window.renderShamirExtra=()=>{renderBytes();multiplication();renderPitfalls();lessons();};
