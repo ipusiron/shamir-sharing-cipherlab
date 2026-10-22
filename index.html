@@ -30,7 +30,33 @@
       <button id="tab-bytes" role="tab" type="button" aria-controls="panel-bytes" aria-selected="false" tabindex="-1" data-i18n="bytes"></button>
       <button id="tab-pitfalls" role="tab" type="button" aria-controls="panel-pitfalls" aria-selected="false" tabindex="-1" data-i18n="pitfalls"></button>
     </div>
-    <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand"><h2 data-i18n="hand"></h2><p data-i18n="handIntro"></p></section>
+    <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand">
+      <h2 data-i18n="hand"></h2><p data-i18n="handIntro"></p>
+      <div class="settings-grid">
+        <label><span>p</span><select id="prime"><option>7</option><option>11</option><option selected>13</option><option>17</option><option>19</option><option>23</option></select></label>
+        <label><span>k</span><select id="threshold"></select></label>
+        <label><span>n</span><select id="share-count"></select></label>
+        <label><span>S = f(0)</span><input id="secret" type="number" min="0" value="5" inputmode="numeric"></label>
+      </div>
+      <div id="coefficient-inputs" class="settings-grid"></div>
+      <div class="actions"><button id="random-coefficients" type="button" data-i18n="randomCoefficients"></button><button id="reset-hand" type="button" data-i18n="reset"></button></div>
+      <p id="hand-status" role="status"></p>
+      <h3 data-i18n="distribute"></h3><p id="polynomial"></p>
+      <div class="table-frame"><table><thead><tr><th>x</th><th data-i18n="termValues"></th><th data-i18n="sum"></th><th>mod p</th></tr></thead><tbody id="distribution-table"></tbody></table></div>
+      <h3 data-i18n="reconstruct"></h3><p data-i18n="chooseShares"></p><div id="share-picks" class="actions"></div>
+      <div class="actions"><button id="select-k" type="button" data-i18n="selectK"></button><button id="select-kminus" type="button" data-i18n="selectKMinus"></button></div>
+      <div id="reconstruction-section"><div class="table-frame"><table><thead><tr><th>xᵢ</th><th>yᵢ</th><th>Πxⱼ</th><th>Π(xⱼ−xᵢ)</th><th data-i18n="inverse"></th><th>λᵢ</th><th>λᵢyᵢ</th></tr></thead><tbody id="reconstruction-table"></tbody></table></div><p id="reconstruction-result" class="result"></p></div>
+      <div id="candidate-section" hidden><h3 data-i18n="candidateTitle"></h3><p id="candidate-result"></p>
+        <div class="actions"><button id="previous-candidate" type="button" data-i18n="previous"></button><button id="next-candidate" type="button" data-i18n="next"></button>
+          <button id="all-candidates" type="button" aria-pressed="false" data-i18n="showAll"></button></div>
+        <label class="check"><input id="leading-only" type="checkbox"><span data-i18n="leadingOnly"></span></label>
+      </div>
+      <h3 data-i18n="gridTitle"></h3><p data-i18n="gridHint"></p><div id="grid-frame" class="grid-frame"><svg id="field-grid" role="img" data-label="gridLabel"></svg></div>
+      <p id="tweak-result" class="result"></p>
+      <h3 data-i18n="realTitle"></h3><p data-i18n="realWarning"></p><div class="grid-frame"><svg id="real-graph" role="img" data-label="realLabel" viewBox="0 0 600 300"></svg></div>
+      <p id="real-result" class="result"></p><div id="real-picks" class="actions"></div>
+      <h3 data-i18n="integerTitle"></h3><p data-i18n="integerIntro"></p><div class="table-frame"><table><thead><tr><th>x</th><th>f(x) ℤ</th><th>f(x) mod x</th></tr></thead><tbody id="integer-table"></tbody></table></div><p id="integer-result"></p>
+    </section>
     <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden><h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p></section>
     <section id="panel-pitfalls" class="panel" role="tabpanel" aria-labelledby="tab-pitfalls" hidden><h2 data-i18n="pitfalls"></h2><p data-i18n="pitfallsIntro"></p></section>
     <details class="panel"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p></details>

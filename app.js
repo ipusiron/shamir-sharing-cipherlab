@@ -21,6 +21,7 @@
       $('tab-' + name).tabIndex = selected ? 0 : -1;
       $('panel-' + name).hidden = !selected;
     }
+    window.renderShamirHand?.();
   }
   tabs.forEach((name, index) => {
     const tab = $('tab-' + name);
@@ -38,4 +39,94 @@
   $('help').addEventListener('click', () => $('help-dialog').showModal());
   $('close-help').addEventListener('click', () => $('help-dialog').close());
   render();
+}());
+
+/* The hand tab has one model. Tables and both plots read that model. */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id), G = ShamirGF;
+  const s = { p:13, k:3, n:5, c:[5,4,2], selected:[1,2,3], candidate:5, all:false, leading:false,
+    activeX:null, moved:'', realY:{1:11,2:8,3:9}, realZero:5 };
+  const t = key => ShamirMessages[document.documentElement.lang][key] || key;
+  const E = (tag, value, cls) => { const el=document.createElement(tag); if(value!==undefined) el.textContent=String(value); if(cls) el.className=cls; return el; };
+  const S = (tag, attrs) => { const el=document.createElementNS('http://www.w3.org/2000/svg',tag); for(const [k,v] of Object.entries(attrs)) el.setAttribute(k,String(v)); return el; };
+  const shares = () => G.splitP(s.c,s.n,s.p), points = () => s.selected.map(x=>shares()[x-1]);
+  function choices(id, from, to, value) { const el=$(id); el.replaceChildren(...Array.from({length:to-from+1},(_,i)=>{const o=E('option',from+i);o.value=String(from+i);o.selected=from+i===value;return o;})); }
+  function controls() {
+    $('prime').value=String(s.p); choices('threshold',1,s.n,s.k); choices('share-count',s.k,Math.min(s.p-1,8),s.n);
+    $('secret').max=String(s.p-1); $('secret').value=String(s.c[0]); $('coefficient-inputs').replaceChildren();
+    for(let i=1;i<s.k;i++){const label=E('label'),input=E('input'); input.type='number';input.min='0';input.max=String(s.p-1);input.value=String(s.c[i]);input.dataset.coefficient=String(i);label.append(E('span',`a${i}`),input);$('coefficient-inputs').append(label);}
+  }
+  function resetReal(){ s.realY={};for(let x=1;x<=s.n;x++)s.realY[x]=G.evalP(s.c,x,s.p);s.realZero=s.c[0]; }
+  function table(id, rows) { const body=$(id);body.replaceChildren();for(const cells of rows){const row=E('tr');for(const value of cells)row.append(E('td',value));body.append(row);} }
+  function renderTables(){
+    $('polynomial').textContent=`f(x) = ${s.c.map((c,i)=>i?` + ${c}x${i>1?`^${i}`:''}`:String(c)).join('')} (mod ${s.p})`;
+    table('distribution-table',shares().map(([x,y])=>{const terms=s.c.map((c,i)=>c*x**i);return [x,terms.join(' + '),terms.reduce((a,b)=>a+b,0),y];}));
+    table('integer-table',Array.from({length:s.n},(_,i)=>{const x=i+1,y=s.c.reduce((a,c,j)=>a+c*x**j,0);return [x,y,y%x];}));
+    const x2=s.c.reduce((a,c,i)=>a+c*2**i,0),x3=s.c.reduce((a,c,i)=>a+c*3**i,0);
+    $('integer-result').textContent=`${t('integerExample')} x=2: ${x2} mod 2=${x2%2}; x=3: ${x3} mod 3=${x3%3}.`;
+    $('share-picks').replaceChildren(...shares().map(([x,y])=>{const b=E('button',`#${x} (${x},${y})`);b.type='button';b.dataset.pick=String(x);b.setAttribute('aria-pressed',String(s.selected.includes(x)));return b;}));
+    const enough=s.selected.length===s.k;
+    $('reconstruction-section').hidden=!enough;$('candidate-section').hidden=enough||s.k===1||s.selected.length!==s.k-1;
+    if(enough){const result=G.lagrangeP(points(),s.k,s.p);table('reconstruction-table',result.terms.map(r=>[r.x,r.y,r.numerator,r.denominator,r.inverse,r.lambda,r.term]));
+      $('reconstruction-result').textContent=`${result.terms.map(r=>r.term).join(' + ')} ≡ ${result.secret} (mod ${s.p})`;
+    }else if(!$('candidate-section').hidden){const visible=G.candidatesP(points(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero);
+      if(!visible.some(r=>r.secret===s.candidate))s.candidate=visible[0].secret;
+      $('candidate-result').textContent=`${visible.length}/${s.p} ${t('candidateCount')} · ${t('candidateSecret')}=${s.candidate}`;
+      $('all-candidates').setAttribute('aria-pressed',String(s.all));$('leading-only').checked=s.leading;
+    }
+    $('tweak-result').textContent=s.k===1?t('kOne'):s.moved;
+  }
+  function grid(){
+    const p=s.p,d=20,svg=$('field-grid'),side=p*d;svg.replaceChildren();svg.setAttribute('width',side);svg.setAttribute('height',side);svg.setAttribute('viewBox',`0 0 ${side} ${side}`);
+    for(let x=0;x<p;x++)for(let y=0;y<p;y++)svg.append(S('rect',{x:d*x,y:d*(p-1-y),width:d,height:d,class:'field-cell','data-cell-x':x,'data-cell-y':y}));
+    let curves=[];
+    if(s.selected.length===s.k){const c=G.polynomialP(points(),p);curves=[{secret:c[0],values:Array.from({length:p},(_,x)=>G.evalP(c,x,p))}];}
+    else if(s.k>1&&s.selected.length===s.k-1){const all=G.candidatesP(points(),s.k,p).filter(r=>!s.leading||!r.leadingZero);curves=s.all?all:all.filter(r=>r.secret===s.candidate);}
+    for(const curve of curves)for(let x=0;x<p;x++)svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-curve.values[x]-.5),r:curve.secret===s.candidate||s.selected.length===s.k?4:2.5,class:curve.secret===s.candidate||s.selected.length===s.k?'field-value':'field-ghost'}));
+    for(const x of s.selected){const y=shares()[x-1][1];svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-y-.5),r:8,class:'field-share','data-share-x':x,tabindex:0,role:'button','aria-label':`${t('sharePoint')} ${x}, ${y}`}));}
+    if(s.k>1&&s.selected.length===s.k-1)svg.append(S('circle',{cx:d*.5,cy:d*(p-s.candidate-.5),r:8,class:'field-secret','data-share-x':0,tabindex:0,role:'button','aria-label':`${t('candidateSecret')} ${s.candidate}`}));
+  }
+  function realAt(pts,x){return pts.reduce((sum,[xi,yi],i)=>sum+yi*pts.reduce((v,[xj],j)=>i===j?v:v*(x-xj)/(xi-xj),1),0);}
+  function real(){const svg=$('real-graph');svg.replaceChildren();const X=x=>28+x*550/(s.n+1),Y=y=>280-y*250/(s.p-1),chosen=s.selected.map(x=>[x,s.realY[x]]);
+    const pts=chosen.length===s.k?chosen:[[0,s.realZero],...chosen];
+    if(pts.length>=2){const data=Array.from({length:181},(_,i)=>{const x=i*(s.n+1)/180;return `${i?'L':'M'}${X(x).toFixed(1)},${Y(realAt(pts,x)).toFixed(1)}`;}).join(' ');svg.append(S('path',{d:data,class:'real-curve'}));}
+    svg.append(S('line',{x1:X(0),y1:20,x2:X(0),y2:280,class:'real-axis'}),S('line',{x1:X(0),y1:Y(0),x2:X(s.n),y2:Y(0),class:'real-axis'}));
+    for(const [x,y] of chosen)svg.append(S('circle',{cx:X(x),cy:Y(y),r:10,class:'real-point','data-real-x':x,tabindex:0,role:'button','aria-label':`${t('sharePoint')} ${x}, ${y}`}));
+    const intercept=pts.length>=2?realAt(pts,0):s.realZero;
+    svg.append(S('circle',{cx:X(0),cy:Y(intercept),r:9,class:'real-secret','data-real-x':0,tabindex:chosen.length===s.k?-1:0,role:'button','aria-label':`${t('candidateSecret')} ${intercept.toFixed(2)}`}));
+    $('real-result').textContent=`${t('realIntercept')}: ${intercept.toFixed(2)}. ${t('realPoints')}: ${chosen.map(([x,y])=>`(${x},${y})`).join(' ')}`;
+    $('real-picks').replaceChildren(...chosen.map(([x,y])=>E('span',`(${x}, ${y})`,'point-chip')));
+  }
+  function render(){renderTables();grid();real();}
+  function move(x,y){if(x===0){s.candidate=y;render();return;}const before=shares()[x-1][1],chosen=points().map(pt=>pt[0]===x?[x,y]:pt);
+    if(s.selected.length===s.k){const lambda=G.lagrangeP(points(),s.k,s.p).terms.find(r=>r.x===x).lambda,old=s.c[0],delta=G.mod(y-before,s.p);
+      s.c=G.polynomialP(chosen,s.p);s.moved=`Δ=${delta}, λ${x}=${lambda}, ΔS=${G.mod(lambda*delta,s.p)}; ${old}→${s.c[0]} (mod ${s.p})`;
+    }else{s.c=G.polynomialP([[0,s.candidate],...chosen],s.p);s.moved=`${t('candidateSecret')}: ${s.candidate}`;}
+    resetReal();controls();render();
+  }
+  window.renderShamirHand=render;
+  $('prime').addEventListener('change',()=>{s.p=Number($('prime').value);s.n=Math.min(s.n,s.p-1);s.k=Math.min(s.k,s.n);s.c=s.c.slice(0,s.k).map(v=>G.mod(v,s.p));s.selected=Array.from({length:s.k},(_,i)=>i+1);s.candidate=G.mod(s.candidate,s.p);s.moved='';resetReal();controls();render();});
+  $('threshold').addEventListener('change',()=>{s.k=Number($('threshold').value);s.c=Array.from({length:s.k},(_,i)=>s.c[i]||0);s.selected=Array.from({length:s.k},(_,i)=>i+1);s.moved='';resetReal();controls();render();});
+  $('share-count').addEventListener('change',()=>{s.n=Number($('share-count').value);resetReal();controls();render();});
+  $('secret').addEventListener('change',()=>{const v=Number($('secret').value);if(!Number.isInteger(v)||v<0||v>=s.p){$('hand-status').textContent=t('invalidInput');$('secret').value=String(s.c[0]);return;}s.c[0]=v;$('hand-status').textContent='';resetReal();render();});
+  $('coefficient-inputs').addEventListener('change',e=>{const i=Number(e.target.dataset.coefficient),v=Number(e.target.value);if(!i)return;if(!Number.isInteger(v)||v<0||v>=s.p){$('hand-status').textContent=t('invalidInput');e.target.value=String(s.c[i]);return;}s.c[i]=v;$('hand-status').textContent='';resetReal();render();});
+  $('random-coefficients').addEventListener('click',()=>{const b=new Uint8Array(s.k-1);crypto.getRandomValues(b);for(let i=1;i<s.k;i++)s.c[i]=b[i-1]%s.p;s.moved='';resetReal();controls();render();});
+  $('reset-hand').addEventListener('click',()=>{Object.assign(s,{p:13,k:3,n:5,c:[5,4,2],selected:[1,2,3],candidate:5,all:false,leading:false,moved:''});resetReal();controls();render();});
+  $('share-picks').addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;const x=Number(b.dataset.pick);s.selected=s.selected.includes(x)?s.selected.filter(v=>v!==x):s.selected.length<s.k?[...s.selected,x].sort((a,b)=>a-b):s.selected;s.moved='';render();});
+  $('select-k').addEventListener('click',()=>{s.selected=Array.from({length:s.k},(_,i)=>i+1);render();});
+  $('select-kminus').addEventListener('click',()=>{s.selected=Array.from({length:Math.max(0,s.k-1)},(_,i)=>i+1);s.candidate=s.c[0];render();});
+  function nextCandidate(direction){const list=G.candidatesP(points(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero).map(r=>r.secret);s.candidate=list[(list.indexOf(s.candidate)+direction+list.length)%list.length];render();}
+  $('previous-candidate').addEventListener('click',()=>nextCandidate(-1));$('next-candidate').addEventListener('click',()=>nextCandidate(1));
+  $('all-candidates').addEventListener('click',()=>{s.all=!s.all;render();});$('leading-only').addEventListener('change',()=>{s.leading=$('leading-only').checked;render();});
+  const field=$('field-grid');
+  field.addEventListener('click',e=>{const point=e.target.closest('[data-share-x]'),cell=e.target.closest('[data-cell-x]');if(point){s.activeX=Number(point.dataset.shareX);return;}if(cell&&s.activeX!==null&&Number(cell.dataset.cellX)===s.activeX)move(s.activeX,Number(cell.dataset.cellY));});
+  field.addEventListener('pointerdown',e=>{const point=e.target.closest('[data-share-x]');if(point){s.gridDrag=Number(point.dataset.shareX);s.activeX=s.gridDrag;field.setPointerCapture(e.pointerId);}});
+  field.addEventListener('pointerup',e=>{if(s.gridDrag===undefined)return;const x=s.gridDrag;s.gridDrag=undefined;const r=field.getBoundingClientRect(),d=r.width/s.p,col=Math.floor((e.clientX-r.left)/d),y=s.p-1-Math.floor((e.clientY-r.top)/d);if(col===x&&y>=0&&y<s.p)move(x,y);});
+  field.addEventListener('keydown',e=>{const point=e.target.closest('[data-share-x]');if(!point||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const x=Number(point.dataset.shareX),old=x===0?s.candidate:shares()[x-1][1];move(x,G.mod(old+(e.key==='ArrowUp'?1:-1),s.p));field.querySelector(`[data-share-x="${x}"]`)?.focus();});
+  const realSvg=$('real-graph');
+  realSvg.addEventListener('pointerdown',e=>{const point=e.target.closest('[data-real-x]');if(point&&point.getAttribute('tabindex')!=='-1'){s.realDrag=Number(point.dataset.realX);realSvg.setPointerCapture(e.pointerId);}});
+  realSvg.addEventListener('pointerup',e=>{if(s.realDrag===undefined)return;const x=s.realDrag;s.realDrag=undefined;const r=realSvg.getBoundingClientRect(),y=Math.max(0,Math.min(s.p-1,Math.round((280-(e.clientY-r.top)*300/r.height)*(s.p-1)/250)));if(x===0)s.realZero=y;else s.realY[x]=y;real();});
+  realSvg.addEventListener('keydown',e=>{const point=e.target.closest('[data-real-x]');if(!point||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const x=Number(point.dataset.realX),delta=e.key==='ArrowUp'?1:-1;if(x===0)s.realZero=Math.max(0,Math.min(s.p-1,s.realZero+delta));else s.realY[x]=Math.max(0,Math.min(s.p-1,s.realY[x]+delta));real();realSvg.querySelector(`[data-real-x="${x}"]`)?.focus();});
+  resetReal();controls();render();
 }());

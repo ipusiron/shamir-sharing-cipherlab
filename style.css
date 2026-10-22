@@ -31,3 +31,29 @@ dialog { max-width:min(90vw,34rem); color:var(--ink); background:var(--paper); b
 dialog::backdrop { background:#101a2ab0; }
 @media (max-width:600px) { .masthead { flex-wrap:wrap; } .header-tools { margin-left:auto; } .eyebrow { font-size:.72rem; } .tabs button { font-size:.86rem; } }
 @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+.settings-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; margin:1rem 0; }
+.settings-grid label { display:grid; gap:.2rem; min-width:0; }
+input, select { width:100%; min-width:0; min-height:44px; padding:.4rem; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:6px; }
+.actions { display:flex; flex-wrap:wrap; gap:.5rem; margin:.7rem 0; }
+.actions button { padding:.4rem .7rem; }
+.actions button[aria-pressed="true"] { color:var(--paper); background:var(--blue); border-color:var(--blue); }
+.table-frame, .grid-frame { max-width:100%; overflow:auto; border:1px solid var(--line); background:var(--paper); }
+table { border-collapse:collapse; width:max-content; min-width:100%; font-variant-numeric:tabular-nums; }
+th, td { padding:.35rem .55rem; border:1px solid var(--line); text-align:center; white-space:nowrap; }
+th { background:var(--bg); }
+.grid-frame { padding:0; }
+#field-grid { display:block; max-width:none; touch-action:none; }
+#real-graph { display:block; width:min(100%,600px); height:auto; touch-action:none; }
+.field-cell { fill:var(--paper); stroke:var(--grid); stroke-width:1; }
+.field-value { fill:var(--blue); pointer-events:none; }
+.field-ghost { fill:var(--muted); opacity:.65; pointer-events:none; }
+.field-share, .real-point { fill:var(--blue); stroke:var(--paper); stroke-width:3; cursor:grab; }
+.field-secret, .real-secret { fill:var(--red); stroke:var(--paper); stroke-width:3; cursor:grab; }
+.real-curve { fill:none; stroke:var(--blue); stroke-width:3; }
+.real-axis { stroke:var(--line); stroke-width:2; }
+.result { color:var(--blue); font-weight:700; overflow-wrap:anywhere; }
+.check { display:flex; align-items:center; gap:.5rem; color:var(--red); }
+.check input { width:20px; min-height:20px; accent-color:var(--red); }
+.point-chip { border:1px solid var(--line); padding:.2rem .5rem; border-radius:4px; }
+@media (min-width:700px) { .settings-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media (max-width:600px) { .panel { padding:.5rem; } }
