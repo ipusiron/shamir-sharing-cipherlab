@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id), G = ShamirGF, p = 13;
-  const state = { n:5, secret:5, slope:4, one:3, two:[3], candidate:0 };
+  const state = { n:5, secret:5, slope:4, one:3, two:[1,2], candidate:0 };
   const t = key => ShamirMessages[document.documentElement.lang][key] || key;
   const format = (key, values) => t(key).replace(/\{([a-z0-9]+)\}/gi, (_, name) => String(values[name]));
   const E = (tag, value) => { const el=document.createElement(tag);if(value!==undefined)el.textContent=String(value);return el; };
@@ -69,6 +69,64 @@
     }
     $('linear-analogy-caption').textContent=format('linearAnalogyCaption',{x,y,secret:candidateSecret});
   }
+  function twoGraph(selected,secret,slope){
+    const svg=$('linear-two-graph'),x0=54,x12=270,y0=252,unit=18;
+    const X=value=>x0+value*unit,Y=value=>y0-value*unit;
+    const lines=[];
+    svg.replaceChildren(S('line',{x1:x0,y1:26,x2:x0,y2:y0,class:'linear-analogy-axis'}),
+      S('line',{x1:x0,y1:y0,x2:x12,y2:y0,class:'linear-analogy-axis'}));
+    if(selected.length===2){
+      if(slope===0){
+        lines.push({x1:X(0),y1:Y(secret),x2:X(12),y2:Y(secret)});
+      } else {
+        const lastWrap=Math.floor((secret+slope*12)/p);
+        for(let wrap=0;wrap<=lastWrap;wrap++){
+          const left=Math.max(0,(p*wrap-secret)/slope);
+          const right=Math.min(12,(p*wrap+12-secret)/slope);
+          if(left<right)lines.push({
+            x1:X(left),y1:Y(secret+slope*left-p*wrap),
+            x2:X(right),y2:Y(secret+slope*right-p*wrap)
+          });
+        }
+      }
+      for(const line of lines)svg.append(S('line',{...line,class:'linear-two-branch'}));
+      svg.append(S('circle',{cx:X(0),cy:Y(secret),r:6,class:'linear-two-secret'}));
+      const secretLabel=S('text',{x:5,y:Y(secret)+4,class:'linear-analogy-label linear-analogy-active-label'});
+      secretLabel.textContent=`s=${secret}`;svg.append(secretLabel);
+      $('linear-two-graph-caption').textContent=format('linearTwoGraphCaption',{secret,slope});
+    } else $('linear-two-graph-caption').textContent=t('linearTwoGraphPending');
+    for(const [labelX,label] of [[x0,'x=0'],[x12,'x=12']]){
+      const text=S('text',{x:labelX,y:283,class:'linear-analogy-axis-label','text-anchor':'middle'});
+      text.textContent=label;svg.append(text);
+    }
+    const labelBoxes=[];
+    const crosses=(box,line)=>{
+      const left=Math.max(box.x-3,line.x1),right=Math.min(box.x+box.width+3,line.x2);
+      if(left>right)return false;
+      const at=value=>line.y1+(value-line.x1)*(line.y2-line.y1)/(line.x2-line.x1);
+      return Math.min(at(left),at(right))<=box.y+box.height+3 && Math.max(at(left),at(right))>=box.y-3;
+    };
+    for(const [x,y] of selected){
+      const pointX=X(x),pointY=Y(y);
+      svg.append(S('circle',{cx:pointX,cy:pointY,r:6,class:'linear-two-share'}));
+      const label=S('text',{class:'linear-analogy-label linear-two-point-label'});
+      label.textContent=`(${x},${y})`;svg.append(label);
+      let best=null;
+      for(const dx of [10,20,35,-45,-60,50,-75])for(const dy of [-10,22,-22,34,-34,46,-46]){
+        label.setAttribute('x',String(pointX+dx));label.setAttribute('y',String(pointY+dy));
+        const box=label.getBBox();
+        if(box.x<x0+7||box.x+box.width>318||box.y<2||box.y+box.height>=y0-4)continue;
+        const overlap=labelBoxes.some(other=>box.x<other.x+other.width+5 && box.x+box.width+5>other.x && box.y<other.y+other.height+5 && box.y+box.height+5>other.y);
+        const score=lines.filter(line=>crosses(box,line)).length+(overlap?100:0);
+        if(!best||score<best.score)best={dx,dy,score,box};
+        if(score===0)break;
+      }
+      if(best){
+        label.setAttribute('x',String(pointX+best.dx));label.setAttribute('y',String(pointY+best.dy));
+        labelBoxes.push(best.box);
+      }
+    }
+  }
   function render() {
     const allShares=shares(), subscript='₀₁₂₃₄₅₆₇₈₉';
     $('linear-n').value=String(state.n);
@@ -98,10 +156,12 @@
       const [[x1,y1],[x2,y2]]=selected,coefficients=G.polynomialP(selected,p),secret=G.lagrangeP(selected,2,p).secret;
       $('linear-two-selected').textContent=format('linearSelectedTwo',{x1,y1,x2,y2});
       $('linear-two-result').textContent=format('linearTwoResult',{x1,y1,x2,y2,secret,slope:coefficients[1]});
+      twoGraph(selected,secret,coefficients[1]);
     } else {
       const [x,y]=selected[0];
       $('linear-two-selected').textContent=format('linearSelectedOne',{x,y});
       $('linear-two-result').textContent=t('linearTwoPending');
+      twoGraph(selected);
     }
   }
   $('linear-n').replaceChildren(...Array.from({length:7},(_,i)=>{const option=E('option',i+2);option.value=String(i+2);return option;}));
@@ -110,13 +170,13 @@
   for(const [id,key] of [['linear-secret','secret'],['linear-slope','slope']])$(id).addEventListener('change',()=>{
     const value=Number($(id).value);
     if(!Number.isInteger(value)||value<0||value>=p){$('linear-status').textContent=t('invalidInput');$(id).value=String(state[key]);return;}
-    state[key]=value;state.one=Math.min(3,state.n);state.two=[state.one];state.candidate=0;$('linear-status').textContent='';render();
+    state[key]=value;state.one=Math.min(3,state.n);state.two=[1,2];state.candidate=0;$('linear-status').textContent='';render();
   });
-  $('linear-reset').addEventListener('click',()=>{Object.assign(state,{n:5,secret:5,slope:4,one:3,two:[3],candidate:0});$('linear-status').textContent='';render();});
+  $('linear-reset').addEventListener('click',()=>{Object.assign(state,{n:5,secret:5,slope:4,one:3,two:[1,2],candidate:0});$('linear-status').textContent='';render();});
   $('linear-one-picks').addEventListener('click',event=>{
     const button=event.target.closest('[data-linear-pick]');if(!button)return;
     state.one=Number(button.dataset.linearPick);
-    state.two=[state.one];state.candidate=0;
+    state.candidate=0;
     render();
     $('linear-one-picks').querySelector(`[data-linear-pick="${state.one}"]`).focus({preventScroll:true});
   });
