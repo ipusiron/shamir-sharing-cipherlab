@@ -121,7 +121,7 @@ The share polynomial `Fⱼ(X)` is distinct from the reduction polynomial `m(z)=z
 
 The nonzero coefficient positions of `m(z)` are 8, 4, 3, 1, and 0. Writing its coefficients from degree eight to zero gives `1 0001 1011₂`, or `0x11B` in hexadecimal. When shifting an eight-bit value left overflows, use `z⁸≡z⁴+z³+z+1 (mod m)`. The low eight bits of the right-hand side are `0x1B`, the reduction constant visible in the implementation.
 
-The reduction polynomial must be irreducible of degree eight. Then the 256 remainders form a field, every nonzero byte has an inverse, and Lagrange interpolation can divide by its denominators. One irreducibility check is `z²⁵⁶≡z (mod m)` together with `gcd(m,z¹⁶−z)=1`. In GF(2), subtraction is XOR: `z¹⁶ mod m=0x5E`, so `z¹⁶−z=0x5C`. The Euclidean remainders are `0x37→0x05→0x01`, giving gcd 1.
+The reduction polynomial must be irreducible of degree eight. Then the 256 remainders form a field, every nonzero byte has an inverse, and Lagrange interpolation can divide by its denominators. As two is the only prime factor of eight, the two conditions `z²⁵⁶≡z (mod m)` and `gcd(m,z¹⁶−z)=1` establish irreducibility. In GF(2), subtraction is XOR: `z¹⁶ mod m=0x5E`, so `z¹⁶−z=0x5C`. The Euclidean remainders are `0x37→0x05→0x01`, giving gcd 1.
 
 Other irreducible polynomials of degree eight exist. This tool selects this one to match the GF(2⁸) multiplication specified for AES in [NIST FIPS 197, section 4.2](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf). It does not use AES encryption to create shares.
 
