@@ -278,7 +278,10 @@ def test_help(page, width):
     assert page.locator("#help-dialog [data-i18n='helpUses']").inner_text() == "活用例"
     assert "実際に使っているパスワード、シードフレーズ、鍵" in dialog.inner_text()
     assert "保存するのは表示言語と明暗の設定だけ" in dialog.inner_text()
-    assert "実数で計算した曲線の違い" in dialog.inner_text()
+    assert "点と曲線のガイドは関係を示す図" in dialog.inner_text()
+    assert "(k,n) の括弧は個数" in dialog.inner_text()
+    assert "P658–659の例" in dialog.inner_text()
+    assert "256で割った余りの計算ではありません" in dialog.inner_text()
     assert "CTF・謎解き" in dialog.inner_text()
     assert dialog.locator("[data-i18n='multiplication']").inner_text() == "GF(2⁸) の掛け算"
     assert "固定例{57}×{13}={FE}" in dialog.locator("[data-i18n='multiplyIntro']").inner_text()

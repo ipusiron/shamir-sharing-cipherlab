@@ -1,6 +1,6 @@
 English · [日本語](README.md)
 
-# ShamirSharing CipherLab - Shamir secret sharing on grids and bytes
+# ShamirSharing CipherLab - Shamir secret sharing with coordinate planes and bytes
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/ipusiron/shamir-sharing-cipherlab?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/ipusiron/shamir-sharing-cipherlab?style=social)
@@ -10,13 +10,15 @@ English · [日本語](README.md)
 
 **Day123 - 200 Security Tools with Generative AI**
 
-ShamirSharing CipherLab is a hands-on teaching tool for Shamir secret sharing, using a grid, byte tables, and deliberately unsafe models. Start with “Visualize (2, n)” to compare one and two participants, then move to “Trace (k, n) by hand” for the general threshold. Shamir and Blakley independently proposed secret sharing in 1979. This tool implements Shamir’s polynomial scheme with Lagrange interpolation; it does not implement Blakley’s geometric scheme.
+ShamirSharing CipherLab is a teaching tool for trying Shamir secret sharing on coordinate planes and in byte tables. Begin with “Visualize (2, n)” to compare one share with two, then calculate a general threshold scheme in “Trace (k, n) by hand”. “Bytes” applies it to a short string, and “Pitfalls” examines invalid inputs and changed shares.
+
+Shamir and Blakley independently proposed secret sharing schemes in 1979. This tool implements Shamir’s polynomial construction. Lagrange interpolation is its reconstruction calculation. Blakley’s geometric construction is outside the scope of the tool.
 
 In Shamir’s (k,n) threshold scheme, n shares are made from secret s and given to n participants, one each. It has two conditions.
 
 ① Any k of the n participants can combine their shares to recover s.
 
-② With only k−1 participants, s cannot be recovered, and their shares reveal no information about it. The grid shows how a polynomial fits every possible secret.
+② With only k−1 participants, s cannot be recovered, and their shares reveal no information about it. If the coefficients are drawn uniformly, including zero, every possible secret remains equally likely.
 
 Use invented numbers for s in “Visualize (2, n)” and “Trace (k, n) by hand”, and a practice phrase in “Bytes”. Do not use this teaching tool to split or store passwords, seed phrases, or keys that you actually use. This tool does not provide share formats, printing, QR codes, or storage advice.
 
@@ -36,53 +38,54 @@ Open it in a browser, or open the HTML directly with `file://`. Computation and 
 |---|---|---|
 | Visualize (2, n) | ![One share and candidate secrets, English, light](assets/en/light/intro.png) | ![One share and candidate secrets, English, dark](assets/en/dark/intro.png) |
 | Trace (k, n) by hand | ![Hand calculation, English, light](assets/en/light/hand.png) | ![Hand calculation, English, dark](assets/en/dark/hand.png) |
-| k−1 candidates | ![Candidate grid, English, light](assets/en/light/candidates.png) | ![Candidate grid, English, dark](assets/en/dark/candidates.png) |
+| k−1 candidates | ![Candidate coordinate plane, English, light](assets/en/light/candidates.png) | ![Candidate coordinate plane, English, dark](assets/en/dark/candidates.png) |
 | Bytes | ![Byte table, English, light](assets/en/light/bytes.png) | ![Byte table, English, dark](assets/en/dark/bytes.png) |
 | Pitfalls | ![Pitfall cards, English, light](assets/en/light/pitfalls.png) | ![Pitfall cards, English, dark](assets/en/dark/pitfalls.png) |
 
 The same five states in Japanese appear in the [Japanese README](README.md).
+The byte table shows one set of coefficients used for the screenshots. Opening “Bytes” again draws new random coefficients and changes the share values.
 
 ## ✨ Features
 
 | Step | Action | What you can see |
 |---|---|---|
-| Visualize (2, n) | Cycle through candidate secrets with one share, then add a second | Thirteen polynomials of degree at most one through one point, then one through two points |
-| Trace (k, n) by hand | Distribute in GF(p), reconstruct with k shares, overlay k−1 candidates | Lagrange weights and one polynomial per candidate secret |
-| Bytes | Split a short UTF-8 phrase in GF(2⁸) and recover with k shares | A polynomial per byte, XOR, and eight shift/reduce steps |
+| Visualize (2, n) | Cycle through candidate secrets with one share, then add a second | Several lines through one point, then one polynomial fixed by two points |
+| Trace (k, n) by hand | Distribute and reconstruct in GF(p), overlay k−1 candidates | Share calculations, Lagrange weights, and possible secrets |
+| Bytes | Split a short UTF-8 phrase in GF(2⁸) and recover with k shares | A polynomial per byte, XOR, and a recovery calculation that responds to the number selected |
 | Pitfalls | Compare tampering, x=0, and too few shares | The differences among no check, CRC-32, and an embedded fingerprint |
 
 Following the book’s notation, `D` is the dealer, `s` the secret, and `vᵢ=f(i)` share number `i`. The `(k,n)` threshold scheme creates n shares and recovers s from any k of them. Choose a prime `p>max(s,n)` for arithmetic. The polynomial has degree at most k−1: degree 0 for k=1, degree 1 for k=2, and degree 2 for k=3. The default `k=3` uses `f(x)=s+a₁x+a₂x² (mod p)` and recovers `s=f(0)` by Lagrange interpolation.
 
 In the book, the share is the value `vᵢ`. On this tool’s `#i (i,vᵢ)` button, `#i` is its identifier and the parentheses contain the identifier and value used for reconstruction. The earlier `(k,n)` gives the threshold and total number of shares, not point coordinates. For example, `n=7` creates seven shares numbered `#1` through `#7`.
 
-Below the “① Distribute” table, each line shows share value `vᵢ=f(i)` and the reconstruction pair `(i,vᵢ)=(i,f(i))=(i, substituted expression mod p)`. Choosing `n=7` shows seven lines; changing coefficients or `p` updates them.
+In the distribution stage, the table shows the substituted expression, its sum, and its value modulo p for each share. Beneath the table, reconstruction pairs `(i,vᵢ)` appear in identifier order. With `n=7`, the tool creates shares `#1` through `#7`; changing coefficients or p updates their values.
 
-The default example in “Trace (k, n) by hand” is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its reconstruction pairs are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes candidate `s=1`.
+The default example in “Trace (k, n) by hand” is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its reconstruction pairs are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For shares #1, #2, and #3, the weights are `(3,10,1)` and their contributions are `(7,2,9)`. Their sum modulo 13 recovers secret `5`. Two shares leave 13 candidates.
 
 Coefficients are allowed to be zero, so the polynomial has degree *at most* k−1. With `k=1`, every share is simply the secret: copying instead of splitting.
 
 ### Why begin with (2, n)?
 
-GF(13) is a finite field with 13 values, 0–12. Add, subtract, and multiply modulo 13; division by a nonzero number means multiplication by its inverse. Because 13 is prime, every nonzero value has an inverse. “Visualize (2, n)” fixes p=13 and uses `f(x)=s+a₁x (mod 13)`. It compares leaked remainders from shares calculated over ordinary integers with shares calculated in GF(13). The GF(2⁸) explanation belongs in “Bytes”.
+GF(13) is a finite field with thirteen integer values, 0–12. Add, subtract, and multiply modulo 13; division by a nonzero number means multiplication by its inverse. Because 13 is prime, every nonzero value has an inverse. “Visualize (2, n)” fixes p=13 and uses `f(x)=s+a₁x (mod 13)`. Its prerequisite section contrasts shares calculated over ordinary integers with shares calculated in GF(13).
 
 The first tab starts with `p=13, n=5, s=5, a₁=4` and makes shares from `f(x)=5+4x (mod 13)`. During “Distribution”, dealer `D` calculates `vᵢ=f(i)` and gives one share to each custodian. Open the disclosure to follow the calculations and recipients, from `v₁=f(1)=(5+4×1) mod 13=9` to `v₅=f(5)=(5+4×5) mod 13=12`.
 
-During “Reconstruction”, start with custodian #1’s share. A share itself is the value `vᵢ`. For reconstruction, pair custodian number `i` (shown as `#i`) with share value `vᵢ` and write `(i,vᵢ)`. In the default example, `(1,9)` means custodian number 1 (`#1`) and share value 9. With this one point, the alternative `s=0, a₁=9` also fits. Every candidate `s=0…12` has a corresponding polynomial. Uniformly chosen coefficients leave all candidates equally likely. Add custodian #2’s `(2,0)` and the polynomial is uniquely `f(x)=5+4x (mod 13)`, recovering `s=f(0)=5`.
+“Reconstruction” initially selects custodian #3’s pair `(3,4)`. The share itself is the value `v₃=4`. For reconstruction, pair identifier `i` (shown as `#i`) with share value `vᵢ` and write `(i,vᵢ)`. For example, `(1,9)` combines custodian #1 with share value 9. With only #3’s point, the alternative `s=0, a₁=10` also fits. Every candidate `s=0…12` has a corresponding polynomial. Uniformly chosen coefficients leave all candidates equally likely. Add custodian #1’s `(1,9)` and the polynomial is uniquely `f(x)=5+4x (mod 13)`, recovering `s=f(0)=5`.
 
-The dealer can change `s` and `a₁` inside a collapsed section. A participant with one share should be considered unaware of those settings. Both grids start at zero: the bottom-left cell is `(0,0)`, with `x` increasing to the right and `y` increasing upward. Hover over a cell or point to see its `(x,y)` coordinates. The grids show finite-field points, so they do not connect them as a continuous real-number line.
+The dealer can change `s` and `a₁` inside a collapsed section. A participant with one share should be considered unaware of those settings. The coordinate plane starts at zero: horizontal x is the share identifier and vertical y is the share value. Hover over a point to read its `(x,y)` coordinates.
 
-Under “② Compare what one and two points determine”, three straight lines through `(1,9)` first appear in an ordinary coordinate plane. Each line intersects the y-axis at `f(0)`, a candidate secret `s`. The intersections are `0`, `5`, and `12`, showing that one point does not determine a line.
+The one-share diagram draws three ordinary straight lines through `(3,4)`. Each intersects the y-axis at `f(0)`, a candidate secret `s`. The intersections are `0`, `5`, and `12`, showing that one point does not determine a line.
 
-In GF(13), `f₀(x)=9x` and `f₅(x)=5+4x` are also distinct polynomials. Both give `f(1)=9`, but `f₀(0)=0` and `f₅(0)=5`. Multiple candidates exist because one point does not determine a polynomial; reduction modulo 13 does not merely make one line look like several. For a chosen candidate `s`, calculate `a₁=(y−s)÷x (mod 13)` to get a polynomial through the point. With `s=0`, `f(x)=9x (mod 13)` gives `0,9,5` at integer `x=0,1,2`. Continue through `x=12` to place the blue dots. Red rings at `x=0` mark the 13 remaining candidate secrets. No continuous line is folded back into the grid. The GF(13) introduction in this tab uses the same `f(x)=5+4x` and five shares.
+In GF(13), `f₀(x)=10x` and `f₅(x)=5+4x` are distinct polynomials. Both give `f(3)=4`, but `f₀(0)=0` and `f₅(0)=5`. One point alone does not determine the polynomial. For a selected candidate `s`, calculate `a₁=(y−s)÷x (mod 13)` to find its formula. With `s=0`, `f(x)=10x (mod 13)` gives `0,10,7` at `x=0,1,2`. The line in the interface helps illustrate the relation between a point and its intercept. GF(13) can be evaluated only at integer `x=0…12`; intermediate positions on the line are not field values.
 
 ## 📚 Follow 『暗号技術のすべて』 alongside the tool
 
-Section 9.2 (pp. 652–661) and the two number tabs make a useful pair. Begin with a linear polynomial in (2,n), then try interpolation and reconstruction for a general (k,n) threshold. Lagrange interpolation is Shamir’s reconstruction calculation, not a separate secret-sharing scheme.
+Follow section 9.2 (pp. 652–661) of 『暗号技術のすべて』 while entering its worked examples in the tool. Start with the linear (2,n) scheme, then trace share generation and interpolation for a general (k,n) threshold. The book’s (3,5) example can also be reproduced.
 
 | Book pages | Try in the tool |
 |---|---|
-| 652–654 | Try the book’s linear (2,n) explanation in “Visualize (2, n)”: one participant leaves 13 possible secrets, while two fix one. Then check the `(k,n)` threshold, dealer `D`, secret `s`, and shares `vᵢ=f(i)` under “① Distribute”. |
-| 655–657 | Compare the book’s three points `(a,A),(b,B),(c,C)` with the selected `(xᵢ,yᵢ)` and weights `λᵢ(0)` under “② Reconstruct”. Select only two shares and overlay the remaining candidates on the grid. |
+| 652–654 | Try the linear (2,n) construction in the first tab: one share leaves 13 candidate secrets, while two fix one. Open the distribution details to see dealer `D` hand one share `vᵢ=f(i)` to each participant. |
+| 655–657 | Match the book’s points `(a,A),(b,B),(c,C)` with `(xᵢ,yᵢ)` and weights `λᵢ(0)` in “Trace (k, n) by hand”. Compare two selected shares, which leave candidates, with the reconstruction from three. |
 | 658–659 | Enter the book’s example: `p=17, k=3, n=5, s=13, a₁=10, a₂=2`. The shares are `f(1)…f(5)=8,7,10,0,11`. Select `#1, #3, #5` and recover `s=13`. |
 | 660–661 | Use “Pitfalls” to explore incorrect shares and verification. The book’s VSS extensions have different capabilities from this tool’s CRC and fingerprint models. |
 
@@ -90,15 +93,13 @@ The tool starts with a smaller GF(13) example. Use “Reset example” after try
 
 ## 📖 How to use it
 
-1. In “Visualize (2, n)”, start with one share and cycle through candidate secrets. Every candidate has a polynomial of degree at most one through the point. Add a second participant to fix one polynomial and one secret. Dealer settings are collapsed to distinguish them from information given to participants.
-2. In “Trace (k, n) by hand”, vary `p, k, n, s, a₁…` and read the distribution and reconstruction tables. Enter coefficients or draw them with cryptographic randomness.
-3. Select `k−1 shares`. Advance one candidate at a time or overlay all of them. Toggle the red nonzero-leading-coefficient switch to see a candidate vanish.
-4. Drag a grid point, or select it and tap another cell in the same column. Clicking a point focuses it, and up and down arrow keys move it one cell. With k shares, the table and `Δs=λᵢ(0)·Δ (mod p)` update together. With fewer than k−1 shares, the curve is not unique; faint points show one example from the current polynomial.
-5. Drag points on the real-number curve to change its y-intercept. With k−1 points, you can move the intercept and still pass through them. After using the curve to see the relationship between points and intercept, use the integer table to observe leaked remainders, then compare with the finite-field grid.
-6. In “Bytes”, enter up to 32 UTF-8 bytes. Split with `2≤k≤n≤8`, select k shares, and recover. Hex is always shown; text appears only for valid UTF-8, with controls escaped.
-7. In “Pitfalls”, switch the checking layer. All three cards use fixed `MEET AT DAWN` data rather than your input.
+1. Open the distribution details in “Visualize (2, n)” to see dealer D calculate and hand out shares `v₁…vₙ`. In reconstruction step ①, select one share and vary the intercept of a line through its point. In step ②, add a second share to fix the polynomial and secret.
+2. In “Trace (k, n) by hand”, set `p, k, n, s, a₁…` and read the substituted expressions and share values in the distribution table. Enter coefficients or use “Draw random coefficients”.
+3. In reconstruction step ①, select `k−1` shares and cycle through candidate secrets or press “Overlay all”. In step ②, select `k` shares to see the Lagrange interpolation table and `f(0)`. Distinguish finite-field values at integer x from the real-number curve drawn as a guide.
+4. In “Bytes”, enter up to 32 UTF-8 bytes and split them with `2≤k≤n≤8`. Select a byte position to inspect its coefficients and share values. In reconstruction, add shares from zero upward and compare the equations below k with the interpolation table at k.
+5. In “Pitfalls”, inspect a changed share, x=0, and too few shares. Switch the check in the first card. The cards use fixed `MEET AT DAWN` data and do not respond to text entered in “Bytes”.
 
-Open “?” at the top right for instructions, use cases, and input and storage information. The theory sections and sources are in a collapsible section of Help.
+Open “?” at the top right for instructions, use cases, the fixed GF(2⁸) multiplication example, and input and storage information. The “Theory” disclosure contains the threshold argument and sources.
 
 ### Processing added in “Bytes”
 
@@ -106,10 +107,10 @@ The book explains Shamir’s scheme through numbers in GF(p). “Bytes” extend
 
 1. Convert the input to UTF-8. A Japanese character can occupy several bytes, so the 32-byte limit counts bytes rather than characters.
 2. Build a separate polynomial `Fⱼ(X)` from the original byte `sⱼ` at each byte position `j`. Draw independent coefficients for each column with `crypto.getRandomValues`. Share `#i` collects the results evaluated at identifier `i` across all positions. Select a byte position in the interface to inspect that run’s coefficients and results for `#1` through `#n`.
-3. Select k shares with distinct identifiers. At each byte position, multiply a share byte by its `λᵢ(0)` weight in GF(2⁸), then XOR the products to recover that byte. Reconstruction stops with fewer than k shares.
+3. Add shares one at a time during reconstruction. With the default k=3, the unknowns for the first byte are `s₀, a₁,₀, a₂,₀`. One share gives one equation; two give two. In either case, every value 00–FF is still possible for `s₀`. Once three shares are selected, calculate `λᵢ(0)` from their identifiers and XOR its products with the share bytes to recover the first byte. Apply the same weights to every other byte position.
 4. Read the recovered bytes in hex first. Display them as text only if they form valid UTF-8, and escape control characters, so the text view does not hide the byte result.
 
-GF(2⁸) is not arithmetic modulo 256; it uses the same finite field as AES, with the irreducible polynomial `x⁸+x⁴+x³+x+1`. Addition is XOR. Compare the eight-step multiplication with the display-only log/exp table further down the tab. This teaching tool does not specify a share file format or a way to store and transfer shares.
+GF(2⁸) addition is XOR, and multiplication uses the irreducible polynomial `z⁸+z⁴+z³+z+1`. Help contains the fixed `{57}×{13}={FE}` example with eight multiplication steps and an explanation of the display-only log/exp table. This example does not change with the random coefficients drawn for shares. The tool does not specify a share file format or a way to store and transfer shares.
 
 ### Why 0x11B appears
 
@@ -147,7 +148,7 @@ Each theory section in the interface separates primary and secondary sources. Sh
 
 | Aspect | Prior examples within the research scope | Added experience here |
 |---|---|---|
-| Visualization | Videos, slides, and a Wolfram graph | Overlay candidates on a grid and move points |
+| Visualization | Videos, slides, and a Wolfram graph | Overlay candidate secrets and compare them with the recovered polynomial |
 | Manual arithmetic | codex32’s GF(32) paper tool | Trace small GF(p) interpolation, then move to GF(2⁸) |
 | Pitfalls | Many implementations reject or check invalid inputs | Place unsafe models beside guarded functions |
 
@@ -159,7 +160,7 @@ Ways of using this tool in particular:
 
 - Mathematics class: students fix `(1,11)` and `(2,8)` and overlay 13 candidates. They can see why no candidate gets priority.
 - Introduction to finite fields: compare integer values `21,35` of `f(x)=5+4x+2x²` with GF(13) values `8,9`. Students see when remainders disclose the secret.
-- Code review exercise: a reviewer toggles the nonzero-leading-coefficient rule, watches `s=1` disappear, and checks the coefficient generation policy.
+- Code review exercise: inspect why the coefficient draw includes zero and why x=0 must not be accepted as a share identifier.
 - Puzzle or CTF design: an author makes a puzzle with public sample values; participants compute secret `5` from `λ=(3,10,1)`. No real credentials are used.
 - Programming lesson: passing two shares to the unsafe function returns wrong bytes beginning `2DB1…`. Students can design threshold and UTF-8 checks.
 
@@ -180,7 +181,7 @@ Run `npm test` with Node.js 22 or later. No package installation is required. Gi
 | Area | Main checks |
 |---|---|
 | A GF(2⁸) | All 65,536 multiplication pairs, two FIPS 197 examples, 255 inverses, generator orders |
-| B GF(p) | Five default shares, three λ sets, 13 candidates, removed `s=1`, integer values, `λᵢ(0)·Δ`, k=1 |
+| B GF(p) | Five default shares, three λ sets, 13 candidates, coefficient sampling range, integer values, k=1 |
 | C Split and combine | Known shares from fixed test randomness, all ten 3-of-5 subsets, random round trips |
 | D Pitfalls | Tampering, CRC, fingerprint, x=0, too few shares, every fixed vector field |
 | E Static and UI | CSP, storage keys, forbidden APIs, bilingual dictionary, SHA-256 copy, viewport and interactions |
@@ -198,10 +199,10 @@ The text after `#` explains each file. The local `.work/` directory is excluded 
 |-- README.en.md # English documentation
 |-- package.json # Test command
 |-- index.html # Four-tab interface and CSP
-|-- style.css # Graph-paper colors and layout
+|-- style.css # Coordinate-plane styling and layout
 |-- messages.js # Japanese and English dictionary
-|-- app.js # DOM, finite-field grid, real-number graph
-|-- intro.js # (2,n) linear polynomial and candidate grid
+|-- app.js # DOM, reconstruction table, candidate diagrams and real-number curve
+|-- intro.js # (2,n) line and candidate diagrams
 |-- gf-core.js # Pure field and interpolation functions
 |-- pitfalls.js # Deliberately unsafe models and checks
 |-- sha256-core.js # SHA-256 copy from Day118
