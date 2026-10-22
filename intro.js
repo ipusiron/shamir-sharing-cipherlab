@@ -2,12 +2,13 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id), G = ShamirGF, p = 13;
-  const state = { n:5, secret:5, slope:4, one:3, two:[1,2], candidate:0 };
+  const state = { n:5, secret:5, slope:4, one:3, two:[3,1], candidate:0 };
   const t = key => ShamirMessages[document.documentElement.lang][key] || key;
   const format = (key, values) => t(key).replace(/\{([a-z0-9]+)\}/gi, (_, name) => String(values[name]));
   const E = (tag, value) => { const el=document.createElement(tag);if(value!==undefined)el.textContent=String(value);return el; };
   const S = (tag, attrs) => { const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));return el; };
   const shares = () => G.splitP([state.secret,state.slope],state.n,p);
+  const defaultPair = () => [state.one,state.one===1?2:1];
   const points = () => state.two.map(x => shares()[x-1]);
   const pickButton = ([x,y],selected) => {
     const button=E('button',selected?`#${x} (${x},${y})`:`#${x}`);
@@ -166,17 +167,22 @@
   }
   $('linear-n').replaceChildren(...Array.from({length:7},(_,i)=>{const option=E('option',i+2);option.value=String(i+2);return option;}));
   $('linear-candidate').replaceChildren(...Array.from({length:p},(_,i)=>{const option=E('option',i);option.value=String(i);return option;}));
-  $('linear-n').addEventListener('change',()=>{state.n=Number($('linear-n').value);if(state.one>state.n)state.one=1;state.two=state.two.filter(x=>x<=state.n);if(!state.two.length)state.two=[state.one];render();});
+  $('linear-n').addEventListener('change',()=>{
+    state.n=Number($('linear-n').value);
+    if(state.one>state.n){state.one=1;state.two=defaultPair();}
+    else {state.two=state.two.filter(x=>x<=state.n);if(state.two.length<2)state.two=defaultPair();}
+    render();
+  });
   for(const [id,key] of [['linear-secret','secret'],['linear-slope','slope']])$(id).addEventListener('change',()=>{
     const value=Number($(id).value);
     if(!Number.isInteger(value)||value<0||value>=p){$('linear-status').textContent=t('invalidInput');$(id).value=String(state[key]);return;}
-    state[key]=value;state.one=Math.min(3,state.n);state.two=[1,2];state.candidate=0;$('linear-status').textContent='';render();
+    state[key]=value;state.one=Math.min(3,state.n);state.two=defaultPair();state.candidate=0;$('linear-status').textContent='';render();
   });
-  $('linear-reset').addEventListener('click',()=>{Object.assign(state,{n:5,secret:5,slope:4,one:3,two:[1,2],candidate:0});$('linear-status').textContent='';render();});
+  $('linear-reset').addEventListener('click',()=>{Object.assign(state,{n:5,secret:5,slope:4,one:3,two:[3,1],candidate:0});$('linear-status').textContent='';render();});
   $('linear-one-picks').addEventListener('click',event=>{
     const button=event.target.closest('[data-linear-pick]');if(!button)return;
     state.one=Number(button.dataset.linearPick);
-    state.candidate=0;
+    state.two=defaultPair();state.candidate=0;
     render();
     $('linear-one-picks').querySelector(`[data-linear-pick="${state.one}"]`).focus({preventScroll:true});
   });

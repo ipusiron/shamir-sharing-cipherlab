@@ -69,12 +69,12 @@ def test_linear_intro(page, width):
     assert "(3,4)" in page.locator("#linear-one-selected").inner_text()
     assert page.locator("[data-i18n='linearGridTitle']").bounding_box()["y"] < page.locator("[data-i18n='linearTwoTitle']").bounding_box()["y"]
     assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
-    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
+    assert "(3,4)" in page.locator("#linear-two-selected").inner_text()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     graph = page.locator("#linear-two-graph")
     assert graph.get_attribute("viewBox") == "0 0 320 292"
     assert graph.locator(".linear-two-share").count() == 2
-    assert graph.locator(".linear-two-share").evaluate_all("els => els.map(el => [el.getAttribute('cx'), el.getAttribute('cy')])") == [["72", "90"], ["90", "252"]]
+    assert graph.locator(".linear-two-share").evaluate_all("els => els.map(el => [el.getAttribute('cx'), el.getAttribute('cy')])") == [["108", "180"], ["72", "90"]]
     assert graph.locator(".linear-two-secret").count() == 1
     assert graph.locator(".linear-two-branch").count() > 1
     assert graph.locator(".linear-two-secret").get_attribute("cx") == "54"
@@ -111,6 +111,7 @@ def test_linear_intro(page, width):
     assert page.locator('#linear-one-picks [data-linear-pick="2"]').evaluate("el => el === document.activeElement")
     assert "(2,0)" in page.locator("#linear-one-selected").inner_text()
     assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
+    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-two-picks [data-linear-pick="3"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
@@ -124,19 +125,21 @@ def test_linear_intro(page, width):
     assert "もう1人" in page.locator("#linear-two-result").inner_text()
     assert graph.locator(".linear-two-branch").count() == 0
     assert graph.locator(".linear-two-share").count() == 1
-    page.locator('#linear-two-picks [data-linear-pick="2"]').click()
+    page.locator('#linear-two-picks [data-linear-pick="1"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-two-picks [data-linear-pick="4"]').click()
-    assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
+    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
     assert "(4,8)" in page.locator("#linear-two-selected").inner_text()
     assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
-    page.locator('#linear-two-picks [data-linear-pick="1"]').click()
+    page.locator('#linear-two-picks [data-linear-pick="2"]').click()
     assert "もう1人" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-two-picks [data-linear-pick="5"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-one-picks [data-linear-pick="3"]').click()
     assert "(3,4)" in page.locator("#linear-one-selected").inner_text()
     assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
+    assert "(3,4)" in page.locator("#linear-two-selected").inner_text()
+    assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
     assert "点 (3,4)" in page.locator("#linear-analogy-caption").inner_text()
     assert page.locator("#linear-analogy .linear-analogy-line").evaluate_all("(els) => els.every(el => Number(el.getAttribute('x2')) > Number(document.querySelector('.linear-analogy-point').getAttribute('cx')))")
     assert page.locator(".linear-analogy-point-label").evaluate("""el => {
@@ -150,6 +153,9 @@ def test_linear_intro(page, width):
         return Math.min(at(left),at(right))>box.y+box.height+3 || Math.max(at(left),at(right))<box.y-3;
       });
     }""")
+    page.locator('#linear-one-picks [data-linear-pick="1"]').click()
+    assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
+    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
     page.locator("#linear-dealer summary").click()
     assert page.locator("#linear-dealer [data-i18n='linearDealerSet']").inner_text() == "秘密情報sと乱数a₁を決めます。"
     assert "本ツールでは仕組みを試すために値を変えられます。" in page.locator("#linear-dealer [data-i18n='linearDealerHelp']").inner_text()
@@ -181,8 +187,8 @@ def test_linear_intro(page, width):
     page.locator("#linear-reset").click()
     assert page.locator("#linear-one-picks button").count() == 5
     assert page.locator("#linear-two-picks button").count() == 5
+    assert "(3,4)" in page.locator("#linear-two-selected").inner_text()
     assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
-    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
     assert rows.count() == 5
     page.locator("#language").click()
     assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
