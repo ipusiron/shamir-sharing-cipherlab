@@ -96,32 +96,46 @@
         <label><span>s = f(0)</span><input id="secret" type="number" min="0" value="5" inputmode="numeric"></label>
       </div>
       <div id="coefficient-inputs" class="settings-grid"></div>
+      <p data-i18n="handCoefficientHelp"></p>
       <div class="actions"><button id="random-coefficients" type="button" data-i18n="randomCoefficients"></button><button id="reset-hand" type="button" data-i18n="reset"></button></div>
       <p id="hand-status" role="status"></p>
       <h3 data-i18n="distribute"></h3><p id="polynomial"></p>
       <div class="table-frame"><table><thead><tr><th>x</th><th data-i18n="termValues"></th><th data-i18n="sum"></th><th>mod p</th></tr></thead><tbody id="distribution-table"></tbody></table></div>
       <div id="share-data" class="share-data"></div>
-      <h3 data-i18n="reconstruct"></h3><p data-i18n="chooseShares"></p><p id="share-notation" data-i18n="shareNotation"></p><div id="share-picks" class="actions"></div>
-      <div class="actions"><button id="select-k" type="button" data-i18n="selectK"></button><button id="select-kminus" type="button" data-i18n="selectKMinus"></button></div>
-      <div id="reconstruction-section"><div class="table-frame"><table><thead><tr><th>xᵢ</th><th>yᵢ</th><th>Πxⱼ</th><th>Π(xⱼ−xᵢ)</th><th data-i18n="inverse"></th><th>λᵢ(0)</th><th>λᵢ(0)yᵢ</th></tr></thead><tbody id="reconstruction-table"></tbody></table></div><p id="reconstruction-result" class="result"></p></div>
-      <div id="candidate-section" hidden><h3 data-i18n="candidateTitle"></h3><p id="candidate-result"></p>
+      <h3 data-i18n="reconstruct"></h3><p id="share-notation" data-i18n="shareNotation"></p>
+      <h4 class="linear-step-heading" data-i18n="handFewTitle"></h4><p id="hand-few-intro" data-i18n="handFewIntro"></p>
+      <div id="hand-few-picks" class="actions" role="group" data-label="handFewPickLabel"></div><p id="hand-few-selected" class="result" role="status"></p>
+      <div id="candidate-section"><h5 data-i18n="candidateTitle"></h5><p id="candidate-result"></p>
         <div class="actions"><button id="previous-candidate" type="button" data-i18n="previous"></button><button id="next-candidate" type="button" data-i18n="next"></button>
           <button id="all-candidates" type="button" aria-pressed="false" data-i18n="showAll"></button></div>
         <label class="check"><input id="leading-only" type="checkbox"><span data-i18n="leadingOnly"></span></label>
       </div>
+      <p id="hand-few-graph-caption"></p><svg id="hand-few-graph" viewBox="0 0 520 310" role="img" data-label="handFewGraphLabel"></svg>
+      <h4 class="linear-step-heading" data-i18n="handEnoughTitle"></h4><p id="hand-enough-intro" data-i18n="handEnoughIntro"></p>
+      <div id="share-picks" class="actions" role="group" data-label="handEnoughPickLabel"></div><p id="hand-enough-selected" class="result" role="status"></p>
+      <div id="reconstruction-section"><div class="table-frame"><table><thead><tr><th>xᵢ</th><th>yᵢ</th><th>Πxⱼ</th><th>Π(xⱼ−xᵢ)</th><th data-i18n="inverse"></th><th>λᵢ(0)</th><th>λᵢ(0)yᵢ</th></tr></thead><tbody id="reconstruction-table"></tbody></table></div><p id="reconstruction-result" class="result"></p></div>
+      <p id="hand-enough-graph-caption"></p><svg id="hand-enough-graph" viewBox="0 0 520 310" role="img" data-label="handEnoughGraphLabel"></svg>
+      <details id="hand-explore"><summary data-i18n="handExploreTitle"></summary><p data-i18n="handExploreIntro"></p>
+      <div class="actions"><button id="select-k" type="button" data-i18n="selectK"></button><button id="select-kminus" type="button" data-i18n="selectKMinus"></button></div>
       <h3 data-i18n="gridTitle"></h3><p data-i18n="gridHint"></p><p data-i18n="gridInteractionHint"></p><p id="grid-range" class="muted"></p><div id="grid-frame" class="grid-frame"><svg id="field-grid" role="group" data-label="gridLabel"></svg></div>
       <p id="tweak-result" class="result"></p>
       <h3 data-i18n="realTitle"></h3><p data-i18n="realWarning"></p><div class="grid-frame"><svg id="real-graph" role="img" data-label="realLabel" viewBox="0 0 600 300"></svg></div>
       <p id="real-result" class="result"></p><div id="real-picks" class="actions"></div>
       <h3 data-i18n="integerTitle"></h3><p data-i18n="integerIntro"></p><div class="table-frame"><table><thead><tr><th>x</th><th>f(x) ℤ</th><th>f(x) mod x</th></tr></thead><tbody id="integer-table"></tbody></table></div><p id="integer-result"></p>
+      </details>
     </section>
     <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden>
       <h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p><p data-i18n="byteFieldBridge"></p><p data-i18n="byteMethod"></p>
       <p data-i18n="fieldRule"></p>
+      <p data-i18n="byteFieldReason"></p>
       <div class="settings-grid"><label><span data-i18n="byteInput"></span><input id="byte-message" type="text" value="MEET AT DAWN" autocomplete="off" spellcheck="false"></label>
         <label><span>k</span><select id="byte-k"></select></label><label><span>n</span><select id="byte-n"></select></label></div>
       <p id="byte-error" role="status"></p>
-      <h3 data-i18n="byteDistribute"></h3><p data-i18n="byteTableHelp"></p><p id="byte-secret-hex" class="result"></p><div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
+      <h3 data-i18n="byteDistribute"></h3><p data-i18n="byteTableHelp"></p><p id="byte-secret-hex" class="result"></p>
+      <h4 data-i18n="byteCalculationTitle"></h4><p id="byte-calculation-intro" data-i18n="byteCalculationIntro"></p>
+      <label class="byte-column-label"><span data-i18n="byteColumnLabel"></span><select id="byte-column"></select></label>
+      <p id="byte-formula" class="result"></p><div id="byte-calculation" class="table-frame"></div>
+      <div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
       <h3 data-i18n="byteRestore"></h3><p data-i18n="byteRestoreHelp"></p><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
       <p id="byte-restored-hex" class="result"></p><p id="byte-restored-text" class="result"></p><p data-i18n="byteOutputHelp"></p>
       <h3 data-i18n="multiplication"></h3><p data-i18n="multiplyIntro"></p><div id="multiply-steps" class="table-frame"></div>
@@ -150,6 +164,7 @@
       <li data-i18n="helpUse1"></li><li data-i18n="helpUse2"></li><li data-i18n="helpUse3"></li>
       <li data-i18n="helpUse4"></li><li data-i18n="helpUse5"></li><li data-i18n="helpUse6"></li>
     </ul>
+    <h3 data-i18n="byteMathHelpTitle"></h3><p data-i18n="byteMathHelp1"></p><p data-i18n="byteMathHelp2"></p>
     <h3 data-i18n="helpPrivacy"></h3><p data-i18n="educational"></p><p data-i18n="privacy"></p>
     <details id="help-theory"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p><div id="lessons"></div></details>
     </div>

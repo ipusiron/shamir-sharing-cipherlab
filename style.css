@@ -69,6 +69,17 @@ th { background:var(--bg); }
 .linear-step-heading { font-size:1.1rem; }
 .linear-candidate-label { display:grid; gap:.2rem; min-width:5rem; }
 #linear-analogy, #linear-two-graph { display:block; width:min(100%,320px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
+#hand-few-graph, #hand-enough-graph { display:block; width:min(100%,520px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
+.hand-graph-axis { stroke:var(--muted); stroke-width:1.5; }
+.hand-graph-curve { fill:none; stroke:var(--muted); stroke-width:1.4; opacity:.55; }
+.hand-graph-active { stroke:var(--blue); stroke-width:2.8; opacity:1; }
+.hand-graph-share { fill:var(--blue); stroke:var(--paper); stroke-width:2; }
+.hand-graph-secret { fill:var(--red); stroke:var(--paper); stroke-width:2; }
+.hand-graph-label { fill:var(--ink); font:12px system-ui,sans-serif; }
+.hand-graph-point-label { paint-order:stroke; stroke:var(--paper); stroke-width:4px; stroke-linejoin:round; }
+.hand-graph-secret-label { fill:var(--red); font-weight:700; }
+#hand-explore { margin:1.25rem 0; padding:.65rem .8rem; border:1px solid var(--line); }
+@media (max-width:600px) { #hand-explore { padding:0; } #hand-explore summary { padding:.65rem .4rem; } }
 .linear-analogy-axis { stroke:var(--muted); stroke-width:1.5; }
 .linear-analogy-line { stroke-width:2.5; }
 .linear-analogy-0 { stroke:var(--red); }
@@ -102,6 +113,10 @@ th { background:var(--bg); }
 @media (min-width:700px) { .settings-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
 @media (max-width:600px) { .panel { padding:.5rem; } }
 #byte-table th, #byte-table td { min-width:38px; padding:.35rem .4rem; font-family:ui-monospace,Consolas,monospace; }
+.byte-column-label { display:grid; gap:.2rem; width:min(100%,260px); margin:.75rem 0; }
+#byte-formula { overflow-wrap:anywhere; }
+#byte-calculation { margin:.5rem 0 1rem; }
+#byte-calculation th, #byte-calculation td { font-family:ui-monospace,Consolas,monospace; }
 .pitfall-card, .lesson-card { margin:1rem 0; padding:1rem; border:1px solid var(--line); background:var(--paper); }
 .pitfall-card { border-left:5px solid var(--red); }
 .pitfall-card h3, .lesson-card h3 { margin-top:0; }

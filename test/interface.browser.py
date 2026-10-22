@@ -357,6 +357,33 @@ def test_hand_primer(page):
     page.locator("#share-count").select_option("5")
 
 
+def test_hand_recovery_stages(page):
+    assert page.locator("[data-i18n='handIntro']").inner_text() == "小さな素数の座標平面で、分散と復元における計算を追います。"
+    assert page.locator("#coefficient-inputs label span").all_inner_texts() == ["a₁", "a₂"]
+    assert "独立に選ぶ乱数" in page.locator("[data-i18n='handCoefficientHelp']").inner_text()
+    assert page.locator("[data-i18n='distribute']").inner_text() == "分散段階"
+    assert page.locator("[data-i18n='reconstruct']").inner_text() == "復元段階"
+    assert [b.get_attribute("data-few-pick") for b in page.locator("#hand-few-picks [aria-pressed='true']").all()] == ["1", "2"]
+    assert [b.get_attribute("data-pick") for b in page.locator("#share-picks [aria-pressed='true']").all()] == ["1", "2", "3"]
+    assert page.locator("#hand-few-graph .hand-graph-curve").count() >= 3
+    assert page.locator("#hand-enough-graph .hand-graph-curve").count() == 1
+    assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
+    page.locator('#hand-few-picks [data-few-pick="2"]').click()
+    assert page.locator("#candidate-section").is_hidden()
+    assert page.locator("#hand-few-graph .hand-graph-curve").count() == 0
+    page.locator('#hand-few-picks [data-few-pick="4"]').click()
+    assert page.locator("#candidate-section").is_visible()
+    assert [b.get_attribute("data-pick") for b in page.locator("#share-picks [aria-pressed='true']").all()] == ["1", "2", "4"]
+    page.locator('#share-picks [data-pick="2"]').click()
+    assert page.locator("#reconstruction-section").is_hidden()
+    assert page.locator("#hand-enough-graph .hand-graph-curve").count() == 0
+    page.locator('#share-picks [data-pick="5"]').click()
+    assert page.locator("#hand-enough-graph .hand-graph-curve").count() == 1
+    assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
+    assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth")
+    page.locator("#reset-hand").click()
+
+
 def test_interactions(page):
     assert first_y(page) == "11"
     assert "左下のマスが (0,0)" in page.locator("[data-i18n='gridHint']").inner_text()
@@ -429,7 +456,7 @@ def test_single_selected_share(page):
         coefficient.fill(value)
         coefficient.press("Tab")
     for x, y in enumerate((11, 4, 10, 3, 9), 1):
-        assert page.locator(f'[data-pick="{x}"]').inner_text() == f"#{x} ({x},{y})"
+        assert page.locator(f'[data-pick="{x}"]').inner_text() == (f"#{x} ({x},{y})" if x <= 3 else f"#{x}")
     page.locator('[data-pick="1"]').click()
     page.locator('[data-pick="2"]').click()
     assert page.locator(".field-ghost").count() == 13
@@ -500,6 +527,26 @@ def test_tabs_and_localization(page):
     assert "復元値はまず16進で確かめます" in byte_text
     assert not page.locator("#panel-hand").is_visible()
     assert "MEET AT DAWN" in page.locator("#byte-restored-text").inner_text()
+    assert "0x11B" in page.locator("[data-i18n='fieldRule']").inner_text()
+    assert "シェアを作る式Fⱼ(X)" in page.locator("[data-i18n='byteFieldReason']").inner_text()
+    formula = page.locator("#byte-formula")
+    assert formula.inner_text().startswith("F₀(X) = {4D} ⊕ ")
+    assert "X²" in formula.inner_text()
+    for share_number, row in enumerate(page.locator("#byte-calculation tbody tr").all(), 1):
+        cells = row.locator("td").all_inner_texts()
+        total = int(cells[3], 16)
+        for term in cells[4:]:
+            total ^= int(term.split("=")[1], 16)
+        assert total == int(cells[2], 16)
+        assert cells[2] == page.locator(f"#byte-table tbody tr:nth-child({share_number + 1}) td:nth-child(2)").inner_text()
+    page.locator("#byte-column").select_option("1")
+    assert formula.inner_text().startswith("F₁(X) = {45} ⊕ ")
+    page.locator("#byte-column").select_option("0")
+    page.locator("#byte-k").select_option("2")
+    assert "X²" not in formula.inner_text()
+    page.locator("#byte-k").select_option("4")
+    assert "X³" in formula.inner_text()
+    page.locator("#byte-k").select_option("3")
     before = page.locator("#byte-secret-hex").inner_text()
     page.locator("#byte-message").evaluate("el => {el.dispatchEvent(new CompositionEvent('compositionstart')); el.value='あ'; el.dispatchEvent(new Event('input',{bubbles:true}));}")
     assert page.locator("#byte-secret-hex").inner_text() == before
@@ -544,6 +591,7 @@ def main():
                 page.on("console", lambda message: failures.append(message.text) if message.type == "error" else None)
                 page.goto(URL)
                 test_linear_intro(page, width)
+                page.locator("#hand-explore summary").click()
                 page.locator("#prime").select_option("23")
                 page.locator('#field-grid [data-cell-x="22"][data-cell-y="22"]').hover()
                 tooltip = page.locator("#grid-coordinate-tooltip")
@@ -555,6 +603,7 @@ def main():
                 page.locator("#reset-hand").click()
                 normal = geometry(page, width)
                 test_hand_primer(page)
+                test_hand_recovery_stages(page)
                 test_distributed_share_data(page)
                 test_help(page, width)
                 if width == 320:
@@ -563,6 +612,7 @@ def main():
                     page.locator("#tab-bytes").click()
                     byte_width = page.evaluate("() => ({table:document.querySelector('#byte-table-frame').scrollWidth, frame:document.querySelector('#byte-table-frame').clientWidth, page:document.documentElement.scrollWidth})")
                     assert byte_width["table"] > byte_width["frame"] and byte_width["page"] == width, byte_width
+                    assert page.locator("#byte-calculation").evaluate("el => el.scrollWidth > el.clientWidth")
                     page.locator("#tab-hand").click()
                 if width == 390:
                     test_book_example(page)

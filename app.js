@@ -43,21 +43,24 @@
   render();
 }());
 
-/* The hand tab has one model. Tables and both plots read that model. */
+/* The hand tab shares one field model across both recovery stages and the optional experiments. */
 (function () {
   'use strict';
   const $ = id => document.getElementById(id), G = ShamirGF;
-  const s = { p:13, k:3, n:5, c:[5,4,2], selected:[1,2,3], candidate:5, all:false, leading:false,
+  const s = { p:13, k:3, n:5, c:[5,4,2], fewer:[1,2], selected:[1,2,3], candidate:5, all:false, leading:false,
     activeX:null, moved:'', realY:{1:11,2:8,3:9}, realZero:5 };
   const t = key => ShamirMessages[document.documentElement.lang][key] || key;
   const E = (tag, value, cls) => { const el=document.createElement(tag); if(value!==undefined) el.textContent=String(value); if(cls) el.className=cls; return el; };
   const S = (tag, attrs) => { const el=document.createElementNS('http://www.w3.org/2000/svg',tag); for(const [k,v] of Object.entries(attrs)) el.setAttribute(k,String(v)); return el; };
-  const shares = () => G.splitP(s.c,s.n,s.p), points = () => s.selected.map(x=>shares()[x-1]);
+  const shares = () => G.splitP(s.c,s.n,s.p), points = () => s.selected.map(x=>shares()[x-1]), fewPoints = () => s.fewer.map(x=>shares()[x-1]);
+  const format = (key,values) => t(key).replace(/\{([a-z]+)\}/gi,(_,name)=>String(values[name]));
+  const initialEnough = () => [...s.fewer,...Array.from({length:s.n},(_,i)=>i+1).filter(x=>!s.fewer.includes(x)).slice(0,Math.max(0,s.k-s.fewer.length))].sort((a,b)=>a-b);
+  const resetSelections = () => { s.fewer=Array.from({length:Math.max(0,s.k-1)},(_,i)=>i+1);s.selected=initialEnough();s.candidate=s.c[0];s.all=false;s.leading=false; };
   function choices(id, from, to, value) { const el=$(id); el.replaceChildren(...Array.from({length:to-from+1},(_,i)=>{const o=E('option',from+i);o.value=String(from+i);o.selected=from+i===value;return o;})); }
   function controls() {
     $('prime').value=String(s.p); choices('threshold',1,s.n,s.k); choices('share-count',s.k,Math.min(s.p-1,8),s.n);
     $('secret').max=String(s.p-1); $('secret').value=String(s.c[0]); $('coefficient-inputs').replaceChildren();
-    for(let i=1;i<s.k;i++){const label=E('label'),input=E('input'); input.type='number';input.min='0';input.max=String(s.p-1);input.value=String(s.c[i]);input.dataset.coefficient=String(i);label.append(E('span',`a${i}`),input);$('coefficient-inputs').append(label);}
+    for(let i=1;i<s.k;i++){const label=E('label'),input=E('input'); input.type='number';input.min='0';input.max=String(s.p-1);input.value=String(s.c[i]);input.dataset.coefficient=String(i);label.append(E('span',`a${'₀₁₂₃₄₅₆₇₈₉'[i]}`),input);$('coefficient-inputs').append(label);}
   }
   function resetReal(){ s.realY={};for(let x=1;x<=s.n;x++)s.realY[x]=s.c.reduce((sum,c,i)=>sum+c*x**i,0);s.realZero=s.c[0]; }
   function table(id, rows) { const body=$(id);body.replaceChildren();for(const cells of rows){const row=E('tr');for(const value of cells)row.append(E('td',value));body.append(row);} }
@@ -75,18 +78,71 @@
     table('integer-table',Array.from({length:s.n},(_,i)=>{const x=i+1,y=s.c.reduce((a,c,j)=>a+c*x**j,0);return [x,y,y%x];}));
     const x2=s.c.reduce((a,c,i)=>a+c*2**i,0),x3=s.c.reduce((a,c,i)=>a+c*3**i,0);
     $('integer-result').textContent=`${t('integerExample')} x=2: ${x2} mod 2=${x2%2}; x=3: ${x3} mod 3=${x3%3}.`;
-    $('share-picks').replaceChildren(...shares().map(([x,y])=>{const b=E('button',`#${x} (${x},${y})`);b.type='button';b.dataset.pick=String(x);b.setAttribute('aria-pressed',String(s.selected.includes(x)));return b;}));
+    const pick=(x,y,pressed,attribute)=>{const b=E('button',pressed?`#${x} (${x},${y})`:`#${x}`);b.type='button';b.dataset[attribute]=String(x);b.setAttribute('aria-pressed',String(pressed));return b;};
+    $('hand-few-picks').replaceChildren(...shares().map(([x,y])=>pick(x,y,s.fewer.includes(x),'fewPick')));
+    $('share-picks').replaceChildren(...shares().map(([x,y])=>pick(x,y,s.selected.includes(x),'pick')));
+    const picked=xs=>xs.length?xs.map(x=>`#${x} (${x},${shares()[x-1][1]})`).join('、'):'なし';
+    $('hand-few-selected').textContent=format('handFewSelected',{shares:picked(s.fewer),count:s.fewer.length});
+    $('hand-enough-selected').textContent=format('handEnoughSelected',{shares:picked(s.selected),count:s.selected.length});
+    $('hand-few-intro').textContent=format('handFewIntro',{k:s.k});
+    $('hand-enough-intro').textContent=format('handEnoughIntro',{k:s.k});
     const enough=s.selected.length===s.k;
-    $('reconstruction-section').hidden=!enough;$('candidate-section').hidden=enough||s.k===1||s.selected.length!==s.k-1;
+    $('reconstruction-section').hidden=!enough;$('candidate-section').hidden=s.k===1||s.fewer.length!==s.k-1;
     if(enough){const result=G.lagrangeP(points(),s.k,s.p);table('reconstruction-table',result.terms.map(r=>[r.x,r.y,r.numerator,r.denominator,r.inverse,r.lambda,r.term]));
       $('reconstruction-result').textContent=`${result.terms.map(r=>r.term).join(' + ')} ≡ ${result.secret} (mod ${s.p})`;
-    }else if(!$('candidate-section').hidden){const visible=G.candidatesP(points(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero);
+    }
+    if(!$('candidate-section').hidden){const visible=G.candidatesP(fewPoints(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero);
       if(!visible.some(r=>r.secret===s.candidate))s.candidate=visible[0].secret;
       $('candidate-result').textContent=`${visible.length}/${s.p} ${t('candidateCount')} · ${t('candidateSecret')}=${s.candidate}`;
       $('all-candidates').setAttribute('aria-pressed',String(s.all));$('leading-only').checked=s.leading;
     }
     const fewShares=s.selected.length>0&&s.selected.length<s.k-1;
     $('tweak-result').textContent=s.k===1?t('kOne'):[s.moved,fewShares?t('fewSharesExample'):''].filter(Boolean).join(' ');
+  }
+  function recoveryGraph(id,selected,candidates,activeSecret){
+    const svg=$(id),left=54,right=490,top=24,bottom=270,scaleX=(right-left)/s.n,scaleY=(bottom-top)/(s.p-1);
+    const X=x=>left+x*scaleX,Y=y=>bottom-y*scaleY;
+    svg.replaceChildren(S('line',{x1:left,y1:top,x2:left,y2:bottom,class:'hand-graph-axis'}),
+      S('line',{x1:left,y1:bottom,x2:right,y2:bottom,class:'hand-graph-axis'}));
+    for(const [x,label] of [[0,'x=0'],[s.n,`x=${s.n}`]]){
+      const text=S('text',{x:X(x),y:295,'text-anchor':'middle',class:'hand-graph-label'});text.textContent=label;svg.append(text);
+    }
+    for(const item of candidates){
+      const values=Array.from({length:s.n+1},(_,x)=>G.evalP(item.coefficients,x,s.p));
+      const data=values.map((y,x)=>`${x?'L':'M'}${X(x).toFixed(2)},${Y(y).toFixed(2)}`).join(' ');
+      svg.append(S('path',{d:data,class:`hand-graph-curve${item.secret===activeSecret?' hand-graph-active':''}`}));
+    }
+    for(const x of selected){
+      const y=shares()[x-1][1];
+      svg.append(S('circle',{cx:X(x),cy:Y(y),r:5,class:'hand-graph-share'}));
+      const label=S('text',{x:Math.min(right-35,X(x)+8),y:Math.max(top+12,Y(y)-8),class:'hand-graph-label hand-graph-point-label'});
+      label.textContent=`(${x},${y})`;svg.append(label);
+    }
+    if(activeSecret!==null){
+      svg.append(S('circle',{cx:X(0),cy:Y(activeSecret),r:6,class:'hand-graph-secret'}));
+      const label=S('text',{x:5,y:Y(activeSecret)+4,class:'hand-graph-label hand-graph-secret-label'});
+      label.textContent=`s=${activeSecret}`;svg.append(label);
+    }
+  }
+  function renderRecoveryGraphs(){
+    if(s.fewer.length===s.k-1){
+      const all=(s.k===1?Array.from({length:s.p},(_,secret)=>({secret,coefficients:[secret],leadingZero:false})):G.candidatesP(fewPoints(),s.k,s.p)).filter(r=>!s.leading||!r.leadingZero);
+      const sample=[0,Math.floor(s.p/2),s.p-1,s.candidate];
+      const shown=s.all?all:all.filter(r=>sample.includes(r.secret));
+      recoveryGraph('hand-few-graph',s.fewer,shown,s.candidate);
+      $('hand-few-graph-caption').textContent=format('handFewGraphCaption',{count:s.fewer.length});
+    }else{
+      recoveryGraph('hand-few-graph',s.fewer,[],null);
+      $('hand-few-graph-caption').textContent=format('handFewPending',{missing:s.k-1-s.fewer.length});
+    }
+    if(s.selected.length===s.k){
+      const coefficients=G.polynomialP(points(),s.p),secret=coefficients[0];
+      recoveryGraph('hand-enough-graph',s.selected,[{coefficients,secret}],secret);
+      $('hand-enough-graph-caption').textContent=format('handEnoughGraphCaption',{max:s.n,secret});
+    }else{
+      recoveryGraph('hand-enough-graph',s.selected,[],null);
+      $('hand-enough-graph-caption').textContent=format('handEnoughPending',{missing:s.k-s.selected.length});
+    }
   }
   function grid(){
     const p=s.p,d=20,svg=$('field-grid'),side=p*d;svg.replaceChildren();svg.setAttribute('width',side);svg.setAttribute('height',side);svg.setAttribute('viewBox',`0 0 ${side} ${side}`);
@@ -113,7 +169,7 @@
     $('real-result').textContent=`${t('realIntercept')}: ${intercept.toFixed(2)}. ${t('realPoints')}: ${chosen.map(([x,y])=>`(${x},${y})`).join(' ')}`;
     $('real-picks').replaceChildren(...chosen.map(([x,y])=>E('span',`(${x}, ${y})`,'point-chip')));
   }
-  function render(){renderTables();grid();real();}
+  function render(){renderTables();renderRecoveryGraphs();grid();real();}
   function move(x,y){if(x===0){s.candidate=y;render();return;}
     const selected=points(),before=shares()[x-1][1],chosen=selected.map(pt=>pt[0]===x?[x,y]:pt);
     if(s.selected.length===s.k){const lambda=G.lagrangeP(selected,s.k,s.p).terms.find(r=>r.x===x).lambda,old=s.c[0],delta=G.mod(y-before,s.p);
@@ -128,19 +184,20 @@
     resetReal();controls();render();
   }
   window.renderShamirHand=render;
-  $('prime').addEventListener('change',()=>{s.p=Number($('prime').value);s.n=Math.min(s.n,s.p-1);s.k=Math.min(s.k,s.n);s.c=s.c.slice(0,s.k).map(v=>G.mod(v,s.p));s.selected=Array.from({length:s.k},(_,i)=>i+1);s.candidate=G.mod(s.candidate,s.p);s.moved='';resetReal();controls();render();});
-  $('threshold').addEventListener('change',()=>{s.k=Number($('threshold').value);s.c=Array.from({length:s.k},(_,i)=>s.c[i]||0);s.selected=Array.from({length:s.k},(_,i)=>i+1);s.moved='';resetReal();controls();render();});
-  $('share-count').addEventListener('change',()=>{s.n=Number($('share-count').value);resetReal();controls();render();});
+  $('prime').addEventListener('change',()=>{s.p=Number($('prime').value);s.n=Math.min(s.n,s.p-1);s.k=Math.min(s.k,s.n);s.c=s.c.slice(0,s.k).map(v=>G.mod(v,s.p));resetSelections();s.moved='';resetReal();controls();render();});
+  $('threshold').addEventListener('change',()=>{s.k=Number($('threshold').value);s.c=Array.from({length:s.k},(_,i)=>s.c[i]||0);resetSelections();s.moved='';resetReal();controls();render();});
+  $('share-count').addEventListener('change',()=>{s.n=Number($('share-count').value);resetSelections();resetReal();controls();render();});
   $('secret').addEventListener('change',()=>{const v=Number($('secret').value);if(!Number.isInteger(v)||v<0||v>=s.p){$('hand-status').textContent=t('invalidInput');$('secret').value=String(s.c[0]);return;}s.c[0]=v;$('hand-status').textContent='';resetReal();render();});
   $('coefficient-inputs').addEventListener('change',e=>{const i=Number(e.target.dataset.coefficient),v=Number(e.target.value);if(!i)return;if(!Number.isInteger(v)||v<0||v>=s.p){$('hand-status').textContent=t('invalidInput');e.target.value=String(s.c[i]);return;}s.c[i]=v;$('hand-status').textContent='';resetReal();render();});
   $('random-coefficients').addEventListener('click',()=>{const limit=256-256%s.p;
     for(let i=1;i<s.k;i++){let value;do{const b=new Uint8Array(1);crypto.getRandomValues(b);value=b[0];}while(value>=limit);s.c[i]=value%s.p;}
     s.moved='';resetReal();controls();render();});
-  $('reset-hand').addEventListener('click',()=>{Object.assign(s,{p:13,k:3,n:5,c:[5,4,2],selected:[1,2,3],candidate:5,all:false,leading:false,moved:''});resetReal();controls();render();});
+  $('reset-hand').addEventListener('click',()=>{Object.assign(s,{p:13,k:3,n:5,c:[5,4,2],fewer:[1,2],selected:[1,2,3],candidate:5,all:false,leading:false,moved:''});resetReal();controls();render();});
+  $('hand-few-picks').addEventListener('click',e=>{const b=e.target.closest('[data-few-pick]');if(!b)return;const x=Number(b.dataset.fewPick);s.fewer=s.fewer.includes(x)?s.fewer.filter(v=>v!==x):s.fewer.length<s.k-1?[...s.fewer,x].sort((a,b)=>a-b):s.fewer;s.selected=initialEnough();s.candidate=s.c[0];s.all=false;s.moved='';render();});
   $('share-picks').addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;const x=Number(b.dataset.pick);s.selected=s.selected.includes(x)?s.selected.filter(v=>v!==x):s.selected.length<s.k?[...s.selected,x].sort((a,b)=>a-b):s.selected;if(s.selected.length<s.k)s.candidate=s.c[0];s.moved='';render();});
   $('select-k').addEventListener('click',()=>{s.selected=Array.from({length:s.k},(_,i)=>i+1);render();});
   $('select-kminus').addEventListener('click',()=>{s.selected=Array.from({length:Math.max(0,s.k-1)},(_,i)=>i+1);s.candidate=s.c[0];render();});
-  function nextCandidate(direction){const list=G.candidatesP(points(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero).map(r=>r.secret);s.candidate=list[(list.indexOf(s.candidate)+direction+list.length)%list.length];render();}
+  function nextCandidate(direction){if(s.fewer.length!==s.k-1)return;const list=G.candidatesP(fewPoints(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero).map(r=>r.secret);s.candidate=list[(list.indexOf(s.candidate)+direction+list.length)%list.length];render();}
   $('previous-candidate').addEventListener('click',()=>nextCandidate(-1));$('next-candidate').addEventListener('click',()=>nextCandidate(1));
   $('all-candidates').addEventListener('click',()=>{s.all=!s.all;render();});$('leading-only').addEventListener('change',()=>{s.leading=$('leading-only').checked;render();});
   const field=$('field-grid');
@@ -192,8 +249,9 @@
   const $ = id => document.getElementById(id), G = ShamirGF, P = ShamirPitfalls;
   const t = key => ShamirMessages[document.documentElement.lang][key] || key;
   const E = (tag, value, cls) => { const el=document.createElement(tag);if(value!==undefined)el.textContent=String(value);if(cls)el.className=cls;return el; };
-  const state = { message:'MEET AT DAWN', k:3, n:5, shares:[], selected:[1,2,3], error:'', composing:false };
+  const state = { message:'MEET AT DAWN', k:3, n:5, shares:[], coefficients:[], column:0, selected:[1,2,3], error:'', composing:false };
   const toHex = value => value.toString(16).toUpperCase().padStart(2,'0');
+  const format = (key,values) => t(key).replace(/\{([a-z]+)\}/gi,(_,name)=>String(values[name]));
   function choices(id, from, to, value) { $(id).replaceChildren(...Array.from({length:to-from+1},(_,i)=>{const o=E('option',from+i);o.value=String(from+i);o.selected=from+i===value;return o;})); }
   function table(parent, headings, rows) { const el=E('table'),head=E('thead'),top=E('tr'),body=E('tbody');
     headings.forEach(value=>top.append(E('th',value)));head.append(top);
@@ -202,9 +260,10 @@
     state.message=$('byte-message').value;
     const bytes=new TextEncoder().encode(state.message);
     state.error=!bytes.length?'byteEmpty':bytes.length>32?'byteTooLong':'';
-    if(state.error){state.shares=[];renderBytes();return;}
-    try { state.shares=G.split256(bytes,state.k,state.n,count=>{const out=new Uint8Array(count);crypto.getRandomValues(out);return out;}); }
-    catch (_) { state.error='byteRandomError';state.shares=[]; }
+    if(state.error){state.shares=[];state.coefficients=[];renderBytes();return;}
+    state.coefficients=[];
+    try { state.shares=G.split256(bytes,state.k,state.n,count=>{const out=new Uint8Array(count);crypto.getRandomValues(out);state.coefficients.push(out);return out;}); }
+    catch (_) { state.error='byteRandomError';state.shares=[];state.coefficients=[]; }
     state.selected=Array.from({length:state.k},(_,i)=>i+1);renderBytes();
   }
   function readable(bytes) {
@@ -214,17 +273,33 @@
   }
   function renderBytes(){
     $('byte-error').textContent=state.error?t(state.error):'';
-    if(!state.shares.length){$('byte-table').replaceChildren();$('byte-secret-hex').textContent='';$('byte-picks').replaceChildren();$('byte-weights').replaceChildren();$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';return;}
+    $('byte-calculation-intro').textContent=format('byteCalculationIntro',{k:state.k,n:state.n});
+    if(!state.shares.length){$('byte-table').replaceChildren();$('byte-secret-hex').textContent='';$('byte-column').replaceChildren();$('byte-formula').textContent='';$('byte-calculation').replaceChildren();$('byte-picks').replaceChildren();$('byte-weights').replaceChildren();$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';return;}
     const secret=new TextEncoder().encode(state.message),head=['x',...Array.from({length:secret.length},(_,i)=>String(i))];
     const rows=[[t('byteSecret'),...Array.from(secret,toHex)],...state.shares.map(share=>[`#${share.x}`,...Array.from(share.y,toHex)])];
     table($('byte-table'),head,rows);
     $('byte-secret-hex').textContent=`${t('byteSecret')}: ${P.hex(secret)} (${secret.length} bytes)`;
+    state.column=Math.min(state.column,secret.length-1);
+    $('byte-column').replaceChildren(...Array.from(secret,(_,index)=>{const option=E('option',`${index}: ${toHex(secret[index])}`);option.value=String(index);option.selected=index===state.column;return option;}));
+    renderByteCalculation(secret);
     $('byte-picks').replaceChildren(...state.shares.map(share=>{const button=E('button',`#${share.x}`);button.type='button';button.dataset.bytePick=String(share.x);button.setAttribute('aria-pressed',String(state.selected.includes(share.x)));return button;}));
     if(state.selected.length<state.k){$('byte-weights').replaceChildren();$('byte-restored-hex').textContent=`${t('needShares')}: ${state.k-state.selected.length}`;$('byte-restored-text').textContent='';return;}
     const chosen=state.selected.map(x=>state.shares[x-1]),result=G.combine256(chosen,state.k);
     table($('byte-weights'),[t('byteShare'),t('byteWeight')],result.terms.map(row=>[`#${row.x}`,toHex(row.lambda)]));
     $('byte-restored-hex').textContent=`${t('restoredHex')}: ${P.hex(result.out)}`;
     $('byte-restored-text').textContent=`${t('restoredText')}: ${readable(result.out)}`;
+  }
+  function renderByteCalculation(secret){
+    const index=state.column,sub=String(index).replace(/[0-9]/g,d=>'₀₁₂₃₄₅₆₇₈₉'[Number(d)]),sup='⁰¹²³⁴⁵⁶⁷⁸⁹';
+    const coefficients=[secret[index],...state.coefficients[index]];
+    $('byte-formula').textContent=`F${sub}(X) = ${coefficients.map((value,degree)=>`{${toHex(value)}}${degree?`·X${degree===1?'':sup[degree]}`:''}`).join(' ⊕ ')}  (GF(2⁸))`;
+    const headings=[t('byteCalcShare'),'X',t('byteCalcResult'),t('byteCalcSecret'),...coefficients.slice(1).map((_,degree)=>`a${'₀₁₂₃₄₅₆₇₈₉'[degree+1]}·X${degree?'⁰¹²³⁴⁵⁶⁷⁸⁹'[degree+1]:''}`)];
+    const rows=state.shares.map(share=>{
+      let power=1,value=coefficients[0];
+      const terms=coefficients.slice(1).map(coefficient=>{power=G.mul256(power,share.x);const product=G.mul256(coefficient,power);value^=product;return `${toHex(coefficient)}×${toHex(power)}=${toHex(product)}`;});
+      return [`#${share.x}`,toHex(share.x),toHex(value),toHex(coefficients[0]),...terms];
+    });
+    table($('byte-calculation'),headings,rows);
   }
   function multiplication(){let a=0x57,b=0x13,result=0;const rows=[];
     for(let step=0;step<8;step++){const added=b&1?a:0;result^=added;const carry=a>>>7;
@@ -266,6 +341,7 @@
   $('byte-message').addEventListener('input',()=>{if(!state.composing)split();});
   $('byte-k').addEventListener('change',()=>{state.k=Number($('byte-k').value);state.n=Math.max(state.k,state.n);choices('byte-n',state.k,8,state.n);split();});
   $('byte-n').addEventListener('change',()=>{state.n=Number($('byte-n').value);split();});
+  $('byte-column').addEventListener('change',()=>{state.column=Number($('byte-column').value);renderBytes();});
   $('byte-picks').addEventListener('click',event=>{const button=event.target.closest('[data-byte-pick]');if(!button)return;const x=Number(button.dataset.bytePick);
     state.selected=state.selected.includes(x)?state.selected.filter(value=>value!==x):state.selected.length<state.k?[...state.selected,x].sort((a,b)=>a-b):state.selected;renderBytes();});
   $('tamper-layer').addEventListener('change',renderPitfalls);
