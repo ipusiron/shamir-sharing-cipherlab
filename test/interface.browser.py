@@ -95,7 +95,11 @@ def test_distributed_share_data(page):
 
 def test_help(page, width):
     assert page.locator(".eyebrow").count() == 0
+    assert page.locator(".page-header > p").count() == 2
+    assert page.locator(".subtitle").inner_text() == "Shamirが提案した(k, n)しきい値法の可視化ツールです。"
     assert "k−1個では秘密が決まらない" in page.locator(".tagline").inner_text()
+    assert page.locator(".subtitle").bounding_box()["y"] < page.locator(".tagline").bounding_box()["y"]
+    assert page.locator(".subtitle").evaluate("el => getComputedStyle(el).textAlign") == "center"
     assert page.locator(".tagline").evaluate("el => getComputedStyle(el).textAlign") == "center"
     tagline_box = page.locator(".tagline").bounding_box()
     assert abs(tagline_box["x"] + tagline_box["width"] / 2 - width / 2) < 1
@@ -142,6 +146,7 @@ def test_help(page, width):
     assert help_body.evaluate("el => el.scrollTop") == 0
     page.locator("#close-help").click()
     page.locator("#language").click()
+    assert page.locator(".subtitle").inner_text() == "A visualization tool for the (k, n) threshold scheme proposed by Shamir."
     assert page.locator("footer").inner_text() == "GitHub repository"
     page.locator("#help").click()
     assert page.locator("#help-title").inner_text() == "Help"
