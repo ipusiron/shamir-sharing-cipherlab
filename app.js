@@ -37,7 +37,7 @@
   });
   $('theme').addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; save(); render(); });
   $('language').addEventListener('click', () => { language = language === 'ja' ? 'en' : 'ja'; save(); render(); });
-  $('help').addEventListener('click', () => $('help-dialog').showModal());
+  $('help').addEventListener('click', () => { const dialog=$('help-dialog'); dialog.showModal(); dialog.scrollTop=0; });
   $('close-help').addEventListener('click', () => $('help-dialog').close());
   render();
 }());
