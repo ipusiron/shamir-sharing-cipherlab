@@ -17,14 +17,13 @@
 </head>
 <body>
   <header class="page-header">
-    <div class="masthead"><div><p class="eyebrow">DAY123 · SPLIT / INTERPOLATE / PITFALLS</p><h1>ShamirSharing <span>CipherLab</span></h1></div>
+    <div class="masthead"><div><h1>ShamirSharing <span>CipherLab</span></h1></div>
       <div class="header-tools"><button id="theme" class="icon-button" type="button" data-label="theme">◐</button>
         <button id="language" class="icon-button" type="button" data-label="language">EN</button>
         <button id="help" class="icon-button" type="button" data-label="help" aria-haspopup="dialog">?</button></div></div>
     <p class="tagline" data-i18n="tagline"></p>
   </header>
   <main>
-    <aside class="notice" data-i18n="educational"></aside>
     <div class="tabs" role="tablist" aria-label="Learning steps" data-label="tablist">
       <button id="tab-hand" role="tab" type="button" aria-controls="panel-hand" aria-selected="true" tabindex="0" data-i18n="hand"></button>
       <button id="tab-bytes" role="tab" type="button" aria-controls="panel-bytes" aria-selected="false" tabindex="-1" data-i18n="bytes"></button>
@@ -70,7 +69,7 @@
       <p data-i18n="fieldRule"></p>
       <div class="settings-grid"><label><span data-i18n="byteInput"></span><input id="byte-message" type="text" value="MEET AT DAWN" autocomplete="off" spellcheck="false"></label>
         <label><span>k</span><select id="byte-k"></select></label><label><span>n</span><select id="byte-n"></select></label></div>
-      <p class="caution" data-i18n="educational"></p><p id="byte-error" role="status"></p>
+      <p id="byte-error" role="status"></p>
       <h3 data-i18n="byteDistribute"></h3><p id="byte-secret-hex" class="result"></p><div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
       <h3 data-i18n="byteRestore"></h3><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
       <p id="byte-restored-hex" class="result"></p><p id="byte-restored-text" class="result"></p>
@@ -83,9 +82,23 @@
       <div class="pitfall-card"><h3 data-i18n="zeroTitle"></h3><div id="zero-output"></div></div>
       <div class="pitfall-card"><h3 data-i18n="shortTitle"></h3><div id="short-output"></div></div>
     </section>
-    <details class="panel"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p><div id="lessons"></div></details>
   </main>
-  <footer><p data-i18n="privacy"></p><a href="https://github.com/ipusiron/shamir-sharing-cipherlab" data-i18n="source"></a></footer>
-  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title" data-i18n="help"></h2><p data-i18n="helpText"></p><button id="close-help" type="button" data-i18n="close"></button></dialog>
+  <footer><a href="https://github.com/ipusiron/shamir-sharing-cipherlab" data-i18n="source"></a></footer>
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <div class="help-header"><h2 id="help-title" data-i18n="help"></h2><button id="close-help" type="button" data-i18n="close"></button></div>
+    <p data-i18n="helpText"></p>
+    <h3 data-i18n="helpHow"></h3>
+    <ol class="help-list">
+      <li data-i18n="helpStep1"></li><li data-i18n="helpStep2"></li><li data-i18n="helpStep3"></li>
+      <li data-i18n="helpStep4"></li><li data-i18n="helpStep5"></li><li data-i18n="helpStep6"></li>
+    </ol>
+    <h3 data-i18n="helpUses"></h3>
+    <ul class="help-list">
+      <li data-i18n="helpUse1"></li><li data-i18n="helpUse2"></li><li data-i18n="helpUse3"></li>
+      <li data-i18n="helpUse4"></li><li data-i18n="helpUse5"></li><li data-i18n="helpUse6"></li>
+    </ul>
+    <h3 data-i18n="helpPrivacy"></h3><p data-i18n="educational"></p><p data-i18n="privacy"></p>
+    <details id="help-theory"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p><div id="lessons"></div></details>
+  </dialog>
 </body>
 </html>

@@ -12,7 +12,7 @@ English · [日本語](README.md)
 
 ShamirSharing CipherLab is a hands-on teaching tool for Shamir secret sharing, using a grid, byte tables, and deliberately unsafe models. With k shares, one polynomial is fixed and the secret returns. With k−1 shares, exactly one polynomial fits every possible secret, so those shares reveal nothing about it.
 
-Educational use only. Do not enter real secrets, passwords, seed phrases, or keys. This tool does not provide share formats, printing, QR codes, or storage advice.
+Use an invented number for S in “Trace by hand” and a practice phrase in “Bytes”. Do not use this teaching tool to split or store passwords, seed phrases, or keys that you actually use. This tool does not provide share formats, printing, QR codes, or storage advice.
 
 ---
 
@@ -61,6 +61,8 @@ Coefficients are allowed to be zero, so the polynomial has degree *at most* k−
 4. Drag points on the real-number curve to change its y-intercept. With k−1 points, you can move the intercept and still pass through them. Ordinary integers and real numbers leak remainders; compare with the finite-field grid.
 5. In “Bytes”, enter up to 32 UTF-8 bytes. Split with `2≤k≤n≤8`, select k shares, and recover. Hex is always shown; text appears only for valid UTF-8, with controls escaped.
 6. In “Pitfalls”, switch the checking layer. All three cards use fixed `MEET AT DAWN` data rather than your input.
+
+Open “?” at the top right for instructions, use cases, and input and storage information. The theory sections and sources are in a collapsible section of Help.
 
 ## 🔬 Method and limits
 

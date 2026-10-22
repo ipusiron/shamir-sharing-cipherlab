@@ -14,8 +14,8 @@ test('README: hub metadata, opening and educational warning', () => {
     'category_ja:', '  - 現代暗号', '  - 情報理論', 'category_en:', '  - Modern Cryptography',
     '  - Information Theory', 'difficulty: 3', 'hub: true']) assert.ok(ja.includes(snippet), snippet);
   assert.match(ja, /ShamirSharing CipherLabは、/);
-  assert.match(ja, /本物の秘密.*入れない/);
-  assert.match(en, /Educational use only\. Do not enter real secrets/);
+  assert.match(ja, /「手で追う」のSには架空の数.*実際に使っているパスワード、シードフレーズ、鍵の分割や保管には、この教材を使わない/);
+  assert.match(en, /Use an invented number for S.*Do not use this teaching tool to split or store passwords/);
   assert.doesNotMatch(en, /category_ja:|slug: shamir-sharing-cipherlab/);
 });
 test('README: Japanese and English section order has full parity', () => {

@@ -50,6 +50,53 @@ def test_distributed_share_data(page):
     page.locator("#reset-hand").click()
 
 
+def test_help(page, width):
+    assert page.locator(".eyebrow").count() == 0
+    assert "k−1個では秘密が決まらない" in page.locator(".tagline").inner_text()
+    assert page.locator("main > details").count() == 0
+    assert page.locator("main [data-i18n='educational']").count() == 0
+    assert page.locator("footer").inner_text() == "GitHubリポジトリ"
+    assert page.locator("footer a").get_attribute("href") == "https://github.com/ipusiron/shamir-sharing-cipherlab"
+    assert page.locator("footer").evaluate("el => getComputedStyle(el).textAlign") == "center"
+    page.locator("#help").click()
+    dialog = page.locator("#help-dialog")
+    assert dialog.is_visible()
+    assert page.locator("#help-title").inner_text() == "ヘルプ"
+    assert page.locator("#help-dialog ol.help-list li").count() == 6
+    assert page.locator("#help-dialog ul.help-list li").count() == 6
+    assert page.locator("#help-dialog [data-i18n='helpUses']").inner_text() == "活用例"
+    assert "実際に使っているパスワード、シードフレーズ、鍵" in dialog.inner_text()
+    assert "保存するのは表示言語と明暗の設定だけ" in dialog.inner_text()
+    assert "方眼の点をドラッグ" in dialog.inner_text()
+    assert "CTF・謎解き" in dialog.inner_text()
+    theory = page.locator("#help-theory")
+    assert theory.get_attribute("open") is None
+    assert page.locator("#lessons .lesson-card").count() == 8
+    assert dialog.evaluate("el => el.scrollHeight > el.clientHeight")
+    assert dialog.evaluate("el => el.scrollWidth <= el.clientWidth")
+    box = dialog.bounding_box()
+    assert box["x"] >= 0 and box["x"] + box["width"] <= width
+    theory.locator("summary").click()
+    assert theory.get_attribute("open") is not None
+    assert page.locator("#lessons .source-links a").first.is_visible()
+    dialog.evaluate("el => el.scrollTop = el.scrollHeight")
+    page.locator("#close-help").click()
+    assert not dialog.is_visible()
+    assert page.locator("#help").evaluate("el => document.activeElement === el")
+    page.locator("#help").click()
+    assert dialog.evaluate("el => el.scrollTop") == 0
+    page.locator("#close-help").click()
+    page.locator("#language").click()
+    assert page.locator("footer").inner_text() == "GitHub repository"
+    page.locator("#help").click()
+    assert page.locator("#help-title").inner_text() == "Help"
+    assert "Ways to use this tool" in dialog.inner_text()
+    assert "Only the language and theme settings are saved" in dialog.inner_text()
+    page.keyboard.press("Escape")
+    assert not dialog.is_visible()
+    page.locator("#language").click()
+
+
 def test_hand_primer(page):
     primer = page.locator("#panel-hand .hand-primer")
     assert primer.is_visible()
@@ -247,6 +294,7 @@ def main():
                 normal = geometry(page, width)
                 test_hand_primer(page)
                 test_distributed_share_data(page)
+                test_help(page, width)
                 if width == 320:
                     assert page.locator("#field-grid").get_attribute("width") == "260"
                     assert normal["grid"] == normal["gridFrame"], normal
