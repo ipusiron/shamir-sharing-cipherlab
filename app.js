@@ -63,6 +63,10 @@
   function renderTables(){
     $('polynomial').textContent=`f(x) = ${s.c.map((c,i)=>i?` + ${c}x${i>1?`^${i}`:''}`:String(c)).join('')} (mod ${s.p})`;
     table('distribution-table',shares().map(([x,y])=>{const terms=s.c.map((c,i)=>c*x**i);return [x,terms.join(' + '),terms.reduce((a,b)=>a+b,0),y];}));
+    $('share-data').replaceChildren(...shares().map(([x,y])=>{
+      const expression=s.c.map((c,i)=>i?`${c}×${x}${i>1?`^${i}`:''}`:String(c)).join(' + ');
+      return E('p',`${t('shareData').replace('{i}',x)} (${x}, f(${x})) = (${x}, (${expression}) mod ${s.p}) = (${x},${y})`);
+    }));
     table('integer-table',Array.from({length:s.n},(_,i)=>{const x=i+1,y=s.c.reduce((a,c,j)=>a+c*x**j,0);return [x,y,y%x];}));
     const x2=s.c.reduce((a,c,i)=>a+c*2**i,0),x3=s.c.reduce((a,c,i)=>a+c*3**i,0);
     $('integer-result').textContent=`${t('integerExample')} x=2: ${x2} mod 2=${x2%2}; x=3: ${x3} mod 3=${x3%3}.`;
