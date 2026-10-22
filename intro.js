@@ -18,6 +18,24 @@
     svg.append(S('circle',{cx:d*.5,cy:d*(p-secret-.5),r:8,class:'linear-secret-dot'}));
     for(const [x,y] of points())svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-y-.5),r:8,class:'linear-selected-dot'}));
   }
+  function analogy([x,y]){
+    const svg=$('linear-analogy'),x0=64,x1=220,Y=value=>32+(12-value)*18;
+    svg.replaceChildren(S('line',{x1:x0,y1:24,x2:x0,y2:260,class:'linear-analogy-axis'}),
+      S('line',{x1:x0,y1:260,x2:265,y2:260,class:'linear-analogy-axis'}));
+    for(const [index,secret] of [0,5,12].entries()){
+      svg.append(S('line',{x1:x0,y1:Y(secret),x2:x1,y2:Y(y),class:`linear-analogy-line linear-analogy-${index}`}));
+      const label=S('text',{x:5,y:Y(secret)+4,class:'linear-analogy-label'});
+      label.textContent=`s=${secret}`;svg.append(label);
+    }
+    svg.append(S('circle',{cx:x1,cy:Y(y),r:6,class:'linear-analogy-point'}));
+    for(const [labelX,label] of [[x0,'x=0'],[x1,`x=${x}`]]){
+      const text=S('text',{x:labelX,y:283,class:'linear-analogy-axis-label','text-anchor':'middle'});
+      text.textContent=label;svg.append(text);
+    }
+    const pointLabel=S('text',{x:231,y:Y(y)+4,class:'linear-analogy-label'});
+    pointLabel.textContent=`(${x},${y})`;svg.append(pointLabel);
+    $('linear-analogy-caption').textContent=format('linearAnalogyCaption',{x,y});
+  }
   function render() {
     const allShares=shares(), subscript='₀₁₂₃₄₅₆₇₈₉';
     $('linear-n').value=String(state.n);
@@ -38,7 +56,10 @@
       $('linear-selected').textContent=format('linearSelectedOne',{x,y});
       $('linear-one-result').textContent=format('linearOneResult',{x,y});
       $('linear-candidate').value=String(state.candidate);
-      $('linear-candidate-result').textContent=format('linearCandidateResult',{secret:state.candidate,slope:candidate.coefficients[1]});
+      $('linear-candidate-result').textContent=format('linearCandidateResult',{
+        x,y,secret:state.candidate,slope:candidate.coefficients[1],y0:candidate.values[0],y1:candidate.values[1],y2:candidate.values[2]
+      });
+      analogy([x,y]);
       grid(candidate.values,state.candidate);
     }else{
       const [[x1,y1],[x2,y2]]=selected,coefficients=G.polynomialP(selected,p),secret=G.lagrangeP(selected,2,p).secret;
