@@ -29,6 +29,27 @@ def first_y(page):
     return page.locator("#distribution-table tr").first.locator("td").last.inner_text()
 
 
+def test_distributed_share_data(page):
+    lines = page.locator("#share-data p")
+    assert lines.count() == 5
+    assert lines.first.inner_text() == "#1 の共有データは (1, f(1)) = (1, (5 + 4×1 + 2×1^2) mod 13) = (1,11)"
+    assert page.locator("#share-data").bounding_box()["y"] > page.locator("#distribution-table").bounding_box()["y"]
+    page.locator("#share-count").select_option("7")
+    assert lines.count() == 7
+    assert lines.last.inner_text().startswith("#7 の共有データは (7, f(7)) = (7, (5 + 4×7 + 2×7^2) mod 13)")
+    page.locator("[data-coefficient='1']").fill("6")
+    page.locator("[data-coefficient='1']").dispatch_event("change")
+    assert lines.first.inner_text().endswith("(1, (5 + 6×1 + 2×1^2) mod 13) = (1,0)")
+    page.locator("#prime").select_option("17")
+    assert lines.first.inner_text().endswith("mod 17) = (1,13)")
+    page.locator("#threshold").select_option("1")
+    assert lines.first.inner_text() == "#1 の共有データは (1, f(1)) = (1, (5) mod 17) = (1,5)"
+    page.locator("#language").click()
+    assert lines.first.inner_text().startswith("Share #1: (1, f(1))")
+    page.locator("#language").click()
+    page.locator("#reset-hand").click()
+
+
 def test_hand_primer(page):
     primer = page.locator("#panel-hand .hand-primer")
     assert primer.is_visible()
@@ -225,6 +246,7 @@ def main():
                 page.locator("#reset-hand").click()
                 normal = geometry(page, width)
                 test_hand_primer(page)
+                test_distributed_share_data(page)
                 if width == 320:
                     assert page.locator("#field-grid").get_attribute("width") == "260"
                     assert normal["grid"] == normal["gridFrame"], normal

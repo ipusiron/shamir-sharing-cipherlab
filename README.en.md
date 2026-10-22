@@ -47,6 +47,8 @@ In `(n,k)`, n shares are created, and at least k of them are needed to reconstru
 
 On a share button labeled `#i (x,y)`, `#i` is the share number and `(x,y)` is its point. Here `x=i` and `y=f(x)` is the share value. The earlier `(n,k)` gives the total number of shares and the reconstruction threshold, not point coordinates. For example, `n=7` creates seven shares numbered `#1` through `#7`.
 
+Below the “① Distribute” table, each share is written as `(i, f(i)) = (i, substituted expression mod p) = (i, share value)`. Choosing `n=7` shows seven lines; changing the coefficients or `p` updates each expression and value.
+
 The default GF(13) example is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its shares are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the reconstruction weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes the candidate `S=1`.
 
 Coefficients are allowed to be zero, so the polynomial has degree *at most* k−1. With `k=1`, every share is simply the secret: copying instead of splitting.

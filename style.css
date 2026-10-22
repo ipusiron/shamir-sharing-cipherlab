@@ -58,6 +58,8 @@ th { background:var(--bg); }
 .real-curve { fill:none; stroke:var(--blue); stroke-width:3; }
 .real-axis { stroke:var(--line); stroke-width:2; }
 .result { color:var(--blue); font-weight:700; overflow-wrap:anywhere; }
+.share-data { margin:.75rem 0 1rem; overflow-wrap:anywhere; }
+.share-data p { margin:.35rem 0; }
 .check { display:flex; align-items:center; gap:.5rem; color:var(--red); }
 .check input { width:20px; min-height:20px; accent-color:var(--red); }
 .point-chip { border:1px solid var(--line); padding:.2rem .5rem; border-radius:4px; }
