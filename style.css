@@ -70,10 +70,11 @@ th { background:var(--bg); }
 .linear-step-heading { font-size:1.1rem; }
 .linear-candidate-label { display:grid; gap:.2rem; min-width:5rem; }
 #linear-analogy, #linear-two-graph { display:block; width:min(100%,320px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
-#hand-few-graph, #hand-enough-graph { display:block; width:min(100%,520px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
+.hand-graph-frame { max-width:100%; overflow-x:auto; margin:.5rem 0 1rem; }
+#hand-few-graph, #hand-enough-graph { display:block; width:520px; height:auto; border:1px solid var(--line); background:var(--paper); }
 .hand-graph-axis { stroke:var(--muted); stroke-width:1.5; }
-.hand-graph-curve { fill:none; stroke:var(--muted); stroke-width:1.4; opacity:.55; }
-.hand-graph-active { stroke:var(--blue); stroke-width:2.8; opacity:1; }
+.hand-graph-value { fill:var(--muted); opacity:.55; }
+.hand-graph-value.hand-graph-active { fill:var(--blue); opacity:1; }
 .hand-graph-share { fill:var(--blue); stroke:var(--paper); stroke-width:2; }
 .hand-graph-secret { fill:var(--red); stroke:var(--paper); stroke-width:2; }
 .hand-graph-label { fill:var(--ink); font:12px system-ui,sans-serif; }
