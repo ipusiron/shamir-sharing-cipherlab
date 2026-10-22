@@ -105,15 +105,29 @@ Open “?” at the top right for instructions, use cases, and input and storage
 The book explains Shamir’s scheme through numbers in GF(p). “Bytes” extends the idea to a short string on a computer. The tab explains each stage on screen.
 
 1. Convert the input to UTF-8. A Japanese character can occupy several bytes, so the 32-byte limit counts bytes rather than characters.
-2. Treat each byte as a separate secret `s` and build a polynomial over GF(2⁸). Draw coefficients with `crypto.getRandomValues`. Share `#i` is the sequence of results at identifier `i` across all byte positions. The table shows each byte in hex.
+2. Build a separate polynomial `Fⱼ(X)` from the original byte `sⱼ` at each byte position `j`. Draw independent coefficients for each column with `crypto.getRandomValues`. Share `#i` collects the results evaluated at identifier `i` across all positions. Select a byte position in the interface to inspect that run’s coefficients and results for `#1` through `#n`.
 3. Select k shares with distinct identifiers. At each byte position, multiply a share byte by its `λᵢ(0)` weight in GF(2⁸), then XOR the products to recover that byte. Reconstruction stops with fewer than k shares.
 4. Read the recovered bytes in hex first. Display them as text only if they form valid UTF-8, and escape control characters, so the text view does not hide the byte result.
 
 GF(2⁸) is not arithmetic modulo 256; it uses the same finite field as AES, with the irreducible polynomial `x⁸+x⁴+x³+x+1`. Addition is XOR. Compare the eight-step multiplication with the display-only log/exp table further down the tab. This teaching tool does not specify a share file format or a way to store and transfer shares.
 
+### Why 0x11B appears
+
+For `(k,n)=(3,5)`, each byte position `j` gets a polynomial `Fⱼ(X)=sⱼ⊕a₁,ⱼX⊕a₂,ⱼX²`. The original byte is `sⱼ`; `a₁,ⱼ` and `a₂,ⱼ` are independently random coefficients. Evaluating at `X=1,2,3,4,5` produces column `j` of shares `#1` through `#5`. Here `k=3` sets the maximum degree of `Fⱼ` to two, and `n=5` sets the number of identifiers to evaluate. The displayed share bytes change on each generation because the coefficients are redrawn.
+
+For a fixed worked example, let `s₀={4D}`, `a₁,₀={57}`, and `a₂,₀={13}`. For column zero of `#2`, substitute `X={02}` and `X²={04}`: `{57}·{02}={AE}` and `{13}·{04}={4C}`, so `{4D}⊕{AE}⊕{4C}={AF}`. For `#4`, `{57}·{04}={47}` and `{13}·{10}={2B}`, giving `{4D}⊕{47}⊕{2B}={21}`. These coefficients illustrate the method; the interface draws fresh random ones.
+
+The share polynomial `Fⱼ(X)` is distinct from the reduction polynomial `m(z)=z⁸+z⁴+z³+z+1` used for byte multiplication. `X` is the share identifier. The symbol `z` represents a byte as a binary polynomial: for example, `0x57` represents `z⁶+z⁴+z²+z+1`. When calculating `X²` or `a₂,ⱼX²` in `Fⱼ(2)`, reduce the byte products modulo `m(z)`. Do not divide the whole share polynomial `Fⱼ(X)` by `m(z)`.
+
+The nonzero coefficient positions of `m(z)` are 8, 4, 3, 1, and 0. Writing its coefficients from degree eight to zero gives `1 0001 1011₂`, or `0x11B` in hexadecimal. When shifting an eight-bit value left overflows, use `z⁸≡z⁴+z³+z+1 (mod m)`. The low eight bits of the right-hand side are `0x1B`, the reduction constant visible in the implementation.
+
+The reduction polynomial must be irreducible of degree eight. Then the 256 remainders form a field, every nonzero byte has an inverse, and Lagrange interpolation can divide by its denominators. One irreducibility check is `z²⁵⁶≡z (mod m)` together with `gcd(m,z¹⁶−z)=1`. In GF(2), subtraction is XOR: `z¹⁶ mod m=0x5E`, so `z¹⁶−z=0x5C`. The Euclidean remainders are `0x37→0x05→0x01`, giving gcd 1.
+
+Other irreducible polynomials of degree eight exist. This tool selects this one to match the GF(2⁸) multiplication specified for AES in [NIST FIPS 197, section 4.2](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf). It does not use AES encryption to create shares.
+
 ## 🔬 Method and limits
 
-In GF(p), `λᵢ(0) = Πⱼ≠ᵢ xⱼ/(xⱼ−xᵢ)` and `s = Σᵢ λᵢ(0)yᵢ`. GF(2⁸) uses the same interpolation with XOR for addition and subtraction. Its irreducible polynomial is `x⁸+x⁴+x³+x+1`; `0x11B` is the code notation. The display-only log/exp table uses generator `{03}`, as in the SLIP-39 reference implementation. The bundled tests check that `{03}` has order 255 and `{02}` has order 51.
+In GF(p), `λᵢ(0) = Πⱼ≠ᵢ xⱼ/(xⱼ−xᵢ)` and `s = Σᵢ λᵢ(0)yᵢ`. GF(2⁸) uses the same interpolation with XOR for addition and subtraction. The previous section derives the relationship between byte multiplication and `0x11B`. The display-only log/exp table uses generator `{03}`, as in the SLIP-39 reference implementation. The bundled tests check that `{03}` has order 255 and `{02}` has order 51.
 
 Actual splitting and reconstruction use eight shifts and masks, without table lookups. [CVE-2023-25000](https://osv.dev/vulnerability/GO-2023-1709) is an example where table lookup timing mattered. JavaScript execution does not guarantee constant time. This browser implementation is for teaching, not operational secret sharing.
 

@@ -30,6 +30,22 @@ test('A: generator 03 has order 255 and 02 has order 51', () => {
   assert.equal(order(3), V.order_03);
   assert.equal(new Set(GF.EXP.slice(0, 255)).size, 255);
 });
+test('A: 0x11B reduction and the fixed byte-share example', () => {
+  const modulus = (1 << 8) | (1 << 4) | (1 << 3) | (1 << 1) | 1;
+  assert.equal(modulus, 0x11b);
+  let power = 2;
+  for (let i = 0; i < 4; i++) power = GF.mul256(power, power);
+  assert.equal(power, 0x5e); // z^16 mod m(z)
+  const degree = x => 31 - Math.clz32(x);
+  const remainder = (a, b) => { while (a && degree(a) >= degree(b)) a ^= b << (degree(a) - degree(b)); return a; };
+  let a = modulus, b = power ^ 2;
+  while (b) [a, b] = [b, remainder(a, b)];
+  assert.equal(a, 1);
+  for (let i = 4; i < 8; i++) power = GF.mul256(power, power);
+  assert.equal(power, 2); // z^256 mod m(z) = z
+  assert.equal(GF.eval256([0x4d, 0x57, 0x13], 2), 0xaf);
+  assert.equal(GF.eval256([0x4d, 0x57, 0x13], 4), 0x21);
+});
 test('B: default GF(13) shares and all three interpolation tables', () => {
   const shares = GF.splitP([5, 4, 2], 5, 13);
   assert.deepEqual(shares, V.gfp_shares);
