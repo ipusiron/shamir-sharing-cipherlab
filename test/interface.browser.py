@@ -46,6 +46,7 @@ def test_hand_primer(page):
     assert "#i は共有番号" in notation.inner_text()
     assert "x=i、y=f(x)" in notation.inner_text()
     assert "(n,k)" in notation.inner_text() and "座標ではありません" in notation.inner_text()
+    assert "n=7 なら共有情報は7個で、共有番号は #1～#7" in notation.inner_text()
     page.locator("#language").click()
     assert "at least k of them are needed" in primer.inner_text()
     assert "degree at most k−1" in primer.inner_text()
@@ -55,10 +56,15 @@ def test_hand_primer(page):
     assert "#i is the share number" in notation.inner_text()
     assert "x=i and y=f(x)" in notation.inner_text()
     assert "not point coordinates" in notation.inner_text()
+    assert "n=7 creates seven shares numbered #1 through #7" in notation.inner_text()
     page.locator("#theme").click()
     assert primer.is_visible()
     page.locator("#theme").click()
     page.locator("#language").click()
+    page.locator("#share-count").select_option("7")
+    shares = page.locator("#share-picks [data-pick]").all()
+    assert [share.get_attribute("data-pick") for share in shares] == [str(i) for i in range(1, 8)]
+    page.locator("#share-count").select_option("5")
 
 
 def test_interactions(page):
