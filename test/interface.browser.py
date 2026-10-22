@@ -461,10 +461,36 @@ def test_tabs_and_localization(page):
     assert "AESと同じ有限体" in byte_text
     assert "UTF-8 のバイト列" in byte_text
     assert "各バイトを別々の秘密情報 s" in byte_text
-    assert "λᵢ(0)" in byte_text and "XOR" in byte_text
+    assert "XOR" in byte_text
     assert "復元値はまず16進で確かめます" in byte_text
     assert not page.locator("#panel-hand").is_visible()
+    assert "0/3個" in page.locator("#byte-selection-status").inner_text()
+    assert "シェアを1個選ぶ" in page.locator("#byte-pending-equations").inner_text()
+    page.locator("[data-byte-pick='1']").click()
+    first_share_byte = page.locator("#byte-table tbody tr:nth-child(2) td:nth-child(2)").inner_text()
+    assert "1/3個" in page.locator("#byte-selection-status").inner_text()
+    assert f"F₀(01) = s₀ ⊕ a₁,₀·01 ⊕ a₂,₀·01² = {first_share_byte}" in page.locator("#byte-pending-equations").inner_text()
+    assert not page.locator("#byte-weights").is_visible()
+    assert not page.locator("#byte-restored-text").inner_text()
+    page.locator("[data-byte-pick='2']").click()
+    assert "2/3個" in page.locator("#byte-selection-status").inner_text()
+    assert page.locator("#byte-pending-equations p").count() == 3
+    assert "s₀は00〜FFのどの値もありえます" in page.locator("#byte-pending-equations").inner_text()
+    page.locator("[data-byte-pick='3']").click()
+    assert "3/3個" in page.locator("#byte-selection-status").inner_text()
+    assert page.locator("#byte-weights tbody tr").count() == 3
+    assert "λᵢ(0)" in page.locator("#byte-weights-intro").inner_text()
+    products = [int(cell.split("=")[-1], 16) for cell in page.locator("#byte-weights tbody tr td:last-child").all_inner_texts()]
+    assert products[0] ^ products[1] ^ products[2] == 0x4D
+    assert "s₀ = " in page.locator("#byte-recovery-example").inner_text()
+    assert "= 4D" in page.locator("#byte-recovery-example").inner_text()
     assert "MEET AT DAWN" in page.locator("#byte-restored-text").inner_text()
+    page.locator("[data-byte-pick='3']").click()
+    page.locator("[data-byte-pick='4']").click()
+    assert any(value != "01" for value in page.locator("#byte-weights tbody tr td:nth-child(7)").all_inner_texts())
+    assert "MEET AT DAWN" in page.locator("#byte-restored-text").inner_text()
+    assert "固定例{57}×{13}={FE}" in page.locator("[data-i18n='multiplyIntro']").inner_text()
+    assert "上の復元計算には使っていません" in page.locator("#multiply-log").inner_text()
     assert "0x11B" in page.locator("[data-i18n='fieldRule']").inner_text()
     assert "シェアを作る式Fⱼ(X)" in page.locator("[data-i18n='byteFieldReason']").inner_text()
     formula = page.locator("#byte-formula")
@@ -509,6 +535,8 @@ def test_tabs_and_localization(page):
     page.locator("#byte-message").evaluate("el => el.dispatchEvent(new CompositionEvent('compositionend'))")
     assert "E38182" in page.locator("#byte-secret-hex").inner_text()
     page.locator("#byte-message").fill("あ")
+    for share_number in (1, 2, 3):
+        page.locator(f"[data-byte-pick='{share_number}']").click()
     assert "E38182" in page.locator("#byte-restored-hex").inner_text()
     page.locator("#byte-message").fill("A" * 33)
     assert page.locator("#byte-error").inner_text()
@@ -580,6 +608,10 @@ def main():
                     byte_width = page.evaluate("() => ({table:document.querySelector('#byte-table-frame').scrollWidth, frame:document.querySelector('#byte-table-frame').clientWidth, page:document.documentElement.scrollWidth})")
                     assert byte_width["table"] > byte_width["frame"] and byte_width["page"] == width, byte_width
                     assert page.locator("#byte-calculation").evaluate("el => el.scrollWidth > el.clientWidth")
+                    for share_number in (1, 2, 3):
+                        page.locator(f"[data-byte-pick='{share_number}']").click()
+                    assert page.locator("#byte-weights").evaluate("el => el.scrollWidth > el.clientWidth")
+                    assert page.evaluate("() => document.documentElement.scrollWidth === innerWidth")
                     page.locator("#tab-hand").click()
                 if width == 390:
                     test_book_example(page)
