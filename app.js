@@ -279,11 +279,11 @@
       n:state.n,last:toHex(state.n)
     });
     $('byte-formula').textContent=`F${sub}(X) = ${symbolic} = ${numeric}  (GF(2⁸))`;
-    const headings=[t('byteCalcShare'),'X',t('byteCalcResult'),t('byteCalcSecret'),...coefficients.slice(1).map((_,degree)=>`${name(degree+1)}·X${degree?sup[degree+1]:''}`)];
+    const headings=[t('byteCalcShare'),'X',t('byteCalcSecret'),...coefficients.slice(1).map((_,degree)=>`${name(degree+1)}·X${degree?sup[degree+1]:''}`),t('byteCalcResult')];
     const rows=state.shares.map(share=>{
       let power=1,value=coefficients[0];
       const terms=coefficients.slice(1).map(coefficient=>{power=G.mul256(power,share.x);const product=G.mul256(coefficient,power);value^=product;return `${toHex(coefficient)}×${toHex(power)}=${toHex(product)}`;});
-      return [`#${share.x}`,toHex(share.x),toHex(value),toHex(coefficients[0]),...terms];
+      return [`#${share.x}`,toHex(share.x),toHex(coefficients[0]),...terms,toHex(value)];
     });
     table($('byte-calculation'),headings,rows);
     const first=state.shares[0],terms=coefficients.slice(1).map((coefficient,degree)=>({

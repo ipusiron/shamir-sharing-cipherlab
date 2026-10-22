@@ -473,24 +473,28 @@ def test_tabs_and_localization(page):
     values = re.findall(r"\{([0-9A-F]{2})\}", formula.inner_text())
     assert len(values) == 3
     assert values[0] == "4D"
+    assert "crypto.getRandomValues" in page.locator("[data-i18n='byteRandomHow']").inner_text()
+    assert "00も候補" in page.locator("[data-i18n='byteRandomHow']").inner_text()
+    assert "k−1個以下のシェア" in page.locator("[data-i18n='byteRandomWhy']").inner_text()
+    assert "バイト位置を切り替えるだけなら乱数は引き直しません" in page.locator("[data-i18n='byteRandomWhy']").inner_text()
     source = page.locator("#byte-coefficient-source").inner_text()
     assert f"a₁,₀={values[1]}" in source and f"a₂,₀={values[2]}" in source
-    assert "元のバイトとは独立に暗号学的乱数" in source
+    assert "s₀から計算した値ではありません" in source
     assert "#1専用という意味ではありません" in source
     headings = page.locator("#byte-calculation thead th").all_inner_texts()
-    assert headings[4:] == ["a₁,₀·X", "a₂,₀·X²"]
-    first_result = page.locator("#byte-calculation tbody tr").first.locator("td").nth(2).inner_text()
+    assert headings == ["シェア", "X", "元のバイト", "a₁,₀·X", "a₂,₀·X²", "XORの結果"]
+    first_result = page.locator("#byte-calculation tbody tr").first.locator("td").last.inner_text()
     assert f"F₀(01) = 4D ⊕ ({values[1]}×01) ⊕ ({values[2]}×01²) = 4D ⊕ {values[1]} ⊕ {values[2]} = {first_result}" in page.locator("#byte-first-example").inner_text()
     for share_number, row in enumerate(page.locator("#byte-calculation tbody tr").all(), 1):
         cells = row.locator("td").all_inner_texts()
-        total = int(cells[3], 16)
-        for term in cells[4:]:
+        total = int(cells[2], 16)
+        for term in cells[3:-1]:
             total ^= int(term.split("=")[1], 16)
-        assert total == int(cells[2], 16)
-        assert cells[2] == page.locator(f"#byte-table tbody tr:nth-child({share_number + 1}) td:nth-child(2)").inner_text()
+        assert total == int(cells[-1], 16)
+        assert cells[-1] == page.locator(f"#byte-table tbody tr:nth-child({share_number + 1}) td:nth-child(2)").inner_text()
     page.locator("#byte-column").select_option("1")
     assert formula.inner_text().startswith("F₁(X) = s₁ ⊕ a₁,₁·X ⊕ a₂,₁·X² = {45} ⊕ ")
-    assert page.locator("#byte-calculation thead th").all_inner_texts()[4:] == ["a₁,₁·X", "a₂,₁·X²"]
+    assert page.locator("#byte-calculation thead th").all_inner_texts()[3:5] == ["a₁,₁·X", "a₂,₁·X²"]
     page.locator("#byte-column").select_option("0")
     assert re.findall(r"\{([0-9A-F]{2})\}", formula.inner_text()) == values
     page.locator("#byte-k").select_option("2")
@@ -535,9 +539,10 @@ def test_tabs_and_localization(page):
     assert page.locator("#real-comparison-graph").get_attribute("aria-label") == "Real-number curve for the selected candidate coefficients"
     assert page.locator("#panel-pitfalls").is_visible()
     page.locator("#tab-bytes").click()
-    assert "cryptographic random source" in page.locator("#byte-coefficient-source").inner_text()
+    assert "crypto.getRandomValues" in page.locator("[data-i18n='byteRandomHow']").inner_text()
+    assert "Switching the inspected byte position does not redraw them" in page.locator("[data-i18n='byteRandomWhy']").inner_text()
     assert "does not mean “for share #1”" in page.locator("#byte-coefficient-source").inner_text()
-    assert page.locator("#byte-calculation thead th").all_inner_texts()[4:] == ["a₁,₀·X", "a₂,₀·X²"]
+    assert page.locator("#byte-calculation thead th").all_inner_texts() == ["Share", "X", "Original byte", "a₁,₀·X", "a₂,₀·X²", "XOR result"]
     page.locator("#tab-pitfalls").click()
     page.locator("#theme").click()
     assert page.locator("html").get_attribute("data-theme") == "dark"
