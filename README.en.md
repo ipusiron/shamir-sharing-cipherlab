@@ -63,6 +63,8 @@ Coefficients are allowed to be zero, so the polynomial has degree *at most* k−
 
 ### Why begin with (2, n)?
 
+GF(13) is a finite field with 13 values, 0–12. Add, subtract, and multiply modulo 13; division by a nonzero number means multiplication by its inverse. Because 13 is prime, every nonzero value has an inverse. The introductory tab now explains arithmetic examples, why a prime is needed, what leaks with ordinary integers, and how GF(2⁸) differs.
+
 The first tab starts with `p=13, n=5, s=5, a₁=4` and makes shares from `f(x)=5+4x (mod 13)`. During “Distribution”, dealer `D` calculates `vᵢ=f(i)` and gives one share to each custodian. Open the disclosure to follow the calculations and recipients, from `v₁=f(1)=(5+4×1) mod 13=9` to `v₅=f(5)=(5+4×5) mod 13=12`.
 
 During “Reconstruction”, start with custodian #1’s share `(1,9)`. With this one point, the alternative `s=0, a₁=9` also fits. Every candidate `s=0…12` has a corresponding polynomial. Uniformly chosen coefficients leave all candidates equally likely. Add custodian #2’s `(2,0)` and the polynomial is uniquely `f(x)=5+4x (mod 13)`, recovering `s=f(0)=5`.

@@ -36,6 +36,17 @@ def test_linear_intro(page, width):
     assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("分散段階")
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("復元段階")
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").bounding_box()["y"] < page.locator("#panel-linear [data-i18n='linearShares']").bounding_box()["y"]
+    primer = page.locator(".field-primer")
+    assert primer.is_visible()
+    assert primer.bounding_box()["y"] < page.locator("#panel-linear .hand-formula").bounding_box()["y"]
+    assert "0〜12 の13個の数" in primer.inner_text()
+    assert "9 + 7 = 16。13で割った余りは3" in primer.inner_text()
+    assert "5 × 4 = 20。13で割った余りは7" in primer.inner_text()
+    assert "2×7 = 14 ≡ 1" in primer.inner_text()
+    assert "2×□ ≡ 1 (mod 12)" in primer.inner_text()
+    assert "(1,11)(2,8)(3,9)(4,1)(5,10)" in primer.inner_text()
+    assert "GF(2⁸)" in primer.inner_text()
+    assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     assert page.locator("#linear-dealer").get_attribute("open") is None
     assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
     assert "13本" in page.locator("#linear-one-result").inner_text()
@@ -81,6 +92,8 @@ def test_linear_intro(page, width):
     assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
     assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("Distribution")
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("Reconstruction")
+    assert "What is GF(13)?" in primer.inner_text()
+    assert "2×7 = 14 ≡ 1" in primer.inner_text()
     assert "D computes v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()
     assert page.locator("#linear-threshold").inner_text().startswith("When two of the 5 participants")
     assert "Thirteen polynomials of degree at most one" in page.locator("#linear-one-result").inner_text()
