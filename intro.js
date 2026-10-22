@@ -15,17 +15,18 @@
     button.type='button';button.dataset.linearPick=String(x);
     button.setAttribute('aria-pressed',String(selected));return button;
   };
+  const straightSegment = ([x,y],secret,X,Y) => {
+    const slope=(y-secret)/x;
+    let left=0,right=12;
+    if(slope>0){left=Math.max(left,-secret/slope);right=Math.min(right,(12-secret)/slope);}
+    if(slope<0){left=Math.max(left,(12-secret)/slope);right=Math.min(right,-secret/slope);}
+    return {x1:X(left),y1:Y(secret+slope*left),x2:X(right),y2:Y(secret+slope*right)};
+  };
   function analogy([x,y],candidateSecret){
     const svg=$('linear-analogy'),x0=54,x12=270,y0=252,unit=18;
     const X=value=>x0+value*unit,Y=value=>y0-value*unit;
     const lines=[];
-    const segment=secret=>{
-      const slope=(y-secret)/x;
-      let left=0,right=12;
-      if(slope>0){left=Math.max(left,-secret/slope);right=Math.min(right,(12-secret)/slope);}
-      if(slope<0){left=Math.max(left,(12-secret)/slope);right=Math.min(right,-secret/slope);}
-      return {x1:X(left),y1:Y(secret+slope*left),x2:X(right),y2:Y(secret+slope*right)};
-    };
+    const segment=secret=>straightSegment([x,y],secret,X,Y);
     svg.replaceChildren(S('line',{x1:x0,y1:26,x2:x0,y2:y0,class:'linear-analogy-axis'}),
       S('line',{x1:x0,y1:y0,x2:x12,y2:y0,class:'linear-analogy-axis'}));
     for(const [index,secret] of [0,5,12].entries()){
@@ -77,6 +78,8 @@
     svg.replaceChildren(S('line',{x1:x0,y1:26,x2:x0,y2:y0,class:'linear-analogy-axis'}),
       S('line',{x1:x0,y1:y0,x2:x12,y2:y0,class:'linear-analogy-axis'}));
     if(selected.length===2){
+      $('linear-two-graph-title').textContent=t('linearTwoGraphTitle');
+      svg.setAttribute('aria-label',t('linearTwoGraphLabel'));
       if(slope===0){
         lines.push({x1:X(0),y1:Y(secret),x2:X(12),y2:Y(secret)});
       } else {
@@ -95,7 +98,19 @@
       const secretLabel=S('text',{x:5,y:Y(secret)+4,class:'linear-analogy-label linear-analogy-active-label'});
       secretLabel.textContent=`s=${secret}`;svg.append(secretLabel);
       $('linear-two-graph-caption').textContent=format('linearTwoGraphCaption',{secret,slope});
-    } else $('linear-two-graph-caption').textContent=t('linearTwoGraphPending');
+    } else {
+      const [x,y]=selected[0];
+      $('linear-two-graph-title').textContent=t('linearTwoGraphOneTitle');
+      svg.setAttribute('aria-label',t('linearTwoGraphOneLabel'));
+      for(const [index,candidateSecret] of [0,5,12].entries()){
+        const line=straightSegment([x,y],candidateSecret,X,Y);
+        lines.push(line);
+        svg.append(S('line',{...line,class:`linear-analogy-line linear-analogy-${index}`}));
+        const label=S('text',{x:5,y:Y(candidateSecret)+4,class:'linear-analogy-label'});
+        label.textContent=`s=${candidateSecret}`;svg.append(label);
+      }
+      $('linear-two-graph-caption').textContent=format('linearTwoGraphOneCaption',{x,y});
+    }
     for(const [labelX,label] of [[x0,'x=0'],[x12,'x=12']]){
       const text=S('text',{x:labelX,y:283,class:'linear-analogy-axis-label','text-anchor':'middle'});
       text.textContent=label;svg.append(text);
