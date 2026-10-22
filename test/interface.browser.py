@@ -68,7 +68,18 @@ def test_linear_intro(page, width):
     assert "直線が何本も引ける" in page.locator("[data-i18n='linearGridIntro']").inner_text()
     assert "(3,4)" in page.locator("#linear-one-selected").inner_text()
     assert page.locator("[data-i18n='linearGridTitle']").bounding_box()["y"] < page.locator("[data-i18n='linearTwoTitle']").bounding_box()["y"]
-    assert "もう1人の管理人のシェアを選ぶ" in page.locator("#linear-two-result").inner_text()
+    assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
+    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
+    assert "s=5" in page.locator("#linear-two-result").inner_text()
+    graph = page.locator("#linear-two-graph")
+    assert graph.get_attribute("viewBox") == "0 0 320 292"
+    assert graph.locator(".linear-two-share").count() == 2
+    assert graph.locator(".linear-two-share").evaluate_all("els => els.map(el => [el.getAttribute('cx'), el.getAttribute('cy')])") == [["72", "90"], ["90", "252"]]
+    assert graph.locator(".linear-two-secret").count() == 1
+    assert graph.locator(".linear-two-branch").count() > 1
+    assert graph.locator(".linear-two-secret").get_attribute("cx") == "54"
+    assert graph.locator(".linear-two-secret").get_attribute("cy") == "162"
+    assert "離れて見える線も同じ式" in page.locator("#linear-two-graph-caption").inner_text()
     lines = page.locator("#linear-analogy .linear-analogy-line")
     assert lines.count() == 4
     assert page.locator("#linear-analogy").get_attribute("viewBox") == "0 0 320 292"
@@ -84,11 +95,12 @@ def test_linear_intro(page, width):
     assert page.locator("#linear-one-picks button").count() == 5
     assert page.locator("#linear-two-picks button").count() == 5
     assert page.locator("#linear-one-picks [aria-pressed='true']").count() == 1
-    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 1
+    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
     pair_meaning = page.locator("#panel-linear [data-i18n='linearPairMeaning']")
     assert "(1,9) は、管理人番号1（＝#1）とシェア9のセット" in pair_meaning.inner_text()
     assert pair_meaning.bounding_box()["y"] < page.locator("#linear-one-picks").bounding_box()["y"]
     assert page.locator("#linear-analogy").bounding_box()["width"] <= width
+    assert graph.bounding_box()["width"] <= width
     assert page.locator("#linear-grid").count() == 0
     assert page.locator("#linear-to-hand").count() == 0
     page.locator("#linear-candidate").select_option("5")
@@ -98,8 +110,8 @@ def test_linear_intro(page, width):
     assert page.locator("#linear-one-picks [aria-pressed='true']").count() == 1
     assert page.locator('#linear-one-picks [data-linear-pick="2"]').evaluate("el => el === document.activeElement")
     assert "(2,0)" in page.locator("#linear-one-selected").inner_text()
-    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
-    assert "もう1人" in page.locator("#linear-two-result").inner_text()
+    assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
+    assert "s=5" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-two-picks [data-linear-pick="3"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
@@ -110,19 +122,21 @@ def test_linear_intro(page, width):
     page.locator('#linear-two-picks [data-linear-pick="3"]').click()
     assert "13本" in page.locator("#linear-one-result").inner_text()
     assert "もう1人" in page.locator("#linear-two-result").inner_text()
-    page.locator('#linear-two-picks [data-linear-pick="1"]').click()
+    assert graph.locator(".linear-two-branch").count() == 0
+    assert graph.locator(".linear-two-share").count() == 1
+    page.locator('#linear-two-picks [data-linear-pick="2"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-two-picks [data-linear-pick="4"]').click()
-    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
+    assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
     assert "(4,8)" in page.locator("#linear-two-selected").inner_text()
     assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
-    page.locator('#linear-two-picks [data-linear-pick="2"]').click()
+    page.locator('#linear-two-picks [data-linear-pick="1"]').click()
     assert "もう1人" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-two-picks [data-linear-pick="5"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     page.locator('#linear-one-picks [data-linear-pick="3"]').click()
     assert "(3,4)" in page.locator("#linear-one-selected").inner_text()
-    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 1
+    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
     assert "点 (3,4)" in page.locator("#linear-analogy-caption").inner_text()
     assert page.locator("#linear-analogy .linear-analogy-line").evaluate_all("(els) => els.every(el => Number(el.getAttribute('x2')) > Number(document.querySelector('.linear-analogy-point').getAttribute('cx')))")
     assert page.locator(".linear-analogy-point-label").evaluate("""el => {
@@ -150,17 +164,25 @@ def test_linear_intro(page, width):
     page.locator("#linear-slope").press("Tab")
     assert "v₁=f(1)=(7+2×1) mod 13=9" in rows.first.inner_text()
     assert "(3,0)" in page.locator("#linear-one-selected").inner_text()
-    page.locator('#linear-two-picks [data-linear-pick="2"]').click()
     assert "s=7" in page.locator("#linear-two-result").inner_text()
+    assert graph.locator(".linear-two-secret").get_attribute("cy") == "126"
     page.locator("#linear-n").select_option("7")
     assert page.locator("#linear-one-picks button").count() == 7
     assert page.locator("#linear-two-picks button").count() == 7
     assert page.locator("#linear-threshold").inner_text().startswith("7人のうち2人")
     assert rows.count() == 7
     assert "v₇=f(7)=(7+2×7) mod 13=8" in rows.last.inner_text()
+    page.locator("#linear-slope").fill("0")
+    page.locator("#linear-slope").press("Tab")
+    assert graph.locator(".linear-two-branch").count() == 1
+    assert graph.locator(".linear-two-share").count() == 2
+    assert graph.locator(".linear-two-branch").first.get_attribute("y1") == "126"
+    assert graph.locator(".linear-two-branch").first.get_attribute("y2") == "126"
     page.locator("#linear-reset").click()
     assert page.locator("#linear-one-picks button").count() == 5
     assert page.locator("#linear-two-picks button").count() == 5
+    assert "(1,9)" in page.locator("#linear-two-selected").inner_text()
+    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
     assert rows.count() == 5
     page.locator("#language").click()
     assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
@@ -174,6 +196,7 @@ def test_linear_intro(page, width):
     assert "(1,9)(2,0)(3,4)(4,8)(5,12)" in primer.inner_text()
     assert "ordinary coordinate plane" in page.locator("#linear-analogy-caption").inner_text()
     assert "Each y-intercept is f(0)" in page.locator("#linear-analogy-caption").inner_text()
+    assert "segments represent the same polynomial" in page.locator("#linear-two-graph-caption").inner_text()
     assert "distinct polynomials" in distinct.inner_text()
     assert "2×7 = 14 ≡ 1" in primer.inner_text()
     assert "D computes v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()

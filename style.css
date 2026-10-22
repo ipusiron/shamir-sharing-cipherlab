@@ -68,7 +68,7 @@ th { background:var(--bg); }
 #linear-dealer { margin:1rem 0; padding:.65rem .8rem; border:1px solid var(--line); }
 .linear-step-heading { font-size:1.1rem; }
 .linear-candidate-label { display:grid; gap:.2rem; min-width:5rem; }
-#linear-analogy { display:block; width:min(100%,320px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
+#linear-analogy, #linear-two-graph { display:block; width:min(100%,320px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
 .linear-analogy-axis { stroke:var(--muted); stroke-width:1.5; }
 .linear-analogy-line { stroke-width:2.5; }
 .linear-analogy-0 { stroke:var(--red); }
@@ -78,6 +78,10 @@ th { background:var(--bg); }
 .linear-analogy-active-label { fill:var(--focus); font-weight:700; }
 .linear-analogy-point { fill:var(--ink); stroke:var(--paper); stroke-width:1.5; }
 .linear-analogy-label, .linear-analogy-axis-label { fill:var(--ink); font:12px system-ui,sans-serif; }
+.linear-two-branch { stroke:var(--blue); stroke-width:2.5; }
+.linear-two-secret { fill:var(--red); stroke:var(--paper); stroke-width:1.5; }
+.linear-two-share { fill:var(--blue); stroke:var(--paper); stroke-width:1.5; }
+.linear-two-point-label { paint-order:stroke; stroke:var(--paper); stroke-width:4px; stroke-linejoin:round; }
 @media (max-width:600px) { .linear-candidate-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); } .linear-candidate-controls .linear-candidate-label { grid-column:1/-1; } }
 #real-graph { display:block; width:min(100%,600px); height:auto; touch-action:none; }
 .field-cell { fill:var(--paper); stroke:var(--grid); stroke-width:1; }
