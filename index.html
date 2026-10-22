@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; connect-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Learn Shamir secret sharing with finite fields, interpolation and implementation pitfalls.">
+  <title>ShamirSharing CipherLab</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script src="sha256-core.js" defer></script>
+  <script src="gf-core.js" defer></script>
+  <script src="pitfalls.js" defer></script>
+  <script src="messages.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="page-header">
+    <div class="masthead"><div><p class="eyebrow">DAY123 · SPLIT / INTERPOLATE / PITFALLS</p><h1>ShamirSharing <span>CipherLab</span></h1></div>
+      <div class="header-tools"><button id="theme" class="icon-button" type="button" data-label="theme">◐</button>
+        <button id="language" class="icon-button" type="button" data-label="language">EN</button>
+        <button id="help" class="icon-button" type="button" data-label="help" aria-haspopup="dialog">?</button></div></div>
+    <p class="tagline" data-i18n="tagline"></p>
+  </header>
+  <main>
+    <aside class="notice" data-i18n="educational"></aside>
+    <div class="tabs" role="tablist" aria-label="Learning steps" data-label="tablist">
+      <button id="tab-hand" role="tab" type="button" aria-controls="panel-hand" aria-selected="true" tabindex="0" data-i18n="hand"></button>
+      <button id="tab-bytes" role="tab" type="button" aria-controls="panel-bytes" aria-selected="false" tabindex="-1" data-i18n="bytes"></button>
+      <button id="tab-pitfalls" role="tab" type="button" aria-controls="panel-pitfalls" aria-selected="false" tabindex="-1" data-i18n="pitfalls"></button>
+    </div>
+    <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand">
+      <h2 data-i18n="hand"></h2><p data-i18n="handIntro"></p>
+      <div class="settings-grid">
+        <label><span>p</span><select id="prime"><option>7</option><option>11</option><option selected>13</option><option>17</option><option>19</option><option>23</option></select></label>
+        <label><span>k</span><select id="threshold"></select></label>
+        <label><span>n</span><select id="share-count"></select></label>
+        <label><span>S = f(0)</span><input id="secret" type="number" min="0" value="5" inputmode="numeric"></label>
+      </div>
+      <div id="coefficient-inputs" class="settings-grid"></div>
+      <div class="actions"><button id="random-coefficients" type="button" data-i18n="randomCoefficients"></button><button id="reset-hand" type="button" data-i18n="reset"></button></div>
+      <p id="hand-status" role="status"></p>
+      <h3 data-i18n="distribute"></h3><p id="polynomial"></p>
+      <div class="table-frame"><table><thead><tr><th>x</th><th data-i18n="termValues"></th><th data-i18n="sum"></th><th>mod p</th></tr></thead><tbody id="distribution-table"></tbody></table></div>
+      <h3 data-i18n="reconstruct"></h3><p data-i18n="chooseShares"></p><div id="share-picks" class="actions"></div>
+      <div class="actions"><button id="select-k" type="button" data-i18n="selectK"></button><button id="select-kminus" type="button" data-i18n="selectKMinus"></button></div>
+      <div id="reconstruction-section"><div class="table-frame"><table><thead><tr><th>xᵢ</th><th>yᵢ</th><th>Πxⱼ</th><th>Π(xⱼ−xᵢ)</th><th data-i18n="inverse"></th><th>λᵢ</th><th>λᵢyᵢ</th></tr></thead><tbody id="reconstruction-table"></tbody></table></div><p id="reconstruction-result" class="result"></p></div>
+      <div id="candidate-section" hidden><h3 data-i18n="candidateTitle"></h3><p id="candidate-result"></p>
+        <div class="actions"><button id="previous-candidate" type="button" data-i18n="previous"></button><button id="next-candidate" type="button" data-i18n="next"></button>
+          <button id="all-candidates" type="button" aria-pressed="false" data-i18n="showAll"></button></div>
+        <label class="check"><input id="leading-only" type="checkbox"><span data-i18n="leadingOnly"></span></label>
+      </div>
+      <h3 data-i18n="gridTitle"></h3><p data-i18n="gridHint"></p><p id="grid-range" class="muted"></p><div id="grid-frame" class="grid-frame"><svg id="field-grid" role="img" data-label="gridLabel"></svg></div>
+      <p id="tweak-result" class="result"></p>
+      <h3 data-i18n="realTitle"></h3><p data-i18n="realWarning"></p><div class="grid-frame"><svg id="real-graph" role="img" data-label="realLabel" viewBox="0 0 600 300"></svg></div>
+      <p id="real-result" class="result"></p><div id="real-picks" class="actions"></div>
+      <h3 data-i18n="integerTitle"></h3><p data-i18n="integerIntro"></p><div class="table-frame"><table><thead><tr><th>x</th><th>f(x) ℤ</th><th>f(x) mod x</th></tr></thead><tbody id="integer-table"></tbody></table></div><p id="integer-result"></p>
+    </section>
+    <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden>
+      <h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p>
+      <p data-i18n="fieldRule"></p>
+      <div class="settings-grid"><label><span data-i18n="byteInput"></span><input id="byte-message" type="text" value="MEET AT DAWN" autocomplete="off" spellcheck="false"></label>
+        <label><span>k</span><select id="byte-k"></select></label><label><span>n</span><select id="byte-n"></select></label></div>
+      <p class="caution" data-i18n="educational"></p><p id="byte-error" role="status"></p>
+      <h3 data-i18n="byteDistribute"></h3><p id="byte-secret-hex" class="result"></p><div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
+      <h3 data-i18n="byteRestore"></h3><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
+      <p id="byte-restored-hex" class="result"></p><p id="byte-restored-text" class="result"></p>
+      <h3 data-i18n="multiplication"></h3><p data-i18n="multiplyIntro"></p><div id="multiply-steps" class="table-frame"></div>
+      <p id="multiply-log"></p>
+    </section>
+    <section id="panel-pitfalls" class="panel" role="tabpanel" aria-labelledby="tab-pitfalls" hidden>
+      <h2 data-i18n="pitfalls"></h2><p data-i18n="pitfallsIntro"></p><p data-i18n="demoOnly"></p>
+      <div class="pitfall-card"><h3 data-i18n="tamperTitle"></h3><label><span data-i18n="checkLayer"></span><select id="tamper-layer"><option value="none" data-i18n="noCheck"></option><option value="crc" data-i18n="crcCheck"></option><option value="fingerprint" data-i18n="fingerprintCheck"></option></select></label><div id="tamper-output"></div></div>
+      <div class="pitfall-card"><h3 data-i18n="zeroTitle"></h3><div id="zero-output"></div></div>
+      <div class="pitfall-card"><h3 data-i18n="shortTitle"></h3><div id="short-output"></div></div>
+    </section>
+    <details class="panel"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p><div id="lessons"></div></details>
+  </main>
+  <footer><p data-i18n="privacy"></p><a href="https://github.com/ipusiron/shamir-sharing-cipherlab" data-i18n="source"></a></footer>
+  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title" data-i18n="help"></h2><p data-i18n="helpText"></p><button id="close-help" type="button" data-i18n="close"></button></dialog>
+</body>
+</html>
