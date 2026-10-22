@@ -63,7 +63,7 @@ Coefficients are allowed to be zero, so the polynomial has degree *at most* k−
 
 ### Why begin with (2, n)?
 
-GF(13) is a finite field with 13 values, 0–12. Add, subtract, and multiply modulo 13; division by a nonzero number means multiplication by its inverse. Because 13 is prime, every nonzero value has an inverse. The introductory tab now explains arithmetic examples, why a prime is needed, what leaks with ordinary integers, and how GF(2⁸) differs.
+GF(13) is a finite field with 13 values, 0–12. Add, subtract, and multiply modulo 13; division by a nonzero number means multiplication by its inverse. Because 13 is prime, every nonzero value has an inverse. “Visualize (2, n)” fixes p=13 and uses `f(x)=s+a₁x (mod 13)`. It compares leaked remainders from shares calculated over ordinary integers with shares calculated in GF(13). The GF(2⁸) explanation belongs in “Bytes”.
 
 The first tab starts with `p=13, n=5, s=5, a₁=4` and makes shares from `f(x)=5+4x (mod 13)`. During “Distribution”, dealer `D` calculates `vᵢ=f(i)` and gives one share to each custodian. Open the disclosure to follow the calculations and recipients, from `v₁=f(1)=(5+4×1) mod 13=9` to `v₅=f(5)=(5+4×5) mod 13=12`.
 
@@ -109,7 +109,7 @@ The book explains Shamir’s scheme through numbers in GF(p). “Bytes” extend
 3. Select k shares with distinct identifiers. At each byte position, multiply a share byte by its `λᵢ(0)` weight in GF(2⁸), then XOR the products to recover that byte. Reconstruction stops with fewer than k shares.
 4. Read the recovered bytes in hex first. Display them as text only if they form valid UTF-8, and escape control characters, so the text view does not hide the byte result.
 
-GF(2⁸) addition is XOR. Multiplication uses the irreducible polynomial `x⁸+x⁴+x³+x+1`. Compare the eight-step multiplication with the display-only log/exp table further down the tab. This teaching tool does not specify a share file format or a way to store and transfer shares.
+GF(2⁸) is not arithmetic modulo 256; it uses the same finite field as AES, with the irreducible polynomial `x⁸+x⁴+x³+x+1`. Addition is XOR. Compare the eight-step multiplication with the display-only log/exp table further down the tab. This teaching tool does not specify a share file format or a way to store and transfer shares.
 
 ## 🔬 Method and limits
 
