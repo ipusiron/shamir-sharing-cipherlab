@@ -30,7 +30,7 @@ test('E: bilingual keys and all HTML labels', () => {
   for (const match of html.matchAll(/data-(?:i18n|label)="([^"]+)"/g)) {
     assert.ok(Object.hasOwn(M.ja, match[1]), `missing ${match[1]}`);
   }
-  for (let i = 1; i <= 8; i++) for (const suffix of ['', 'Text', 'Row']) assert.ok(M.ja[`lesson${i}${suffix}`]);
+  for (let i = 1; i <= 8; i++) for (const suffix of ['', 'Text']) assert.ok(M.ja[`lesson${i}${suffix}`]);
 });
 test('E: wording and original SHA-256 bytes from Day118 main 2c1afac', () => {
   for (const [locale, messages] of Object.entries(M)) {

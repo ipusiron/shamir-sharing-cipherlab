@@ -37,7 +37,7 @@
   });
   $('theme').addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; save(); render(); });
   $('language').addEventListener('click', () => { language = language === 'ja' ? 'en' : 'ja'; save(); render(); });
-  $('help').addEventListener('click', () => { const dialog=$('help-dialog'); dialog.showModal(); dialog.scrollTop=0; });
+  $('help').addEventListener('click', () => { $('help-dialog').showModal(); document.querySelector('.help-body').scrollTop=0; });
   $('close-help').addEventListener('click', () => $('help-dialog').close());
   render();
 }());
@@ -233,7 +233,6 @@
   ];
   function lessons(){const holder=$('lessons');holder.replaceChildren();for(let i=1;i<=8;i++){
     const section=E('section',undefined,'lesson-card');section.append(E('h3',t(`lesson${i}`)),E('p',t(`lesson${i}Text`)));
-    const frame=E('div',undefined,'table-frame');table(frame,[t('lesson'),t('byteShare')],[[String(i),t(`lesson${i}Row`)]]);section.append(frame);
     const links=E('p',undefined,'source-links');for(const [type,url] of sources[i-1]){const a=E('a',`${t(type)}: ${new URL(url).hostname}`);a.href=url;a.target='_blank';a.rel='noopener noreferrer';links.append(a,E('span',' · '));}section.append(links);holder.append(section);
   }}
   window.renderShamirExtra=()=>{renderBytes();multiplication();renderPitfalls();lessons();};
