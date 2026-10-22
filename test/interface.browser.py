@@ -368,20 +368,21 @@ def test_hand_recovery_stages(page):
     assert page.locator("[data-i18n='reconstruct']").inner_text() == "復元段階"
     assert [b.get_attribute("data-few-pick") for b in page.locator("#hand-few-picks [aria-pressed='true']").all()] == ["1", "2"]
     assert [b.get_attribute("data-pick") for b in page.locator("#share-picks [aria-pressed='true']").all()] == ["1", "2", "3"]
-    assert page.locator("#hand-few-graph .hand-graph-curve").count() >= 3
-    assert page.locator("#hand-enough-graph .hand-graph-curve").count() == 1
+    assert page.locator("#hand-few-graph .hand-graph-value").count() >= 3
+    assert page.locator("#hand-enough-graph .hand-graph-value").count() == 6
+    assert page.locator("#hand-few-graph path, #hand-enough-graph path").count() == 0
     assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
     page.locator('#hand-few-picks [data-few-pick="2"]').click()
     assert page.locator("#candidate-section").is_hidden()
-    assert page.locator("#hand-few-graph .hand-graph-curve").count() == 0
+    assert page.locator("#hand-few-graph .hand-graph-value").count() == 0
     page.locator('#hand-few-picks [data-few-pick="4"]').click()
     assert page.locator("#candidate-section").is_visible()
     assert [b.get_attribute("data-pick") for b in page.locator("#share-picks [aria-pressed='true']").all()] == ["1", "2", "4"]
     page.locator('#share-picks [data-pick="2"]').click()
     assert page.locator("#reconstruction-section").is_hidden()
-    assert page.locator("#hand-enough-graph .hand-graph-curve").count() == 0
+    assert page.locator("#hand-enough-graph .hand-graph-value").count() == 0
     page.locator('#share-picks [data-pick="5"]').click()
-    assert page.locator("#hand-enough-graph .hand-graph-curve").count() == 1
+    assert page.locator("#hand-enough-graph .hand-graph-value").count() == 6
     assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
     assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth")
     page.locator("#reset-hand").click()
@@ -427,8 +428,8 @@ def test_interactions(page):
     page.locator("#reset-hand").click()
     page.locator("#select-kminus").click()
     assert "13/13" in page.locator("#candidate-result").inner_text()
-    page.locator("#leading-only").check()
-    assert "12/13" in page.locator("#candidate-result").inner_text()
+    assert page.locator("#leading-only").count() == 0
+    assert "13/13" in page.locator("#candidate-result").inner_text()
     page.locator('#real-graph [data-real-x="0"]').focus()
     before = page.locator("#real-result").inner_text()
     page.keyboard.press("ArrowUp")
@@ -616,6 +617,9 @@ def main():
                 normal = geometry(page, width)
                 test_hand_primer(page)
                 test_hand_recovery_stages(page)
+                if width == 320:
+                    assert page.locator(".hand-graph-frame").first.evaluate("el => el.scrollWidth > el.clientWidth")
+                    assert page.evaluate("() => document.documentElement.scrollWidth === innerWidth")
                 test_distributed_share_data(page)
                 test_help(page, width)
                 if width == 320:

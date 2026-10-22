@@ -47,7 +47,7 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id), G = ShamirGF;
-  const s = { p:13, k:3, n:5, c:[5,4,2], fewer:[1,2], selected:[1,2,3], candidate:5, all:false, leading:false,
+  const s = { p:13, k:3, n:5, c:[5,4,2], fewer:[1,2], selected:[1,2,3], candidate:5, all:false,
     activeX:null, moved:'', realY:{1:11,2:8,3:9}, realZero:5 };
   const t = key => ShamirMessages[document.documentElement.lang][key] || key;
   const E = (tag, value, cls) => { const el=document.createElement(tag); if(value!==undefined) el.textContent=String(value); if(cls) el.className=cls; return el; };
@@ -55,7 +55,7 @@
   const shares = () => G.splitP(s.c,s.n,s.p), points = () => s.selected.map(x=>shares()[x-1]), fewPoints = () => s.fewer.map(x=>shares()[x-1]);
   const format = (key,values) => t(key).replace(/\{([a-z]+)\}/gi,(_,name)=>String(values[name]));
   const initialEnough = () => [...s.fewer,...Array.from({length:s.n},(_,i)=>i+1).filter(x=>!s.fewer.includes(x)).slice(0,Math.max(0,s.k-s.fewer.length))].sort((a,b)=>a-b);
-  const resetSelections = () => { s.fewer=Array.from({length:Math.max(0,s.k-1)},(_,i)=>i+1);s.selected=initialEnough();s.candidate=s.c[0];s.all=false;s.leading=false; };
+  const resetSelections = () => { s.fewer=Array.from({length:Math.max(0,s.k-1)},(_,i)=>i+1);s.selected=initialEnough();s.candidate=s.c[0];s.all=false; };
   function choices(id, from, to, value) { const el=$(id); el.replaceChildren(...Array.from({length:to-from+1},(_,i)=>{const o=E('option',from+i);o.value=String(from+i);o.selected=from+i===value;return o;})); }
   function controls() {
     $('prime').value=String(s.p); choices('threshold',1,s.n,s.k); choices('share-count',s.k,Math.min(s.p-1,8),s.n);
@@ -90,10 +90,10 @@
     if(enough){const result=G.lagrangeP(points(),s.k,s.p);table('reconstruction-table',result.terms.map(r=>[r.x,r.y,r.numerator,r.denominator,r.inverse,r.lambda,r.term]));
       $('reconstruction-result').textContent=`${result.terms.map(r=>r.term).join(' + ')} ≡ ${result.secret} (mod ${s.p})`;
     }
-    if(!$('candidate-section').hidden){const visible=G.candidatesP(fewPoints(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero);
+    if(!$('candidate-section').hidden){const visible=G.candidatesP(fewPoints(),s.k,s.p);
       if(!visible.some(r=>r.secret===s.candidate))s.candidate=visible[0].secret;
       $('candidate-result').textContent=`${visible.length}/${s.p} ${t('candidateCount')} · ${t('candidateSecret')}=${s.candidate}`;
-      $('all-candidates').setAttribute('aria-pressed',String(s.all));$('leading-only').checked=s.leading;
+      $('all-candidates').setAttribute('aria-pressed',String(s.all));
     }
     const fewShares=s.selected.length>0&&s.selected.length<s.k-1;
     $('tweak-result').textContent=s.k===1?t('kOne'):[s.moved,fewShares?t('fewSharesExample'):''].filter(Boolean).join(' ');
@@ -106,10 +106,10 @@
     for(const [x,label] of [[0,'x=0'],[s.n,`x=${s.n}`]]){
       const text=S('text',{x:X(x),y:295,'text-anchor':'middle',class:'hand-graph-label'});text.textContent=label;svg.append(text);
     }
-    for(const item of candidates){
-      const values=Array.from({length:s.n+1},(_,x)=>G.evalP(item.coefficients,x,s.p));
-      const data=values.map((y,x)=>`${x?'L':'M'}${X(x).toFixed(2)},${Y(y).toFixed(2)}`).join(' ');
-      svg.append(S('path',{d:data,class:`hand-graph-curve${item.secret===activeSecret?' hand-graph-active':''}`}));
+    for(const item of candidates)for(let x=0;x<=s.n;x++){
+      const y=G.evalP(item.coefficients,x,s.p);
+      svg.append(S('circle',{cx:X(x),cy:Y(y),r:item.secret===activeSecret?4:2.8,
+        class:`hand-graph-value${item.secret===activeSecret?' hand-graph-active':''}`}));
     }
     for(const x of selected){
       const y=shares()[x-1][1];
@@ -125,7 +125,7 @@
   }
   function renderRecoveryGraphs(){
     if(s.fewer.length===s.k-1){
-      const all=(s.k===1?Array.from({length:s.p},(_,secret)=>({secret,coefficients:[secret],leadingZero:false})):G.candidatesP(fewPoints(),s.k,s.p)).filter(r=>!s.leading||!r.leadingZero);
+      const all=s.k===1?Array.from({length:s.p},(_,secret)=>({secret,coefficients:[secret]})):G.candidatesP(fewPoints(),s.k,s.p);
       const sample=[0,Math.floor(s.p/2),s.p-1,s.candidate];
       const shown=s.all?all:all.filter(r=>sample.includes(r.secret));
       recoveryGraph('hand-few-graph',s.fewer,shown,s.candidate);
@@ -150,7 +150,7 @@
     let curves=[];
     const example=s.selected.length>0&&s.selected.length<s.k-1;
     if(s.selected.length===s.k){const c=G.polynomialP(points(),p);curves=[{secret:c[0],values:Array.from({length:p},(_,x)=>G.evalP(c,x,p))}];}
-    else if(s.k>1&&s.selected.length===s.k-1){const all=G.candidatesP(points(),s.k,p).filter(r=>!s.leading||!r.leadingZero);curves=s.all?all:all.filter(r=>r.secret===s.candidate);}
+    else if(s.k>1&&s.selected.length===s.k-1){const all=G.candidatesP(points(),s.k,p);curves=s.all?all:all.filter(r=>r.secret===s.candidate);}
     else if(example)curves=[{secret:s.c[0],values:Array.from({length:p},(_,x)=>G.evalP(s.c,x,p))}];
     for(const curve of curves)for(let x=0;x<p;x++)svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-curve.values[x]-.5),r:example?2.5:curve.secret===s.candidate||s.selected.length===s.k?4:2.5,class:example?'field-ghost':curve.secret===s.candidate||s.selected.length===s.k?'field-value':'field-ghost'}));
     for(const x of s.selected){const y=shares()[x-1][1];svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-y-.5),r:8,class:'field-share','data-share-x':x,tabindex:0,role:'button','aria-label':`${t('sharePoint')} ${x}, ${y}`}));}
@@ -191,14 +191,14 @@
   $('random-coefficients').addEventListener('click',()=>{const limit=256-256%s.p;
     for(let i=1;i<s.k;i++){let value;do{const b=new Uint8Array(1);crypto.getRandomValues(b);value=b[0];}while(value>=limit);s.c[i]=value%s.p;}
     s.moved='';resetReal();controls();render();});
-  $('reset-hand').addEventListener('click',()=>{Object.assign(s,{p:13,k:3,n:5,c:[5,4,2],fewer:[1,2],selected:[1,2,3],candidate:5,all:false,leading:false,moved:''});resetReal();controls();render();});
+  $('reset-hand').addEventListener('click',()=>{Object.assign(s,{p:13,k:3,n:5,c:[5,4,2],fewer:[1,2],selected:[1,2,3],candidate:5,all:false,moved:''});resetReal();controls();render();});
   $('hand-few-picks').addEventListener('click',e=>{const b=e.target.closest('[data-few-pick]');if(!b)return;const x=Number(b.dataset.fewPick);s.fewer=s.fewer.includes(x)?s.fewer.filter(v=>v!==x):s.fewer.length<s.k-1?[...s.fewer,x].sort((a,b)=>a-b):s.fewer;s.selected=initialEnough();s.candidate=s.c[0];s.all=false;s.moved='';render();});
   $('share-picks').addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;const x=Number(b.dataset.pick);s.selected=s.selected.includes(x)?s.selected.filter(v=>v!==x):s.selected.length<s.k?[...s.selected,x].sort((a,b)=>a-b):s.selected;if(s.selected.length<s.k)s.candidate=s.c[0];s.moved='';render();});
   $('select-k').addEventListener('click',()=>{s.selected=Array.from({length:s.k},(_,i)=>i+1);render();});
   $('select-kminus').addEventListener('click',()=>{s.selected=Array.from({length:Math.max(0,s.k-1)},(_,i)=>i+1);s.candidate=s.c[0];render();});
-  function nextCandidate(direction){if(s.fewer.length!==s.k-1)return;const list=G.candidatesP(fewPoints(),s.k,s.p).filter(r=>!s.leading||!r.leadingZero).map(r=>r.secret);s.candidate=list[(list.indexOf(s.candidate)+direction+list.length)%list.length];render();}
+  function nextCandidate(direction){if(s.fewer.length!==s.k-1)return;const list=G.candidatesP(fewPoints(),s.k,s.p).map(r=>r.secret);s.candidate=list[(list.indexOf(s.candidate)+direction+list.length)%list.length];render();}
   $('previous-candidate').addEventListener('click',()=>nextCandidate(-1));$('next-candidate').addEventListener('click',()=>nextCandidate(1));
-  $('all-candidates').addEventListener('click',()=>{s.all=!s.all;render();});$('leading-only').addEventListener('change',()=>{s.leading=$('leading-only').checked;render();});
+  $('all-candidates').addEventListener('click',()=>{s.all=!s.all;render();});
   const field=$('field-grid');
   const coordinateTooltip=$('grid-coordinate-tooltip');
   const hideCoordinates=()=>{coordinateTooltip.hidden=true;};
