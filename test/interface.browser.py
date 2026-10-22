@@ -35,7 +35,7 @@ def test_linear_intro(page, width):
     assert page.locator("#tab-linear").get_attribute("aria-selected") == "true"
     assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("分散段階")
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("復元段階")
-    assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").bounding_box()["y"] < page.locator("#panel-linear [data-i18n='linearShares']").bounding_box()["y"]
+    assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").bounding_box()["y"] < page.locator("#panel-linear [data-i18n='linearGridTitle']").bounding_box()["y"]
     primer = page.locator(".field-primer")
     assert primer.is_visible()
     formula = page.locator("#panel-linear .linear-formula")
@@ -64,11 +64,11 @@ def test_linear_intro(page, width):
     assert page.locator("#linear-dealer").get_attribute("open") is None
     assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
     assert "13本" in page.locator("#linear-one-result").inner_text()
-    assert page.locator("[data-i18n='linearGridTitle']").inner_text() == "② シェアが1つだけあった場合：1点を通る直線を考える"
+    assert page.locator("[data-i18n='linearGridTitle']").inner_text() == "① シェアが1つだけの場合：1点を通る直線を考える"
     assert "直線が何本も引ける" in page.locator("[data-i18n='linearGridIntro']").inner_text()
-    assert page.locator("#linear-one-focus").inner_text() == "ここでは #3 のシェア (3,4) だけに注目します。"
+    assert "(3,4)" in page.locator("#linear-one-selected").inner_text()
     assert page.locator("[data-i18n='linearGridTitle']").bounding_box()["y"] < page.locator("[data-i18n='linearTwoTitle']").bounding_box()["y"]
-    assert page.locator("#linear-two").is_hidden()
+    assert "もう1人の管理人のシェアを選ぶ" in page.locator("#linear-two-result").inner_text()
     lines = page.locator("#linear-analogy .linear-analogy-line")
     assert lines.count() == 4
     assert page.locator("#linear-analogy").get_attribute("viewBox") == "0 0 320 292"
@@ -81,28 +81,48 @@ def test_linear_intro(page, width):
     assert "余りの見かけではありません" in distinct.inner_text()
     assert "GF(13) での x=0,1,2 の値は 0,10,7" in page.locator("#linear-candidate-result").inner_text()
     assert "GF(13) の係数 a₁ をそのまま傾きにした線ではありません" in page.locator("#linear-candidate-result").inner_text()
-    assert "(3,4)" in page.locator("#linear-selected").inner_text()
+    assert page.locator("#linear-one-picks button").count() == 5
+    assert page.locator("#linear-two-picks button").count() == 5
+    assert page.locator("#linear-one-picks [aria-pressed='true']").count() == 1
+    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 1
     pair_meaning = page.locator("#panel-linear [data-i18n='linearPairMeaning']")
     assert "(1,9) は、管理人番号1（＝#1）とシェア9のセット" in pair_meaning.inner_text()
-    assert pair_meaning.bounding_box()["y"] < page.locator("#linear-picks").bounding_box()["y"]
+    assert pair_meaning.bounding_box()["y"] < page.locator("#linear-one-picks").bounding_box()["y"]
     assert page.locator("#linear-analogy").bounding_box()["width"] <= width
     assert page.locator("#linear-grid").count() == 0
     assert page.locator("#linear-to-hand").count() == 0
     page.locator("#linear-candidate").select_option("5")
     assert "a₁=(4−5)÷3≡4" in page.locator("#linear-candidate-result").inner_text()
     assert "(mod 13)" in page.locator("#linear-candidate-result").inner_text()
-    page.locator('[data-linear-pick="2"]').click()
+    page.locator('#linear-one-picks [data-linear-pick="2"]').click()
+    assert page.locator("#linear-one-picks [aria-pressed='true']").count() == 1
+    assert page.locator('#linear-one-picks [data-linear-pick="2"]').evaluate("el => el === document.activeElement")
+    assert "(2,0)" in page.locator("#linear-one-selected").inner_text()
+    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
+    assert "もう1人" in page.locator("#linear-two-result").inner_text()
+    page.locator('#linear-two-picks [data-linear-pick="3"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
-    assert page.locator("[data-i18n='linearTwoTitle']").inner_text() == "③ シェアが2つ揃った場合：2点から式を決める"
+    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
+    assert page.locator('#linear-two-picks [data-linear-pick="3"]').evaluate("el => el === document.activeElement")
+    assert page.locator("[data-i18n='linearTwoTitle']").inner_text() == "② シェアが2つ揃った場合：2点から直線が決まる"
     assert "(2,n) しきい値法" in page.locator("[data-i18n='linearTwoIntro']").inner_text()
     assert page.locator("#linear-analogy").is_visible()
-    assert page.locator("#linear-one-focus").inner_text() == "ここでは #2 のシェア (2,0) だけに注目します。"
-    page.locator('[data-linear-pick="2"]').click()
+    page.locator('#linear-two-picks [data-linear-pick="3"]').click()
     assert "13本" in page.locator("#linear-one-result").inner_text()
-    page.locator('[data-linear-pick="1"]').click()
+    assert "もう1人" in page.locator("#linear-two-result").inner_text()
+    page.locator('#linear-two-picks [data-linear-pick="1"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
-    page.locator('[data-linear-pick="1"]').click()
-    assert page.locator("#linear-one-focus").inner_text() == "ここでは #3 のシェア (3,4) だけに注目します。"
+    page.locator('#linear-two-picks [data-linear-pick="4"]').click()
+    assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
+    assert "(4,8)" in page.locator("#linear-two-selected").inner_text()
+    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 2
+    page.locator('#linear-two-picks [data-linear-pick="2"]').click()
+    assert "もう1人" in page.locator("#linear-two-result").inner_text()
+    page.locator('#linear-two-picks [data-linear-pick="5"]').click()
+    assert "s=5" in page.locator("#linear-two-result").inner_text()
+    page.locator('#linear-one-picks [data-linear-pick="3"]').click()
+    assert "(3,4)" in page.locator("#linear-one-selected").inner_text()
+    assert page.locator("#linear-two-picks [aria-pressed='true']").count() == 1
     assert "点 (3,4)" in page.locator("#linear-analogy-caption").inner_text()
     assert page.locator("#linear-analogy .linear-analogy-line").evaluate_all("(els) => els.every(el => Number(el.getAttribute('x2')) > Number(document.querySelector('.linear-analogy-point').getAttribute('cx')))")
     assert page.locator(".linear-analogy-point-label").evaluate("""el => {
@@ -116,7 +136,6 @@ def test_linear_intro(page, width):
         return Math.min(at(left),at(right))>box.y+box.height+3 || Math.max(at(left),at(right))<box.y-3;
       });
     }""")
-    page.locator('[data-linear-pick="1"]').click()
     page.locator("#linear-dealer summary").click()
     assert page.locator("#linear-dealer [data-i18n='linearDealerSet']").inner_text() == "秘密情報sと乱数a₁を決めます。"
     assert "本ツールでは仕組みを試すために値を変えられます。" in page.locator("#linear-dealer [data-i18n='linearDealerHelp']").inner_text()
@@ -130,16 +149,18 @@ def test_linear_intro(page, width):
     page.locator("#linear-slope").fill("2")
     page.locator("#linear-slope").press("Tab")
     assert "v₁=f(1)=(7+2×1) mod 13=9" in rows.first.inner_text()
-    assert "(3,0)" in page.locator("#linear-selected").inner_text()
-    page.locator('[data-linear-pick="2"]').click()
+    assert "(3,0)" in page.locator("#linear-one-selected").inner_text()
+    page.locator('#linear-two-picks [data-linear-pick="2"]').click()
     assert "s=7" in page.locator("#linear-two-result").inner_text()
     page.locator("#linear-n").select_option("7")
-    assert page.locator("#linear-picks button").count() == 7
+    assert page.locator("#linear-one-picks button").count() == 7
+    assert page.locator("#linear-two-picks button").count() == 7
     assert page.locator("#linear-threshold").inner_text().startswith("7人のうち2人")
     assert rows.count() == 7
     assert "v₇=f(7)=(7+2×7) mod 13=8" in rows.last.inner_text()
     page.locator("#linear-reset").click()
-    assert page.locator("#linear-picks button").count() == 5
+    assert page.locator("#linear-one-picks button").count() == 5
+    assert page.locator("#linear-two-picks button").count() == 5
     assert rows.count() == 5
     page.locator("#language").click()
     assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
