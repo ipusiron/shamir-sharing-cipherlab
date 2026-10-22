@@ -54,6 +54,10 @@ def test_interactions(page):
         assert "ΔS=3" in page.locator("#tweak-result").inner_text(), method
         assert page.locator('#field-grid [data-share-x="1"]').get_attribute("aria-label").endswith("1, 12")
     page.locator("#reset-hand").click()
+    page.locator("#threshold").select_option("1")
+    assert "コピー" in page.locator("#tweak-result").inner_text()
+    assert [row.locator("td").last.inner_text() for row in page.locator("#distribution-table tr").all()] == ["5"] * 5
+    page.locator("#reset-hand").click()
     page.locator("#select-kminus").click()
     assert "13/13" in page.locator("#candidate-result").inner_text()
     page.locator("#leading-only").check()
@@ -62,6 +66,22 @@ def test_interactions(page):
     before = page.locator("#real-result").inner_text()
     page.keyboard.press("ArrowUp")
     assert page.locator("#real-result").inner_text() != before
+    page.locator("#reset-hand").click()
+    real_point = page.locator('#real-graph [data-real-x="1"]')
+    real_point.click()
+    point_box, graph_box = real_point.bounding_box(), page.locator("#real-graph").bounding_box()
+    page.locator("#real-graph").click(position={"x": point_box["x"] + point_box["width"] / 2 - graph_box["x"], "y": point_box["y"] + point_box["height"] / 2 - graph_box["y"] - 20})
+    assert "(1,11)" not in page.locator("#real-result").inner_text()
+    page.locator("#reset-hand").click()
+    real_point = page.locator('#real-graph [data-real-x="1"]')
+    real_point.scroll_into_view_if_needed()
+    point_box = real_point.bounding_box()
+    x, y = point_box["x"] + point_box["width"] / 2, point_box["y"] + point_box["height"] / 2
+    page.mouse.move(x, y)
+    page.mouse.down()
+    page.mouse.move(x, y - 20)
+    page.mouse.up()
+    assert "(1,11)" not in page.locator("#real-result").inner_text()
 
 
 def test_tabs_and_localization(page):
@@ -72,8 +92,16 @@ def test_tabs_and_localization(page):
     assert page.locator("#panel-bytes").is_visible()
     assert not page.locator("#panel-hand").is_visible()
     assert "MEET AT DAWN" in page.locator("#byte-restored-text").inner_text()
+    before = page.locator("#byte-secret-hex").inner_text()
+    page.locator("#byte-message").evaluate("el => {el.dispatchEvent(new CompositionEvent('compositionstart')); el.value='あ'; el.dispatchEvent(new Event('input',{bubbles:true}));}")
+    assert page.locator("#byte-secret-hex").inner_text() == before
+    page.locator("#byte-message").evaluate("el => el.dispatchEvent(new CompositionEvent('compositionend'))")
+    assert "E38182" in page.locator("#byte-secret-hex").inner_text()
     page.locator("#byte-message").fill("あ")
     assert "E38182" in page.locator("#byte-restored-hex").inner_text()
+    page.locator("#byte-message").fill("A" * 33)
+    assert page.locator("#byte-error").inner_text()
+    assert not page.locator("#byte-table tbody tr").count()
     page.locator("#byte-message").fill("MEET AT DAWN")
     page.locator("#tab-pitfalls").click()
     assert page.locator("#panel-pitfalls").is_visible()

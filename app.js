@@ -58,7 +58,7 @@
     $('secret').max=String(s.p-1); $('secret').value=String(s.c[0]); $('coefficient-inputs').replaceChildren();
     for(let i=1;i<s.k;i++){const label=E('label'),input=E('input'); input.type='number';input.min='0';input.max=String(s.p-1);input.value=String(s.c[i]);input.dataset.coefficient=String(i);label.append(E('span',`a${i}`),input);$('coefficient-inputs').append(label);}
   }
-  function resetReal(){ s.realY={};for(let x=1;x<=s.n;x++)s.realY[x]=G.evalP(s.c,x,s.p);s.realZero=s.c[0]; }
+  function resetReal(){ s.realY={};for(let x=1;x<=s.n;x++)s.realY[x]=s.c.reduce((sum,c,i)=>sum+c*x**i,0);s.realZero=s.c[0]; }
   function table(id, rows) { const body=$(id);body.replaceChildren();for(const cells of rows){const row=E('tr');for(const value of cells)row.append(E('td',value));body.append(row);} }
   function renderTables(){
     $('polynomial').textContent=`f(x) = ${s.c.map((c,i)=>i?` + ${c}x${i>1?`^${i}`:''}`:String(c)).join('')} (mod ${s.p})`;
@@ -80,6 +80,7 @@
   }
   function grid(){
     const p=s.p,d=20,svg=$('field-grid'),side=p*d;svg.replaceChildren();svg.setAttribute('width',side);svg.setAttribute('height',side);svg.setAttribute('viewBox',`0 0 ${side} ${side}`);
+    $('grid-range').textContent=`x, y = 0…${p-1} (mod ${p}); 1 ${t('cell')} = 20 px`;
     for(let x=0;x<p;x++)for(let y=0;y<p;y++)svg.append(S('rect',{x:d*x,y:d*(p-1-y),width:d,height:d,class:'field-cell','data-cell-x':x,'data-cell-y':y}));
     let curves=[];
     if(s.selected.length===s.k){const c=G.polynomialP(points(),p);curves=[{secret:c[0],values:Array.from({length:p},(_,x)=>G.evalP(c,x,p))}];}
@@ -89,7 +90,8 @@
     if(s.k>1&&s.selected.length===s.k-1)svg.append(S('circle',{cx:d*.5,cy:d*(p-s.candidate-.5),r:8,class:'field-secret','data-share-x':0,tabindex:0,role:'button','aria-label':`${t('candidateSecret')} ${s.candidate}`}));
   }
   function realAt(pts,x){return pts.reduce((sum,[xi,yi],i)=>sum+yi*pts.reduce((v,[xj],j)=>i===j?v:v*(x-xj)/(xi-xj),1),0);}
-  function real(){const svg=$('real-graph');svg.replaceChildren();const X=x=>28+x*550/(s.n+1),Y=y=>280-y*250/(s.p-1),chosen=s.selected.map(x=>[x,s.realY[x]]);
+  function realRange(){return Math.max(40,...s.selected.map(x=>s.realY[x]+5),s.realZero+5);}
+  function real(){const svg=$('real-graph');svg.replaceChildren();const range=realRange(),X=x=>28+x*550/(s.n+1),Y=y=>280-y*250/range,chosen=s.selected.map(x=>[x,s.realY[x]]);
     const pts=chosen.length===s.k?chosen:[[0,s.realZero],...chosen];
     if(pts.length>=2){const data=Array.from({length:181},(_,i)=>{const x=i*(s.n+1)/180;return `${i?'L':'M'}${X(x).toFixed(1)},${Y(realAt(pts,x)).toFixed(1)}`;}).join(' ');svg.append(S('path',{d:data,class:'real-curve'}));}
     svg.append(S('line',{x1:X(0),y1:20,x2:X(0),y2:280,class:'real-axis'}),S('line',{x1:X(0),y1:Y(0),x2:X(s.n),y2:Y(0),class:'real-axis'}));
@@ -128,9 +130,17 @@
   field.addEventListener('pointerup',e=>{if(s.gridDrag===undefined)return;const x=s.gridDrag;s.gridDrag=undefined;const r=field.getBoundingClientRect(),d=r.width/s.p,col=Math.floor((e.clientX-r.left)/d),y=s.p-1-Math.floor((e.clientY-r.top)/d);if(col===x&&y>=0&&y<s.p)move(x,y);});
   field.addEventListener('keydown',e=>{const point=e.target.closest('[data-share-x]');if(!point||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const x=Number(point.dataset.shareX),old=x===0?s.candidate:shares()[x-1][1];move(x,G.mod(old+(e.key==='ArrowUp'?1:-1),s.p));field.querySelector(`[data-share-x="${x}"]`)?.focus();});
   const realSvg=$('real-graph');
-  realSvg.addEventListener('pointerdown',e=>{const point=e.target.closest('[data-real-x]');if(point&&point.getAttribute('tabindex')!=='-1'){s.realDrag=Number(point.dataset.realX);realSvg.setPointerCapture(e.pointerId);}});
-  realSvg.addEventListener('pointerup',e=>{if(s.realDrag===undefined)return;const x=s.realDrag;s.realDrag=undefined;const r=realSvg.getBoundingClientRect(),y=Math.max(0,Math.min(s.p-1,Math.round((280-(e.clientY-r.top)*300/r.height)*(s.p-1)/250)));if(x===0)s.realZero=y;else s.realY[x]=y;real();});
-  realSvg.addEventListener('keydown',e=>{const point=e.target.closest('[data-real-x]');if(!point||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const x=Number(point.dataset.realX),delta=e.key==='ArrowUp'?1:-1;if(x===0)s.realZero=Math.max(0,Math.min(s.p-1,s.realZero+delta));else s.realY[x]=Math.max(0,Math.min(s.p-1,s.realY[x]+delta));real();realSvg.querySelector(`[data-real-x="${x}"]`)?.focus();});
+  realSvg.addEventListener('pointerdown',e=>{const point=e.target.closest('[data-real-x]');if(point&&point.getAttribute('tabindex')!=='-1'){s.realDrag=Number(point.dataset.realX);s.realActive=s.realDrag;realSvg.setPointerCapture(e.pointerId);}});
+  realSvg.addEventListener('pointerup',e=>{if(s.realDrag===undefined)return;const x=s.realDrag;s.realDrag=undefined;const r=realSvg.getBoundingClientRect(),range=realRange(),y=Math.max(0,Math.min(range,Math.round((280-(e.clientY-r.top)*300/r.height)*range/250)));if(x===0)s.realZero=y;else s.realY[x]=y;real();});
+  realSvg.addEventListener('click',e=>{const point=e.target.closest('[data-real-x]');
+    if(point){s.realActive=Number(point.dataset.realX);return;}
+    if(s.realActive===undefined)return;
+    const r=realSvg.getBoundingClientRect(),expectedX=r.left+(28+s.realActive*550/(s.n+1))*r.width/600;
+    if(Math.abs(e.clientX-expectedX)>24*r.width/600)return;
+    const y=Math.max(0,Math.min(realRange(),Math.round((280-(e.clientY-r.top)*300/r.height)*realRange()/250)));
+    if(s.realActive===0)s.realZero=y;else s.realY[s.realActive]=y;real();
+  });
+  realSvg.addEventListener('keydown',e=>{const point=e.target.closest('[data-real-x]');if(!point||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const x=Number(point.dataset.realX),delta=e.key==='ArrowUp'?1:-1;if(x===0)s.realZero=Math.max(0,Math.min(realRange(),s.realZero+delta));else s.realY[x]=Math.max(0,Math.min(realRange(),s.realY[x]+delta));real();realSvg.querySelector(`[data-real-x="${x}"]`)?.focus();});
   resetReal();controls();render();
 }());
 
