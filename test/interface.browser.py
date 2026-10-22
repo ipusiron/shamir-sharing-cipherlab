@@ -38,7 +38,10 @@ def test_linear_intro(page, width):
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").bounding_box()["y"] < page.locator("#panel-linear [data-i18n='linearShares']").bounding_box()["y"]
     primer = page.locator(".field-primer")
     assert primer.is_visible()
-    assert primer.bounding_box()["y"] < page.locator("#panel-linear .hand-formula").bounding_box()["y"]
+    formula = page.locator("#panel-linear .linear-formula")
+    assert primer.bounding_box()["y"] < formula.bounding_box()["y"]
+    assert "p=13 に固定し、GF(p) の世界で f(x) を考えます" in formula.inner_text()
+    assert formula.locator("strong").inner_text() == "f(x) = s + a₁x (mod 13)"
     assert "0〜12 の13個の数" in primer.inner_text()
     assert "9 + 7 = 16。13で割った余りは3" in primer.inner_text()
     assert "5 × 4 = 20。13で割った余りは7" in primer.inner_text()
@@ -47,7 +50,10 @@ def test_linear_intro(page, width):
     assert "このタブの既定例 f(x)=5+4x" in primer.inner_text()
     assert "(1,9)(2,0)(3,4)(4,8)(5,12)" in primer.inner_text()
     assert "f(2)=s+2a₁" in primer.inner_text()
-    assert "GF(2⁸)" in primer.inner_text()
+    assert "整数の世界で f(x)=5+4x を考え" in primer.inner_text()
+    assert "整数値13に対応するシェア値は0" in primer.inner_text()
+    assert "1個のシェアが得られる確率はどの秘密情報 s に対しても同じ" in primer.inner_text()
+    assert "GF(2⁸)" not in primer.inner_text()
     assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     assert page.locator("#linear-dealer").get_attribute("open") is None
     assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
@@ -124,6 +130,8 @@ def test_linear_intro(page, width):
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("Reconstruction")
     assert "What is GF(13)?" in primer.inner_text()
     assert "In this tab’s default example, f(x)=5+4x" in primer.inner_text()
+    assert "over the ordinary integers" in primer.inner_text()
+    assert "consider f(x) over GF(p)" in formula.inner_text()
     assert "(1,9)(2,0)(3,4)(4,8)(5,12)" in primer.inner_text()
     assert "share value" in page.locator("[data-i18n='linearGridHelp']").inner_text()
     assert "ordinary coordinate plane" in page.locator("#linear-analogy-caption").inner_text()
@@ -404,6 +412,8 @@ def test_tabs_and_localization(page):
     page.keyboard.press("ArrowRight")
     assert page.locator("#panel-bytes").is_visible()
     byte_text = page.locator("#panel-bytes").inner_text()
+    assert "256は素数ではなく" in byte_text
+    assert "AESと同じ有限体" in byte_text
     assert "UTF-8 のバイト列" in byte_text
     assert "各バイトを別々の秘密情報 s" in byte_text
     assert "λᵢ(0)" in byte_text and "XOR" in byte_text
