@@ -52,9 +52,12 @@
     const selected=points(),one=selected.length===1;
     $('linear-one').hidden=!one;$('linear-two').hidden=one;
     if(one){
-      const [x,y]=selected[0],candidate=G.candidatesP(selected,2,p)[state.candidate];
+      const [x,y]=selected[0],candidates=G.candidatesP(selected,2,p),candidate=candidates[state.candidate];
       $('linear-selected').textContent=format('linearSelectedOne',{x,y});
       $('linear-one-result').textContent=format('linearOneResult',{x,y});
+      $('linear-distinct').textContent=format('linearDistinct',{
+        x,y,a0:candidates[0].coefficients[1],a5:candidates[5].coefficients[1]
+      });
       $('linear-candidate').value=String(state.candidate);
       $('linear-candidate-result').textContent=format('linearCandidateResult',{
         x,y,secret:state.candidate,slope:candidate.coefficients[1],y0:candidate.values[0],y1:candidate.values[1],y2:candidate.values[2]

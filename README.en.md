@@ -57,7 +57,7 @@ In the book, the share is the value `vᵢ`. On this tool’s `#i (i,vᵢ)` butto
 
 Below the “① Distribute” table, each line shows share value `vᵢ=f(i)` and the reconstruction pair `(i,vᵢ)=(i,f(i))=(i, substituted expression mod p)`. Choosing `n=7` shows seven lines; changing coefficients or `p` updates them.
 
-The tool’s default GF(13) example is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its reconstruction pairs are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes candidate `s=1`.
+The default example in “Trace (k, n) by hand” is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its reconstruction pairs are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes candidate `s=1`.
 
 Coefficients are allowed to be zero, so the polynomial has degree *at most* k−1. With `k=1`, every share is simply the secret: copying instead of splitting.
 
@@ -71,7 +71,9 @@ During “Reconstruction”, start with custodian #1’s share. A share itself i
 
 The dealer can change `s` and `a₁` inside a collapsed section. A participant with one share should be considered unaware of those settings. Both grids start at zero: the bottom-left cell is `(0,0)`, with `x` increasing to the right and `y` increasing upward. Hover over a cell or point to see its `(x,y)` coordinates. The grids show finite-field points, so they do not connect them as a continuous real-number line.
 
-Under “② Compare what one and two points determine”, three straight lines through `(1,9)` first appear in an ordinary coordinate plane. They have different values, `0`, `5`, and `12`, at `x=0`, showing that one point does not determine a line. This is an illustration of the idea. Next, choose a candidate secret `s` in GF(13) and calculate `a₁=(y−s)÷x (mod 13)`. With the default point `(1,9)` and `s=0`, `a₁=9` and `f(x)=9x (mod 13)`. Substitution at `x=0,1,2` gives `0,9,5`; continue through `x=12` to place the blue dots. Red rings at `x=0` mark the 13 remaining candidate secrets. The real-number straight lines and finite-field points appear in separate figures.
+Under “② Compare what one and two points determine”, three straight lines through `(1,9)` first appear in an ordinary coordinate plane. Each line intersects the y-axis at `f(0)`, a candidate secret `s`. The intersections are `0`, `5`, and `12`, showing that one point does not determine a line.
+
+In GF(13), `f₀(x)=9x` and `f₅(x)=5+4x` are also distinct polynomials. Both give `f(1)=9`, but `f₀(0)=0` and `f₅(0)=5`. Multiple candidates exist because one point does not determine a polynomial; reduction modulo 13 does not merely make one line look like several. For a chosen candidate `s`, calculate `a₁=(y−s)÷x (mod 13)` to get a polynomial through the point. With `s=0`, `f(x)=9x (mod 13)` gives `0,9,5` at integer `x=0,1,2`. Continue through `x=12` to place the blue dots. Red rings at `x=0` mark the 13 remaining candidate secrets. No continuous line is folded back into the grid. The GF(13) introduction in this tab uses the same `f(x)=5+4x` and five shares.
 
 ## 📚 Follow 『暗号技術のすべて』 alongside the tool
 
