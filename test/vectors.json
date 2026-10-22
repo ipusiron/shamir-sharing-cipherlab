@@ -1,0 +1,187 @@
+{
+ "gfp_shares": [
+  [
+   1,
+   11
+  ],
+  [
+   2,
+   8
+  ],
+  [
+   3,
+   9
+  ],
+  [
+   4,
+   1
+  ],
+  [
+   5,
+   10
+  ]
+ ],
+ "gfp_lambda_123": {
+  "lambda": [
+   3,
+   10,
+   1
+  ],
+  "terms": [
+   7,
+   2,
+   9
+  ],
+  "secret": 5
+ },
+ "gfp_lambda_245": {
+  "lambda": [
+   12,
+   8,
+   7
+  ],
+  "terms": [
+   5,
+   8,
+   5
+  ],
+  "secret": 5
+ },
+ "gfp_lambda_135": {
+  "lambda": [
+   10,
+   2,
+   2
+  ],
+  "terms": [
+   6,
+   5,
+   7
+  ],
+  "secret": 5
+ },
+ "gfp_candidates_count": 13,
+ "gfp_candidates_distinct": 13,
+ "gfp_leading_zero_candidates": [
+  1
+ ],
+ "gfp_tweak_x1_plus1": 8,
+ "gfp_k1_shares": [
+  [
+   1,
+   5
+  ],
+  [
+   2,
+   5
+  ],
+  [
+   3,
+   5
+  ]
+ ],
+ "gf256_shares_MEET": [
+  {
+   "x": 1,
+   "y": "766A1EB34B9E7F079F2EAC29"
+  },
+  {
+   "x": 2,
+   "y": "9B1C5DA53D055CDAC415C25F"
+  },
+  {
+   "x": 3,
+   "y": "A033064256DA77FD1F7A3938"
+  },
+  {
+   "x": 4,
+   "y": "4CEBFB3D1B602729EBF79D3D"
+  },
+  {
+   "x": 5,
+   "y": "77C4A0DA70BF0C0E3098665A"
+  }
+ ],
+ "gf256_first_coeffs": [
+  11,
+  48,
+  85,
+  122
+ ],
+ "gf256_lambda_123": [
+  1,
+  1,
+  1
+ ],
+ "gf256_lambda_245": [
+  "D0",
+  "03",
+  "D2"
+ ],
+ "gf256_roundtrip_ok": true,
+ "naive_two_shares_12": "2DB1D648901E974C5FCE7FF2",
+ "naive_two_shares_12_ascii": "-±ÖH\u001eL_Îò",
+ "x0_attack_result": "ATTACKER!!!!",
+ "digest_T": "8739EBE2",
+ "gf256_shares_M": [
+  {
+   "x": 1,
+   "y": "766A1EB34B9E7F079F2EAC29AC06C005"
+  },
+  {
+   "x": 2,
+   "y": "9B1C5DA53D055CDAC415C25F0C5D350E"
+  },
+  {
+   "x": 3,
+   "y": "A033064256DA77FD1F7A393827621EE9"
+  },
+  {
+   "x": 4,
+   "y": "4CEBFB3D1B602729EBF79D3DD3995AC5"
+  },
+  {
+   "x": 5,
+   "y": "77C4A0DA70BF0C0E3098665AF8A67122"
+  }
+ ],
+ "crc32_shares_M": [
+  {
+   "x": 1,
+   "crc": "8A41EE2E"
+  },
+  {
+   "x": 2,
+   "crc": "FD0D0F13"
+  },
+  {
+   "x": 3,
+   "crc": "406289BB"
+  },
+  {
+   "x": 4,
+   "crc": "C359AB45"
+  },
+  {
+   "x": 5,
+   "crc": "7E362DED"
+  }
+ ],
+ "tamper_E": "00000000000000000014040500000000",
+ "tamper_share2_y": "9B1C5DA53D055CDAC401C65A0C5D350E",
+ "tamper_share2_crc_recomputed": "3DED7AA8",
+ "tamper_reconstructed_S": "MEET AT DUSK",
+ "tamper_reconstructed_T": "8739EBE2",
+ "tamper_digest_matches": false,
+ "tamper_cheater_recovers": "MEET AT DAWN",
+ "tamper_set245_S_hex": "4D4545542041542044833AF3",
+ "tamper_set245_digest_matches": false,
+ "crc32_share2_original": "FD0D0F13",
+ "fips": {
+  "57x13": "fe",
+  "57x83": "c1"
+ },
+ "order_02": 51,
+ "order_03": 255,
+ "crc32_check_123456789": "cbf43926"
+}
