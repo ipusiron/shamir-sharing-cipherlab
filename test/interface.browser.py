@@ -37,7 +37,7 @@ def test_interactions(page):
         point = page.locator('#field-grid [data-share-x="1"]')
         cell = page.locator('#field-grid [data-cell-x="1"][data-cell-y="12"]')
         if method == "keyboard":
-            point.focus()
+            point.click()
             page.keyboard.press("ArrowUp")
         elif method == "tap":
             point.click()
@@ -82,6 +82,54 @@ def test_interactions(page):
     page.mouse.move(x, y - 20)
     page.mouse.up()
     assert "(1,11)" not in page.locator("#real-result").inner_text()
+
+
+def test_single_selected_share(page):
+    # Reproduce the one-selected-share state: (1,11), (2,4), (3,10), (4,3), (5,9).
+    page.locator("#reset-hand").click()
+    for index, value in ((1, "6"), (2, "0")):
+        coefficient = page.locator(f'[data-coefficient="{index}"]')
+        coefficient.fill(value)
+        coefficient.press("Tab")
+    for x, y in enumerate((11, 4, 10, 3, 9), 1):
+        assert page.locator(f'[data-pick="{x}"]').inner_text() == f"#{x} ({x},{y})"
+    page.locator('[data-pick="1"]').click()
+    page.locator('[data-pick="2"]').click()
+    assert page.locator(".field-ghost").count() == 13
+    assert page.locator("#tweak-result").inner_text()
+    original = page.locator("#polynomial").inner_text()
+    page.locator('#field-grid [data-share-x="3"]').click()
+    assert page.locator("#polynomial").inner_text() == original
+    assert page.evaluate('() => document.activeElement.getAttribute("data-share-x")') == "3"
+    page.keyboard.press("ArrowUp")
+    assert page.locator('#field-grid [data-share-x="3"]').get_attribute("aria-label").endswith("3, 11")
+    assert page.locator("#secret").input_value() == "5"
+    assert page.locator("[data-coefficient]").count() == 2
+
+    page.locator("#reset-hand").click()
+    page.locator('[data-pick="1"]').click()
+    page.locator('[data-pick="2"]').click()
+    point = page.locator('#field-grid [data-share-x="3"]')
+    cell = page.locator('#field-grid [data-cell-x="3"][data-cell-y="10"]')
+    start, end = point.bounding_box(), cell.bounding_box()
+    page.mouse.move(start["x"] + start["width"] / 2, start["y"] + start["height"] / 2)
+    page.mouse.down()
+    page.mouse.move(end["x"] + end["width"] / 2, end["y"] + end["height"] / 2)
+    page.mouse.up()
+    assert page.locator('#field-grid [data-share-x="3"]').get_attribute("aria-label").endswith("3, 10")
+    assert page.locator("#secret").input_value() == "5"
+    assert page.locator("[data-coefficient]").count() == 2
+    assert page.evaluate('() => document.activeElement.getAttribute("data-share-x")') == "3"
+
+    page.locator("#reset-hand").click()
+    page.locator("#select-kminus").click()
+    page.locator("#next-candidate").click()
+    assert page.locator("#candidate-result").inner_text().endswith("=6")
+    page.locator('#field-grid [data-share-x="1"]').click()
+    page.keyboard.press("ArrowUp")
+    assert page.locator('[data-pick="2"]').inner_text() == "#2 (2,8)"
+    assert page.locator("#secret").input_value() == "6"
+    assert page.locator("[data-coefficient]").count() == 2
 
 
 def test_tabs_and_localization(page):
@@ -148,6 +196,7 @@ def main():
                 if width == 390:
                     test_interactions(page)
                     assert page.locator(".field-value").first.evaluate("el => getComputedStyle(el).animationName") == "none"
+                    test_single_selected_share(page)
                     test_tabs_and_localization(page)
                 assert not failures, failures
                 print(browser_name, width, "OK", normal)

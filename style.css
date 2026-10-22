@@ -51,6 +51,7 @@ th { background:var(--bg); }
 .field-ghost { fill:var(--muted); opacity:.65; pointer-events:none; }
 .field-share, .real-point { fill:var(--blue); stroke:var(--paper); stroke-width:3; cursor:grab; }
 .field-secret, .real-secret { fill:var(--red); stroke:var(--paper); stroke-width:3; cursor:grab; }
+.field-share:focus, .field-secret:focus { stroke:var(--focus); stroke-width:4; }
 .real-curve { fill:none; stroke:var(--blue); stroke-width:3; }
 .real-axis { stroke:var(--line); stroke-width:2; }
 .result { color:var(--blue); font-weight:700; overflow-wrap:anywhere; }
