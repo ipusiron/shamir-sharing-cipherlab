@@ -7,6 +7,7 @@
   return {
     ja: {
       theme: '明暗を切り替える', language: '英語に切り替える', help: 'ヘルプ', tablist: '学ぶ順番',
+      subtitle: 'Shamirが提案した(k, n)しきい値法の可視化ツールです。',
       tagline: '方眼とバイト表で、シェアの作成・復元と、k−1個では秘密が決まらない理由を確かめます。',
       educational: '数のタブの s には架空の数を、「バイトで見る」の短い文には練習用の文を入力してください。実際に使っているパスワード、シードフレーズ、鍵の分割や保管には、この教材を使わないでください。',
       linear: '(2, n)を可視化する', hand: '(k, n)を手で追う', bytes: 'バイトで見る', pitfalls: '確かめる',
@@ -92,6 +93,7 @@
     },
     en: {
       theme: 'Toggle theme', language: 'Switch to Japanese', help: 'Help', tablist: 'Learning steps',
+      subtitle: 'A visualization tool for the (k, n) threshold scheme proposed by Shamir.',
       tagline: 'Use the grid and byte table to create and recover shares, and see why k−1 shares cannot fix the secret.',
       educational: 'Use invented numbers for s in the number tabs and a practice phrase in “Bytes”. Do not use this teaching tool to split or store passwords, seed phrases, or keys that you actually use.',
       linear: 'Visualize (2, n)', hand: 'Trace (k, n) by hand', bytes: 'Bytes', pitfalls: 'Pitfalls',
