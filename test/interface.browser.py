@@ -11,16 +11,16 @@ def geometry(page, width):
     measured = page.evaluate("""() => ({
       page: document.documentElement.scrollWidth,
       viewport: innerWidth,
-      grid: document.querySelector('#grid-frame').scrollWidth,
-      gridFrame: document.querySelector('#grid-frame').clientWidth,
+      graph: document.querySelector('.hand-graph-frame').scrollWidth,
+      graphFrame: document.querySelector('.hand-graph-frame').clientWidth,
       byteTable: document.querySelector('#byte-table-frame').scrollWidth,
       byteFrame: document.querySelector('#byte-table-frame').clientWidth
     })""")
     assert measured["page"] <= measured["viewport"], measured
     assert measured["viewport"] == width, measured
-    assert measured["gridFrame"] <= measured["viewport"], measured
+    assert measured["graphFrame"] <= measured["viewport"], measured
     assert measured["byteFrame"] <= measured["viewport"], measured
-    assert measured["grid"] >= measured["gridFrame"], measured
+    assert measured["graph"] >= measured["graphFrame"], measured
     assert measured["byteTable"] >= measured["byteFrame"], measured
     return measured
 
@@ -272,12 +272,12 @@ def test_help(page, width):
     dialog = page.locator("#help-dialog")
     assert dialog.is_visible()
     assert page.locator("#help-title").inner_text() == "ヘルプ"
-    assert page.locator("#help-dialog ol.help-list li").count() == 7
+    assert page.locator("#help-dialog ol.help-list li").count() == 5
     assert page.locator("#help-dialog ul.help-list li").count() == 6
     assert page.locator("#help-dialog [data-i18n='helpUses']").inner_text() == "活用例"
     assert "実際に使っているパスワード、シードフレーズ、鍵" in dialog.inner_text()
     assert "保存するのは表示言語と明暗の設定だけ" in dialog.inner_text()
-    assert "座標平面の点をドラッグ" in dialog.inner_text()
+    assert "実数で計算した曲線の違い" in dialog.inner_text()
     assert "CTF・謎解き" in dialog.inner_text()
     theory = page.locator("#help-theory")
     assert theory.get_attribute("open") is None
@@ -388,117 +388,29 @@ def test_hand_recovery_stages(page):
     page.locator("#reset-hand").click()
 
 
-def test_interactions(page):
-    assert first_y(page) == "11"
-    assert "左下のマスが (0,0)" in page.locator("[data-i18n='gridHint']").inner_text()
-    page.locator('#field-grid [data-share-x="1"]').hover()
-    tooltip = page.locator("#grid-coordinate-tooltip")
-    assert tooltip.is_visible() and tooltip.inner_text() == "(1, 11)"
-    origin = page.locator('#field-grid [data-cell-x="0"][data-cell-y="0"]').bounding_box()
-    page.mouse.move(origin["x"] + origin["width"] / 2, origin["y"] + origin["height"] / 2)
-    assert tooltip.inner_text() == "(0, 0)"
-    page.mouse.move(0, 0)
-    assert not tooltip.is_visible()
-    assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
-    for method in ("keyboard", "tap", "drag"):
-        page.locator("#reset-hand").click()
-        point = page.locator('#field-grid [data-share-x="1"]')
-        cell = page.locator('#field-grid [data-cell-x="1"][data-cell-y="12"]')
-        if method == "keyboard":
-            point.click()
-            page.keyboard.press("ArrowUp")
-        elif method == "tap":
-            point.click()
-            cell.click()
-        else:
-            point.scroll_into_view_if_needed()
-            start, end = point.bounding_box(), cell.bounding_box()
-            page.mouse.move(start["x"] + start["width"] / 2, start["y"] + start["height"] / 2)
-            page.mouse.down()
-            page.mouse.move(end["x"] + end["width"] / 2, end["y"] + end["height"] / 2)
-            page.mouse.up()
-        assert first_y(page) == "12", method
-        assert "≡ 8" in page.locator("#reconstruction-result").inner_text(), method
-        assert "Δs=3" in page.locator("#tweak-result").inner_text(), method
-        assert page.locator('#field-grid [data-share-x="1"]').get_attribute("aria-label").endswith("1, 12")
-    page.locator("#reset-hand").click()
-    page.locator("#threshold").select_option("1")
-    assert "コピー" in page.locator("#tweak-result").inner_text()
-    assert [row.locator("td").last.inner_text() for row in page.locator("#distribution-table tr").all()] == ["5"] * 5
-    page.locator("#reset-hand").click()
-    page.locator("#select-kminus").click()
-    assert "13/13" in page.locator("#candidate-result").inner_text()
-    assert page.locator("#leading-only").count() == 0
-    assert "13/13" in page.locator("#candidate-result").inner_text()
-    page.locator('#real-graph [data-real-x="0"]').focus()
-    before = page.locator("#real-result").inner_text()
-    page.keyboard.press("ArrowUp")
-    assert page.locator("#real-result").inner_text() != before
-    page.locator("#reset-hand").click()
-    real_point = page.locator('#real-graph [data-real-x="1"]')
-    real_point.click()
-    point_box, graph_box = real_point.bounding_box(), page.locator("#real-graph").bounding_box()
-    page.locator("#real-graph").click(position={"x": point_box["x"] + point_box["width"] / 2 - graph_box["x"], "y": point_box["y"] + point_box["height"] / 2 - graph_box["y"] - 20})
-    assert "(1,11)" not in page.locator("#real-result").inner_text()
-    page.locator("#reset-hand").click()
-    real_point = page.locator('#real-graph [data-real-x="1"]')
-    real_point.scroll_into_view_if_needed()
-    point_box = real_point.bounding_box()
-    x, y = point_box["x"] + point_box["width"] / 2, point_box["y"] + point_box["height"] / 2
-    page.mouse.move(x, y)
-    page.mouse.down()
-    page.mouse.move(x, y - 20)
-    page.mouse.up()
-    assert "(1,11)" not in page.locator("#real-result").inner_text()
-
-
-def test_single_selected_share(page):
-    # Reproduce the one-selected-share state: (1,11), (2,4), (3,10), (4,3), (5,9).
-    page.locator("#reset-hand").click()
-    for index, value in ((1, "6"), (2, "0")):
-        coefficient = page.locator(f'[data-coefficient="{index}"]')
-        coefficient.fill(value)
-        coefficient.press("Tab")
-    for x, y in enumerate((11, 4, 10, 3, 9), 1):
-        assert page.locator(f'[data-pick="{x}"]').inner_text() == (f"#{x} ({x},{y})" if x <= 3 else f"#{x}")
-    page.locator('[data-pick="1"]').click()
-    page.locator('[data-pick="2"]').click()
-    assert page.locator(".field-ghost").count() == 13
-    assert page.locator("#tweak-result").inner_text()
-    original = page.locator("#polynomial").inner_text()
-    page.locator('#field-grid [data-share-x="3"]').click()
-    assert page.locator("#polynomial").inner_text() == original
-    assert page.evaluate('() => document.activeElement.getAttribute("data-share-x")') == "3"
-    page.keyboard.press("ArrowUp")
-    assert page.locator('#field-grid [data-share-x="3"]').get_attribute("aria-label").endswith("3, 11")
-    assert page.locator("#secret").input_value() == "5"
-    assert page.locator("[data-coefficient]").count() == 2
-
-    page.locator("#reset-hand").click()
-    page.locator('[data-pick="1"]').click()
-    page.locator('[data-pick="2"]').click()
-    point = page.locator('#field-grid [data-share-x="3"]')
-    cell = page.locator('#field-grid [data-cell-x="3"][data-cell-y="10"]')
-    point.scroll_into_view_if_needed()
-    start, end = point.bounding_box(), cell.bounding_box()
-    page.mouse.move(start["x"] + start["width"] / 2, start["y"] + start["height"] / 2)
-    page.mouse.down()
-    page.mouse.move(end["x"] + end["width"] / 2, end["y"] + end["height"] / 2)
-    page.mouse.up()
-    assert page.locator('#field-grid [data-share-x="3"]').get_attribute("aria-label").endswith("3, 10")
-    assert page.locator("#secret").input_value() == "5"
-    assert page.locator("[data-coefficient]").count() == 2
-    assert page.evaluate('() => document.activeElement.getAttribute("data-share-x")') == "3"
-
-    page.locator("#reset-hand").click()
-    page.locator("#select-kminus").click()
-    page.locator("#next-candidate").click()
-    assert page.locator("#candidate-result").inner_text().endswith("=6")
-    page.locator('#field-grid [data-share-x="1"]').click()
-    page.keyboard.press("ArrowUp")
-    assert page.locator('[data-pick="2"]').inner_text() == "#2 (2,8)"
-    assert page.locator("#secret").input_value() == "6"
-    assert page.locator("[data-coefficient]").count() == 2
+def test_real_comparison(page):
+    page.locator('#reset-hand').click()
+    assert page.locator('#hand-explore').count() == 0
+    assert page.locator('#real-comparison').is_visible()
+    assert page.locator('#real-comparison-graph .real-comparison-curve').count() == 1
+    assert '(1,11)' in page.locator('#real-comparison-graph').text_content()
+    assert '(2,21)' in page.locator('#real-comparison-graph').text_content()
+    assert 'x=2の整数値は21、GF(13)では8' in page.locator('#real-comparison-caption').inner_text()
+    page.locator('#next-candidate').click()
+    assert 's=6' in page.locator('#real-comparison-caption').inner_text()
+    assert 's=6' in page.locator('#real-comparison-graph').text_content()
+    page.locator('#previous-candidate').click()
+    assert page.locator('#real-comparison-graph path').count() == 1
+    assert page.locator('#hand-few-graph path').count() == 0
+    page.locator('#hand-few-picks [data-few-pick="2"]').click()
+    assert page.locator('#real-comparison').is_hidden()
+    page.locator('#hand-few-picks [data-few-pick="2"]').click()
+    assert page.locator('#real-comparison').is_visible()
+    page.locator('#threshold').select_option('2')
+    assert '高々1次' in page.locator('#real-comparison-caption').inner_text()
+    page.locator('#threshold').select_option('4')
+    assert '高々3次' in page.locator('#real-comparison-caption').inner_text()
+    page.locator('#reset-hand').click()
 
 
 def test_book_example(page):
@@ -582,8 +494,7 @@ def test_tabs_and_localization(page):
     page.locator("#language").click()
     assert page.locator("html").get_attribute("lang") == "en"
     assert page.locator("#tab-hand").inner_text() == "Trace (k, n) by hand"
-    assert page.locator("#field-grid").get_attribute("aria-label") == "Finite-field coordinate plane of shares and candidates"
-    assert page.locator("#real-graph").get_attribute("aria-label") == "Real-number interpolation curve"
+    assert page.locator("#real-comparison-graph").get_attribute("aria-label") == "Real-number curve for the selected candidate coefficients"
     assert page.locator("#panel-pitfalls").is_visible()
     page.locator("#theme").click()
     assert page.locator("html").get_attribute("data-theme") == "dark"
@@ -604,16 +515,9 @@ def main():
                 page.on("console", lambda message: failures.append(message.text) if message.type == "error" else None)
                 page.goto(URL)
                 test_linear_intro(page, width)
-                page.locator("#hand-explore summary").click()
-                page.locator("#prime").select_option("23")
-                page.locator('#field-grid [data-cell-x="22"][data-cell-y="22"]').hover()
-                tooltip = page.locator("#grid-coordinate-tooltip")
-                assert tooltip.is_visible() and tooltip.inner_text() == "(22, 22)"
-                tip_box = tooltip.bounding_box()
-                assert 0 <= tip_box["x"] and tip_box["x"] + tip_box["width"] <= width
-                large = geometry(page, width)
-                assert large["grid"] > large["gridFrame"] if width == 320 else True
-                page.locator("#reset-hand").click()
+                page.locator('#prime').select_option('23')
+                assert 'GF(23)' in page.locator('#real-comparison-caption').inner_text()
+                page.locator('#reset-hand').click()
                 normal = geometry(page, width)
                 test_hand_primer(page)
                 test_hand_recovery_stages(page)
@@ -623,8 +527,7 @@ def main():
                 test_distributed_share_data(page)
                 test_help(page, width)
                 if width == 320:
-                    assert page.locator("#field-grid").get_attribute("width") == "260"
-                    assert normal["grid"] == normal["gridFrame"], normal
+                    assert normal["graph"] > normal["graphFrame"], normal
                     page.locator("#tab-bytes").click()
                     byte_width = page.evaluate("() => ({table:document.querySelector('#byte-table-frame').scrollWidth, frame:document.querySelector('#byte-table-frame').clientWidth, page:document.documentElement.scrollWidth})")
                     assert byte_width["table"] > byte_width["frame"] and byte_width["page"] == width, byte_width
@@ -632,9 +535,7 @@ def main():
                     page.locator("#tab-hand").click()
                 if width == 390:
                     test_book_example(page)
-                    test_interactions(page)
-                    assert page.locator(".field-value").first.evaluate("el => getComputedStyle(el).animationName") == "none"
-                    test_single_selected_share(page)
+                    test_real_comparison(page)
                     test_tabs_and_localization(page)
                 assert not failures, failures
                 print(browser_name, width, "OK", normal)
