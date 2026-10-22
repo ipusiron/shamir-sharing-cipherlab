@@ -53,6 +53,9 @@ def test_distributed_share_data(page):
 def test_help(page, width):
     assert page.locator(".eyebrow").count() == 0
     assert "k−1個では秘密が決まらない" in page.locator(".tagline").inner_text()
+    assert page.locator(".tagline").evaluate("el => getComputedStyle(el).textAlign") == "center"
+    tagline_box = page.locator(".tagline").bounding_box()
+    assert abs(tagline_box["x"] + tagline_box["width"] / 2 - width / 2) < 1
     assert page.locator("main > details").count() == 0
     assert page.locator("main [data-i18n='educational']").count() == 0
     assert page.locator("footer").inner_text() == "GitHubリポジトリ"
