@@ -152,7 +152,7 @@ def test_linear_intro(page, width):
     assert "consider f(x) over GF(p)" in formula.inner_text()
     assert "(1,9)(2,0)(3,4)(4,8)(5,12)" in primer.inner_text()
     assert "ordinary coordinate plane" in page.locator("#linear-analogy-caption").inner_text()
-    assert "Their y-intercepts are f(0)" in page.locator("#linear-analogy-caption").inner_text()
+    assert "Each y-intercept is f(0)" in page.locator("#linear-analogy-caption").inner_text()
     assert "distinct polynomials" in distinct.inner_text()
     assert "2×7 = 14 ≡ 1" in primer.inner_text()
     assert "D computes v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()
