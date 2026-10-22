@@ -34,19 +34,23 @@
     </div>
     <section id="panel-linear" class="panel" role="tabpanel" aria-labelledby="tab-linear">
       <h2 data-i18n="linear"></h2>
+      <h3 data-i18n="linearDistributionTitle"></h3>
       <p data-i18n="linearIntro"></p>
       <p class="hand-formula">f(x) = s + a₁x (mod 13)</p>
       <p data-i18n="linearField"></p>
       <div class="settings-grid"><label><span>n</span><select id="linear-n"></select></label></div>
       <p id="linear-threshold" role="status"></p>
+      <p data-i18n="linearDistributionIntro"></p>
       <details id="linear-dealer"><summary data-i18n="linearDealer"></summary><p data-i18n="linearDealerSet"></p><p data-i18n="linearDealerHelp"></p>
         <div class="settings-grid"><label><span>s = f(0)</span><input id="linear-secret" type="number" min="0" max="12" value="5" inputmode="numeric"></label>
           <label><span>a₁</span><input id="linear-slope" type="number" min="0" max="12" value="4" inputmode="numeric"></label></div>
         <button id="linear-reset" type="button" data-i18n="reset"></button><p id="linear-status" role="status"></p>
+        <p data-i18n="linearDistributionHelp"></p><div id="linear-distribution" class="share-data"></div>
       </details>
-      <h3 data-i18n="linearShares"></h3><p data-i18n="linearShareHint"></p><div id="linear-picks" class="actions"></div>
+      <h3 data-i18n="linearRecoveryTitle"></h3><p data-i18n="linearRecoveryIntro"></p>
+      <h4 class="linear-step-heading" data-i18n="linearShares"></h4><p data-i18n="linearShareHint"></p><div id="linear-picks" class="actions"></div>
       <p id="linear-selected" class="result" role="status"></p>
-      <h3 data-i18n="linearGridTitle"></h3><p data-i18n="linearGridHelp"></p>
+      <h4 class="linear-step-heading" data-i18n="linearGridTitle"></h4><p data-i18n="linearGridHelp"></p>
       <div class="grid-frame"><svg id="linear-grid" width="260" height="260" viewBox="0 0 260 260" role="img" data-label="linearGridLabel"></svg></div>
       <div id="linear-one"><p id="linear-one-result"></p><div class="actions linear-candidate-controls"><button id="linear-previous" type="button" data-i18n="previous"></button>
         <button id="linear-next" type="button" data-i18n="next"></button>

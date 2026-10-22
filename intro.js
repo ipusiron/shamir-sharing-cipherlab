@@ -19,11 +19,15 @@
     for(const [x,y] of points())svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-y-.5),r:8,class:'linear-selected-dot'}));
   }
   function render() {
+    const allShares=shares(), subscript='₀₁₂₃₄₅₆₇₈₉';
     $('linear-n').value=String(state.n);
     $('linear-threshold').textContent=format('linearThreshold',{n:state.n});
     $('linear-secret').value=String(state.secret);
     $('linear-slope').value=String(state.slope);
-    $('linear-picks').replaceChildren(...shares().map(([x,y])=>{
+    $('linear-distribution').replaceChildren(...allShares.map(([i,y])=>E('p',format('linearDistributionRow',{
+      i,sub:subscript[i],secret:state.secret,slope:state.slope,y
+    }))));
+    $('linear-picks').replaceChildren(...allShares.map(([x,y])=>{
       const selected=state.selected.includes(x), button=E('button',selected?`#${x} (${x},${y})`:`#${x}`);
       button.type='button';button.dataset.linearPick=String(x);button.setAttribute('aria-pressed',String(selected));return button;
     }));

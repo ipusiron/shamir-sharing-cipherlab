@@ -33,6 +33,9 @@ def test_linear_intro(page, width):
     assert page.locator("#panel-linear").is_visible()
     assert not page.locator("#panel-hand").is_visible()
     assert page.locator("#tab-linear").get_attribute("aria-selected") == "true"
+    assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("分散段階")
+    assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("復元段階")
+    assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").bounding_box()["y"] < page.locator("#panel-linear [data-i18n='linearShares']").bounding_box()["y"]
     assert page.locator("#linear-dealer").get_attribute("open") is None
     assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
     assert "13本" in page.locator("#linear-one-result").inner_text()
@@ -53,20 +56,32 @@ def test_linear_intro(page, width):
     page.locator("#linear-dealer summary").click()
     assert page.locator("#linear-dealer [data-i18n='linearDealerSet']").inner_text() == "秘密情報sと乱数a₁を決めます。"
     assert "本ツールでは仕組みを試すために値を変えられます。" in page.locator("#linear-dealer [data-i18n='linearDealerHelp']").inner_text()
+    rows = page.locator("#linear-distribution p")
+    assert rows.count() == 5
+    assert "v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()
+    assert "管理人 #1 にシェア 9 を渡します" in rows.first.inner_text()
+    assert "v₅=f(5)=(5+4×5) mod 13=12" in rows.last.inner_text()
     page.locator("#linear-secret").fill("7")
     page.locator("#linear-secret").press("Tab")
     page.locator("#linear-slope").fill("2")
     page.locator("#linear-slope").press("Tab")
+    assert "v₁=f(1)=(7+2×1) mod 13=9" in rows.first.inner_text()
     assert "(1,9)" in page.locator("#linear-selected").inner_text()
     page.locator('[data-linear-pick="2"]').click()
     assert "s=7" in page.locator("#linear-two-result").inner_text()
     page.locator("#linear-n").select_option("7")
     assert page.locator("#linear-picks button").count() == 7
     assert page.locator("#linear-threshold").inner_text().startswith("7人のうち2人")
+    assert rows.count() == 7
+    assert "v₇=f(7)=(7+2×7) mod 13=8" in rows.last.inner_text()
     page.locator("#linear-reset").click()
     assert page.locator("#linear-picks button").count() == 5
+    assert rows.count() == 5
     page.locator("#language").click()
     assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
+    assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("Distribution")
+    assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("Reconstruction")
+    assert "D computes v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()
     assert page.locator("#linear-threshold").inner_text().startswith("When two of the 5 participants")
     assert "Thirteen polynomials of degree at most one" in page.locator("#linear-one-result").inner_text()
     page.locator("#language").click()
