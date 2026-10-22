@@ -47,58 +47,76 @@ def test_linear_intro(page, width):
     assert "5 × 4 = 20。13で割った余りは7" in primer.inner_text()
     assert "2×7 = 14 ≡ 1" in primer.inner_text()
     assert "2×□ ≡ 1 (mod 12)" in primer.inner_text()
-    assert "このタブの既定例 f(x)=5+4x" in primer.inner_text()
+    assert "既定値は n=5、s=5、a₁=4" in primer.inner_text()
+    assert "f(i)=(5+4i) mod 13 を i=1〜5 に代入" in primer.inner_text()
     assert "(1,9)(2,0)(3,4)(4,8)(5,12)" in primer.inner_text()
     assert "f(2)=s+2a₁" in primer.inner_text()
     assert "整数の世界で f(x)=5+4x を考え" in primer.inner_text()
-    assert "整数値13に対応するシェア値は0" in primer.inner_text()
+    assert "2a₁ は必ず偶数" in primer.inner_text()
+    assert page.locator("[data-i18n='gf13FieldContrast']").inner_text().startswith("それに対して")
+    assert "0〜12の整数値として扱い" in primer.inner_text()
+    assert "f(2)=5+2×4=13" in primer.inner_text()
+    assert "このシェア値0だけでは秘密情報 s の偶奇は決まりません" in primer.inner_text()
+    assert formula.locator("br").count() == 0
     assert "1個のシェアが得られる確率はどの秘密情報 s に対しても同じ" in primer.inner_text()
     assert "GF(2⁸)" not in primer.inner_text()
     assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     assert page.locator("#linear-dealer").get_attribute("open") is None
     assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
     assert "13本" in page.locator("#linear-one-result").inner_text()
-    assert "1点と2点で式の決まり方" in page.locator("[data-i18n='linearGridTitle']").inner_text()
-    assert "縦がシェア値 y" in page.locator("[data-i18n='linearGridHelp']").inner_text()
+    assert page.locator("[data-i18n='linearGridTitle']").inner_text() == "② シェアが1つだけあった場合：1点を通る直線を考える"
+    assert "直線が何本も引ける" in page.locator("[data-i18n='linearGridIntro']").inner_text()
+    assert page.locator("#linear-one-focus").inner_text() == "ここでは #3 のシェア (3,4) だけに注目します。"
+    assert page.locator("[data-i18n='linearGridTitle']").bounding_box()["y"] < page.locator("[data-i18n='linearTwoTitle']").bounding_box()["y"]
+    assert page.locator("#linear-two").is_hidden()
     lines = page.locator("#linear-analogy .linear-analogy-line")
-    assert lines.count() == 3
-    assert len({line.get_attribute("y1") for line in lines.all()}) == 3
-    assert len({line.get_attribute("y2") for line in lines.all()}) == 1
+    assert lines.count() == 4
+    assert page.locator("#linear-analogy").get_attribute("viewBox") == "0 0 320 292"
+    assert "x=12" in page.locator("#linear-analogy").text_content()
     assert "普通の座標平面" in page.locator("#linear-analogy-caption").inner_text()
     assert "y軸との交点は x=0 での値 f(0)" in page.locator("#linear-analogy-caption").inner_text()
     distinct = page.locator("#linear-distinct")
-    assert "f₀(x)=0+9x と f₅(x)=5+4x" in distinct.inner_text()
+    assert "f₀(x)=0+10x と f₅(x)=5+4x" in distinct.inner_text()
     assert "f₀(0)=0、f₅(0)=5" in distinct.inner_text()
     assert "余りの見かけではありません" in distinct.inner_text()
-    assert "連続した直線のはみ出た部分を折り返しているわけではありません" in page.locator("[data-i18n='linearGridPoints']").inner_text()
-    assert "x=0,1,2 での値は 0,9,5" in page.locator("#linear-candidate-result").inner_text()
-    assert "(1,9)" in page.locator("#linear-selected").inner_text()
+    assert "GF(13) での x=0,1,2 の値は 0,10,7" in page.locator("#linear-candidate-result").inner_text()
+    assert "GF(13) の係数 a₁ をそのまま傾きにした線ではありません" in page.locator("#linear-candidate-result").inner_text()
+    assert "(3,4)" in page.locator("#linear-selected").inner_text()
     pair_meaning = page.locator("#panel-linear [data-i18n='linearPairMeaning']")
     assert "(1,9) は、管理人番号1（＝#1）とシェア9のセット" in pair_meaning.inner_text()
     assert pair_meaning.bounding_box()["y"] < page.locator("#linear-picks").bounding_box()["y"]
-    assert page.locator("#linear-grid circle.linear-possible").count() == 13
-    assert page.locator("#linear-grid").get_attribute("width") == "260"
-    assert page.locator("#linear-grid").bounding_box()["width"] <= width
-    assert "左下のマスが (0,0)" in page.locator("[data-i18n='linearGridHelp']").inner_text()
-    page.locator("#linear-grid circle.linear-selected-dot").hover()
-    tooltip = page.locator("#grid-coordinate-tooltip")
-    assert tooltip.is_visible() and tooltip.inner_text() == "(1, 9)"
-    origin = page.locator("#linear-grid rect.field-cell").first.bounding_box()
-    page.mouse.move(origin["x"] + origin["width"] / 2, origin["y"] + origin["height"] / 2)
-    assert tooltip.inner_text() == "(0, 0)"
-    page.mouse.move(0, 0)
-    assert not tooltip.is_visible()
+    assert page.locator("#linear-analogy").bounding_box()["width"] <= width
+    assert page.locator("#linear-grid").count() == 0
+    assert page.locator("#linear-to-hand").count() == 0
     page.locator("#linear-candidate").select_option("5")
-    assert "a₁=(9−5)÷1≡4" in page.locator("#linear-candidate-result").inner_text()
+    assert "a₁=(4−5)÷3≡4" in page.locator("#linear-candidate-result").inner_text()
     assert "(mod 13)" in page.locator("#linear-candidate-result").inner_text()
     page.locator('[data-linear-pick="2"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
-    assert not page.locator("#linear-analogy").is_visible()
-    assert page.locator("#linear-grid circle.linear-possible").count() == 0
+    assert page.locator("[data-i18n='linearTwoTitle']").inner_text() == "③ シェアが2つ揃った場合：2点から式を決める"
+    assert "(2,n) しきい値法" in page.locator("[data-i18n='linearTwoIntro']").inner_text()
+    assert page.locator("#linear-analogy").is_visible()
+    assert page.locator("#linear-one-focus").inner_text() == "ここでは #2 のシェア (2,0) だけに注目します。"
     page.locator('[data-linear-pick="2"]').click()
     assert "13本" in page.locator("#linear-one-result").inner_text()
-    page.locator('[data-linear-pick="3"]').click()
+    page.locator('[data-linear-pick="1"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
+    page.locator('[data-linear-pick="1"]').click()
+    assert page.locator("#linear-one-focus").inner_text() == "ここでは #3 のシェア (3,4) だけに注目します。"
+    assert "点 (3,4)" in page.locator("#linear-analogy-caption").inner_text()
+    assert page.locator("#linear-analogy .linear-analogy-line").evaluate_all("(els) => els.every(el => Number(el.getAttribute('x2')) > Number(document.querySelector('.linear-analogy-point').getAttribute('cx')))")
+    assert page.locator(".linear-analogy-point-label").evaluate("""el => {
+      const box=el.getBBox();
+      return [...document.querySelectorAll('#linear-analogy .linear-analogy-line')].every(line => {
+        const x1=Number(line.getAttribute('x1')), x2=Number(line.getAttribute('x2'));
+        const y1=Number(line.getAttribute('y1')), y2=Number(line.getAttribute('y2'));
+        const left=Math.max(box.x-3,x1), right=Math.min(box.x+box.width+3,x2);
+        if(left>right)return true;
+        const at=x=>y1+(x-x1)*(y2-y1)/(x2-x1);
+        return Math.min(at(left),at(right))>box.y+box.height+3 || Math.max(at(left),at(right))<box.y-3;
+      });
+    }""")
+    page.locator('[data-linear-pick="1"]').click()
     page.locator("#linear-dealer summary").click()
     assert page.locator("#linear-dealer [data-i18n='linearDealerSet']").inner_text() == "秘密情報sと乱数a₁を決めます。"
     assert "本ツールでは仕組みを試すために値を変えられます。" in page.locator("#linear-dealer [data-i18n='linearDealerHelp']").inner_text()
@@ -112,7 +130,7 @@ def test_linear_intro(page, width):
     page.locator("#linear-slope").fill("2")
     page.locator("#linear-slope").press("Tab")
     assert "v₁=f(1)=(7+2×1) mod 13=9" in rows.first.inner_text()
-    assert "(1,9)" in page.locator("#linear-selected").inner_text()
+    assert "(3,0)" in page.locator("#linear-selected").inner_text()
     page.locator('[data-linear-pick="2"]').click()
     assert "s=7" in page.locator("#linear-two-result").inner_text()
     page.locator("#linear-n").select_option("7")
@@ -129,20 +147,19 @@ def test_linear_intro(page, width):
     assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("Distribution")
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("Reconstruction")
     assert "What is GF(13)?" in primer.inner_text()
-    assert "In this tab’s default example, f(x)=5+4x" in primer.inner_text()
+    assert "This tab defaults to n=5, s=5, and a₁=4" in primer.inner_text()
     assert "over the ordinary integers" in primer.inner_text()
     assert "consider f(x) over GF(p)" in formula.inner_text()
     assert "(1,9)(2,0)(3,4)(4,8)(5,12)" in primer.inner_text()
-    assert "share value" in page.locator("[data-i18n='linearGridHelp']").inner_text()
     assert "ordinary coordinate plane" in page.locator("#linear-analogy-caption").inner_text()
-    assert "intersections with the y-axis are their values f(0)" in page.locator("#linear-analogy-caption").inner_text()
+    assert "Their y-intercepts are f(0)" in page.locator("#linear-analogy-caption").inner_text()
     assert "distinct polynomials" in distinct.inner_text()
     assert "2×7 = 14 ≡ 1" in primer.inner_text()
     assert "D computes v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()
     assert page.locator("#linear-threshold").inner_text().startswith("When two of the 5 participants")
     assert "Thirteen polynomials of degree at most one" in page.locator("#linear-one-result").inner_text()
     page.locator("#language").click()
-    page.locator("#linear-to-hand").click()
+    page.locator("#tab-hand").click()
     assert page.locator("#panel-hand").is_visible()
     assert page.locator("#tab-hand").evaluate("el => document.activeElement === el")
 
@@ -194,7 +211,7 @@ def test_help(page, width):
     assert page.locator("#help-dialog [data-i18n='helpUses']").inner_text() == "活用例"
     assert "実際に使っているパスワード、シードフレーズ、鍵" in dialog.inner_text()
     assert "保存するのは表示言語と明暗の設定だけ" in dialog.inner_text()
-    assert "方眼の点をドラッグ" in dialog.inner_text()
+    assert "座標平面の点をドラッグ" in dialog.inner_text()
     assert "CTF・謎解き" in dialog.inner_text()
     theory = page.locator("#help-theory")
     assert theory.get_attribute("open") is None
@@ -442,7 +459,7 @@ def test_tabs_and_localization(page):
     page.locator("#language").click()
     assert page.locator("html").get_attribute("lang") == "en"
     assert page.locator("#tab-hand").inner_text() == "Trace (k, n) by hand"
-    assert page.locator("#field-grid").get_attribute("aria-label") == "Finite field grid of shares and candidates"
+    assert page.locator("#field-grid").get_attribute("aria-label") == "Finite-field coordinate plane of shares and candidates"
     assert page.locator("#real-graph").get_attribute("aria-label") == "Real-number interpolation curve"
     assert page.locator("#panel-pitfalls").is_visible()
     page.locator("#theme").click()

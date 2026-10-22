@@ -65,23 +65,20 @@ th { background:var(--bg); }
 .grid-coordinate-tooltip { position:fixed; z-index:5; pointer-events:none; padding:.2rem .45rem; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--ink); box-shadow:0 2px 6px var(--shadow); font-size:.85rem; font-variant-numeric:tabular-nums; }
 .grid-coordinate-tooltip[hidden] { display:none; }
 #field-grid { display:block; max-width:none; touch-action:none; }
-#linear-grid { display:block; max-width:none; }
 #linear-dealer { margin:1rem 0; padding:.65rem .8rem; border:1px solid var(--line); }
 .linear-step-heading { font-size:1.1rem; }
 .linear-candidate-label { display:grid; gap:.2rem; min-width:5rem; }
-#linear-analogy { display:block; width:min(100%,300px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
+#linear-analogy { display:block; width:min(100%,320px); height:auto; margin:.5rem 0 1rem; border:1px solid var(--line); background:var(--paper); }
 .linear-analogy-axis { stroke:var(--muted); stroke-width:1.5; }
 .linear-analogy-line { stroke-width:2.5; }
 .linear-analogy-0 { stroke:var(--red); }
 .linear-analogy-1 { stroke:var(--blue); }
 .linear-analogy-2 { stroke:var(--muted); }
+.linear-analogy-active { stroke:var(--focus); stroke-width:3.5; stroke-dasharray:5 4; }
+.linear-analogy-active-label { fill:var(--focus); font-weight:700; }
 .linear-analogy-point { fill:var(--ink); stroke:var(--paper); stroke-width:1.5; }
 .linear-analogy-label, .linear-analogy-axis-label { fill:var(--ink); font:12px system-ui,sans-serif; }
 @media (max-width:600px) { .linear-candidate-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); } .linear-candidate-controls .linear-candidate-label { grid-column:1/-1; } }
-.linear-possible { fill:none; stroke:var(--red); stroke-width:2; opacity:.8; }
-.linear-candidate-dot { fill:var(--blue); opacity:.8; }
-.linear-secret-dot { fill:var(--red); stroke:var(--paper); stroke-width:2; }
-.linear-selected-dot { fill:var(--blue); stroke:var(--paper); stroke-width:3; }
 #real-graph { display:block; width:min(100%,600px); height:auto; touch-action:none; }
 .field-cell { fill:var(--paper); stroke:var(--grid); stroke-width:1; }
 .field-value { fill:var(--blue); pointer-events:none; animation:ink-in .25s ease-out; transform-origin:center; }
