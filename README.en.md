@@ -10,7 +10,7 @@ English · [日本語](README.md)
 
 **Day123 - 200 Security Tools with Generative AI**
 
-ShamirSharing CipherLab is a hands-on teaching tool for Shamir secret sharing, using a grid, byte tables, and deliberately unsafe models. Shamir and Blakley independently proposed secret sharing in 1979. This tool implements Shamir’s polynomial scheme with Lagrange interpolation; it does not implement Blakley’s geometric scheme.
+ShamirSharing CipherLab is a hands-on teaching tool for Shamir secret sharing, using a grid, byte tables, and deliberately unsafe models. Start with “Visualize (2, n)” to compare one and two participants, then move to “Trace (k, n) by hand” for the general threshold. Shamir and Blakley independently proposed secret sharing in 1979. This tool implements Shamir’s polynomial scheme with Lagrange interpolation; it does not implement Blakley’s geometric scheme.
 
 In Shamir’s (k,n) threshold scheme, n shares are made from secret s and given to n participants, one each. It has two conditions.
 
@@ -18,7 +18,7 @@ In Shamir’s (k,n) threshold scheme, n shares are made from secret s and given 
 
 ② With only k−1 participants, s cannot be recovered, and their shares reveal no information about it. The grid shows how a polynomial fits every possible secret.
 
-Use an invented number for s in “Trace by hand” and a practice phrase in “Bytes”. Do not use this teaching tool to split or store passwords, seed phrases, or keys that you actually use. This tool does not provide share formats, printing, QR codes, or storage advice.
+Use invented numbers for s in “Visualize (2, n)” and “Trace (k, n) by hand”, and a practice phrase in “Bytes”. Do not use this teaching tool to split or store passwords, seed phrases, or keys that you actually use. This tool does not provide share formats, printing, QR codes, or storage advice.
 
 ---
 
@@ -34,18 +34,20 @@ Open it in a browser, or open the HTML directly with `file://`. Computation and 
 
 | State | Light | Dark |
 |---|---|---|
-| Trace by hand | ![Hand calculation, English, light](assets/en/light/hand.png) | ![Hand calculation, English, dark](assets/en/dark/hand.png) |
+| Visualize (2, n) | ![One share and candidate secrets, English, light](assets/en/light/intro.png) | ![One share and candidate secrets, English, dark](assets/en/dark/intro.png) |
+| Trace (k, n) by hand | ![Hand calculation, English, light](assets/en/light/hand.png) | ![Hand calculation, English, dark](assets/en/dark/hand.png) |
 | k−1 candidates | ![Candidate grid, English, light](assets/en/light/candidates.png) | ![Candidate grid, English, dark](assets/en/dark/candidates.png) |
 | Bytes | ![Byte table, English, light](assets/en/light/bytes.png) | ![Byte table, English, dark](assets/en/dark/bytes.png) |
 | Pitfalls | ![Pitfall cards, English, light](assets/en/light/pitfalls.png) | ![Pitfall cards, English, dark](assets/en/dark/pitfalls.png) |
 
-The same four states in Japanese appear in the [Japanese README](README.md).
+The same five states in Japanese appear in the [Japanese README](README.md).
 
 ## ✨ Features
 
 | Step | Action | What you can see |
 |---|---|---|
-| Trace by hand | Distribute in GF(p), reconstruct with k shares, overlay k−1 candidates | Lagrange weights and one polynomial per candidate secret |
+| Visualize (2, n) | Cycle through candidate secrets with one share, then add a second | Thirteen polynomials of degree at most one through one point, then one through two points |
+| Trace (k, n) by hand | Distribute in GF(p), reconstruct with k shares, overlay k−1 candidates | Lagrange weights and one polynomial per candidate secret |
 | Bytes | Split a short UTF-8 phrase in GF(2⁸) and recover with k shares | A polynomial per byte, XOR, and eight shift/reduce steps |
 | Pitfalls | Compare tampering, x=0, and too few shares | The differences among no check, CRC-32, and an embedded fingerprint |
 
@@ -59,13 +61,19 @@ The tool’s default GF(13) example is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its rec
 
 Coefficients are allowed to be zero, so the polynomial has degree *at most* k−1. With `k=1`, every share is simply the secret: copying instead of splitting.
 
+### Why begin with (2, n)?
+
+The first tab starts with `p=13, n=5, s=5, a₁=4` and makes shares from `f(x)=5+4x (mod 13)`. Participant #1 receives `(1,9)`. With this one point, the alternative `s=0, a₁=9` also fits. Every candidate `s=0…12` has a corresponding polynomial. Uniformly chosen coefficients leave all candidates equally likely. Add participant #2’s `(2,0)` and the polynomial is uniquely `f(x)=5+4x (mod 13)`, recovering `s=f(0)=5`.
+
+The dealer can change `s` and `a₁` inside a collapsed section. A participant with one share should be considered unaware of those settings. The grid shows finite-field points, so it does not connect them as a continuous real-number line.
+
 ## 📚 Follow 『暗号技術のすべて』 alongside the tool
 
-Section 9.2 (pp. 652–661) and the “Trace by hand” tab make a useful pair. Follow the definition, interpolation, reconstruction, and the reason fewer than k shares leave the secret undetermined. Lagrange interpolation is Shamir’s reconstruction calculation, not a separate secret-sharing scheme.
+Section 9.2 (pp. 652–661) and the two number tabs make a useful pair. Begin with a linear polynomial in (2,n), then try interpolation and reconstruction for a general (k,n) threshold. Lagrange interpolation is Shamir’s reconstruction calculation, not a separate secret-sharing scheme.
 
 | Book pages | Try in the tool |
 |---|---|
-| 652–654 | Check the `(k,n)` threshold, dealer `D`, secret `s`, and shares `vᵢ=f(i)` in the introduction and “① Distribute”. |
+| 652–654 | Try the book’s linear (2,n) explanation in “Visualize (2, n)”: one participant leaves 13 possible secrets, while two fix one. Then check the `(k,n)` threshold, dealer `D`, secret `s`, and shares `vᵢ=f(i)` under “① Distribute”. |
 | 655–657 | Compare the book’s three points `(a,A),(b,B),(c,C)` with the selected `(xᵢ,yᵢ)` and weights `λᵢ(0)` under “② Reconstruct”. Select only two shares and overlay the remaining candidates on the grid. |
 | 658–659 | Enter the book’s example: `p=17, k=3, n=5, s=13, a₁=10, a₂=2`. The shares are `f(1)…f(5)=8,7,10,0,11`. Select `#1, #3, #5` and recover `s=13`. |
 | 660–661 | Use “Pitfalls” to explore incorrect shares and verification. The book’s VSS extensions have different capabilities from this tool’s CRC and fingerprint models. |
@@ -74,12 +82,13 @@ The tool starts with a smaller GF(13) example. Use “Reset example” after try
 
 ## 📖 How to use it
 
-1. In “Trace by hand”, vary `p, k, n, s, a₁…` and read the distribution and reconstruction tables. Enter coefficients or draw them with cryptographic randomness.
-2. Select `k−1 shares`. Advance one candidate at a time or overlay all of them. Toggle the red nonzero-leading-coefficient switch to see a candidate vanish.
-3. Drag a grid point, or select it and tap another cell in the same column. Clicking a point focuses it, and up and down arrow keys move it one cell. With k shares, the table and `Δs=λᵢ(0)·Δ (mod p)` update together. With fewer than k−1 shares, the curve is not unique; faint points show one example from the current polynomial.
-4. Drag points on the real-number curve to change its y-intercept. With k−1 points, you can move the intercept and still pass through them. After using the curve to see the relationship between points and intercept, use the integer table to observe leaked remainders, then compare with the finite-field grid.
-5. In “Bytes”, enter up to 32 UTF-8 bytes. Split with `2≤k≤n≤8`, select k shares, and recover. Hex is always shown; text appears only for valid UTF-8, with controls escaped.
-6. In “Pitfalls”, switch the checking layer. All three cards use fixed `MEET AT DAWN` data rather than your input.
+1. In “Visualize (2, n)”, start with one share and cycle through candidate secrets. Every candidate has a polynomial of degree at most one through the point. Add a second participant to fix one polynomial and one secret. Dealer settings are collapsed to distinguish them from information given to participants.
+2. In “Trace (k, n) by hand”, vary `p, k, n, s, a₁…` and read the distribution and reconstruction tables. Enter coefficients or draw them with cryptographic randomness.
+3. Select `k−1 shares`. Advance one candidate at a time or overlay all of them. Toggle the red nonzero-leading-coefficient switch to see a candidate vanish.
+4. Drag a grid point, or select it and tap another cell in the same column. Clicking a point focuses it, and up and down arrow keys move it one cell. With k shares, the table and `Δs=λᵢ(0)·Δ (mod p)` update together. With fewer than k−1 shares, the curve is not unique; faint points show one example from the current polynomial.
+5. Drag points on the real-number curve to change its y-intercept. With k−1 points, you can move the intercept and still pass through them. After using the curve to see the relationship between points and intercept, use the integer table to observe leaked remainders, then compare with the finite-field grid.
+6. In “Bytes”, enter up to 32 UTF-8 bytes. Split with `2≤k≤n≤8`, select k shares, and recover. Hex is always shown; text appears only for valid UTF-8, with controls escaped.
+7. In “Pitfalls”, switch the checking layer. All three cards use fixed `MEET AT DAWN` data rather than your input.
 
 Open “?” at the top right for instructions, use cases, and input and storage information. The theory sections and sources are in a collapsible section of Help.
 
@@ -166,10 +175,11 @@ The text after `#` explains each file. The local `.work/` directory is excluded 
 |-- README.md # Japanese documentation and hub YAML
 |-- README.en.md # English documentation
 |-- package.json # Test command
-|-- index.html # Three-tab interface and CSP
+|-- index.html # Four-tab interface and CSP
 |-- style.css # Graph-paper colors and layout
 |-- messages.js # Japanese and English dictionary
 |-- app.js # DOM, finite-field grid, real-number graph
+|-- intro.js # (2,n) linear polynomial and candidate grid
 |-- gf-core.js # Pure field and interpolation functions
 |-- pitfalls.js # Deliberately unsafe models and checks
 |-- sha256-core.js # SHA-256 copy from Day118
@@ -179,18 +189,22 @@ The text after `#` explains each file. The local `.work/` directory is excluded 
 |-- test/interface.browser.py # file:// and UI browser tests
 |-- test/vectors.json # Expected values copied from the reference
 |-- assets/ja/light/hand.png # Japanese light hand calculation
+|-- assets/ja/light/intro.png # Japanese light (2,n) introduction
 |-- assets/ja/light/bytes.png # Japanese light byte table
 |-- assets/ja/light/pitfalls.png # Japanese light pitfall cards
 |-- assets/ja/light/candidates.png # Japanese light candidates
 |-- assets/ja/dark/hand.png # Japanese dark hand calculation
+|-- assets/ja/dark/intro.png # Japanese dark (2,n) introduction
 |-- assets/ja/dark/bytes.png # Japanese dark byte table
 |-- assets/ja/dark/pitfalls.png # Japanese dark pitfall cards
 |-- assets/ja/dark/candidates.png # Japanese dark candidates
 |-- assets/en/light/hand.png # English light hand calculation
+|-- assets/en/light/intro.png # English light (2,n) introduction
 |-- assets/en/light/bytes.png # English light byte table
 |-- assets/en/light/pitfalls.png # English light pitfall cards
 |-- assets/en/light/candidates.png # English light candidates
 |-- assets/en/dark/hand.png # English dark hand calculation
+|-- assets/en/dark/intro.png # English dark (2,n) introduction
 |-- assets/en/dark/bytes.png # English dark byte table
 |-- assets/en/dark/pitfalls.png # English dark pitfall cards
 |-- assets/en/dark/candidates.png # English dark candidates

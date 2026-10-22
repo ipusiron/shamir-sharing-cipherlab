@@ -6,18 +6,19 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const M = require('../messages.js');
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
-const html = read('index.html'), app = read('app.js'), gf = read('gf-core.js'), pitfalls = read('pitfalls.js');
+const html = read('index.html'), app = read('app.js'), intro = read('intro.js'), gf = read('gf-core.js'), pitfalls = read('pitfalls.js');
 
 test('E: strict CSP and offline file script structure', () => {
   assert.match(html, /default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; connect-src 'none'/);
   assert.match(html, /name="referrer" content="no-referrer"/);
   assert.doesNotMatch(html, /<script[^>]*type="module"|<script(?![^>]*src=)[^>]*>|\sstyle=|\sonclick=/);
   assert.match(html, /role="tablist"/);
-  assert.equal((html.match(/role="tab"/g) || []).length, 3);
+  assert.equal((html.match(/role="tab"/g) || []).length, 4);
+  assert.match(html, /src="intro\.js"/);
   assert.match(html, /<dialog id="help-dialog"/);
 });
 test('E: calculation uses no weak random fallback or network and stores only preferences', () => {
-  for (const code of [gf, pitfalls, app]) {
+  for (const code of [gf, pitfalls, app, intro]) {
     assert.doesNotMatch(code, /Math\.random\s*\(|fetch\s*\(|XMLHttpRequest|WebSocket|innerHTML/);
   }
   assert.match(app, /crypto\.getRandomValues/);

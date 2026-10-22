@@ -18,8 +18,8 @@ test('README: hub metadata, opening and educational warning', () => {
   assert.match(ja, /② `k−1`人.*情報は一切わかりません/);
   assert.match(en, /① Any k of the n participants/);
   assert.match(en, /② With only k−1 participants.*reveal no information/);
-  assert.match(ja, /「手で追う」の`s`には架空の数.*実際に使っているパスワード、シードフレーズ、鍵の分割や保管には、この教材を使わない/);
-  assert.match(en, /Use an invented number for s.*Do not use this teaching tool to split or store passwords/);
+  assert.match(ja, /「\(2, n\)を可視化する」と「\(k, n\)を手で追う」の`s`には架空の数.*実際に使っているパスワード、シードフレーズ、鍵の分割や保管には、この教材を使わない/);
+  assert.match(en, /Use invented numbers for s.*Do not use this teaching tool to split or store passwords/);
   assert.doesNotMatch(en, /category_ja:|slug: shamir-sharing-cipherlab/);
 });
 test('README: Japanese and English section order has full parity', () => {
@@ -75,7 +75,7 @@ test('README: both file trees match real tracked-source layout', () => {
 });
 test('README: screenshots exist and wording stays in educational scope', () => {
   for (const [locale, text] of [['ja', ja], ['en', en]]) {
-    for (const theme of ['light', 'dark']) for (const tab of ['hand', 'bytes', 'pitfalls', 'candidates']) {
+    for (const theme of ['light', 'dark']) for (const tab of ['intro', 'hand', 'bytes', 'pitfalls', 'candidates']) {
       const image = `assets/${locale}/${theme}/${tab}.png`;
       assert.ok(text.includes(image), image);
       assert.ok(fs.statSync(path.join(root, image)).size > 2000, image);

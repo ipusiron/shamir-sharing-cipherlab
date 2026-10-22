@@ -14,6 +14,7 @@
   <script src="pitfalls.js" defer></script>
   <script src="messages.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="intro.js" defer></script>
 </head>
 <body>
   <header class="page-header">
@@ -25,11 +26,33 @@
   </header>
   <main>
     <div class="tabs" role="tablist" aria-label="Learning steps" data-label="tablist">
-      <button id="tab-hand" role="tab" type="button" aria-controls="panel-hand" aria-selected="true" tabindex="0" data-i18n="hand"></button>
+      <button id="tab-linear" role="tab" type="button" aria-controls="panel-linear" aria-selected="true" tabindex="0" data-i18n="linear"></button>
+      <button id="tab-hand" role="tab" type="button" aria-controls="panel-hand" aria-selected="false" tabindex="-1" data-i18n="hand"></button>
       <button id="tab-bytes" role="tab" type="button" aria-controls="panel-bytes" aria-selected="false" tabindex="-1" data-i18n="bytes"></button>
       <button id="tab-pitfalls" role="tab" type="button" aria-controls="panel-pitfalls" aria-selected="false" tabindex="-1" data-i18n="pitfalls"></button>
     </div>
-    <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand">
+    <section id="panel-linear" class="panel" role="tabpanel" aria-labelledby="tab-linear">
+      <h2 data-i18n="linear"></h2>
+      <p data-i18n="linearIntro"></p>
+      <p class="hand-formula">f(x) = s + a₁x (mod 13)</p>
+      <p data-i18n="linearField"></p>
+      <div class="settings-grid"><label><span>n</span><select id="linear-n"></select></label></div>
+      <details id="linear-dealer"><summary data-i18n="linearDealer"></summary><p data-i18n="linearDealerHelp"></p>
+        <div class="settings-grid"><label><span>s = f(0)</span><input id="linear-secret" type="number" min="0" max="12" value="5" inputmode="numeric"></label>
+          <label><span>a₁</span><input id="linear-slope" type="number" min="0" max="12" value="4" inputmode="numeric"></label></div>
+        <button id="linear-reset" type="button" data-i18n="reset"></button><p id="linear-status" role="status"></p>
+      </details>
+      <h3 data-i18n="linearShares"></h3><p data-i18n="linearShareHint"></p><div id="linear-picks" class="actions"></div>
+      <p id="linear-selected" class="result" role="status"></p>
+      <h3 data-i18n="linearGridTitle"></h3><p data-i18n="linearGridHelp"></p>
+      <div class="grid-frame"><svg id="linear-grid" width="260" height="260" viewBox="0 0 260 260" role="img" data-label="linearGridLabel"></svg></div>
+      <div id="linear-one"><p id="linear-one-result"></p><div class="actions linear-candidate-controls"><button id="linear-previous" type="button" data-i18n="previous"></button>
+        <button id="linear-next" type="button" data-i18n="next"></button>
+        <label class="linear-candidate-label"><span data-i18n="linearCandidateLabel"></span><select id="linear-candidate"></select></label></div><p id="linear-candidate-result" class="result"></p></div>
+      <div id="linear-two" hidden><p id="linear-two-result" class="result"></p></div>
+      <button id="linear-to-hand" type="button" data-i18n="linearToHand"></button>
+    </section>
+    <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand" hidden>
       <h2 data-i18n="hand"></h2><p data-i18n="handIntro"></p>
       <div class="hand-primer">
         <p data-i18n="handParameters"></p>
@@ -92,7 +115,7 @@
     <p data-i18n="helpText"></p>
     <h3 data-i18n="helpHow"></h3>
     <ol class="help-list">
-      <li data-i18n="helpStep1"></li><li data-i18n="helpStep2"></li><li data-i18n="helpStep3"></li>
+      <li data-i18n="helpStep0"></li><li data-i18n="helpStep1"></li><li data-i18n="helpStep2"></li><li data-i18n="helpStep3"></li>
       <li data-i18n="helpStep4"></li><li data-i18n="helpStep5"></li><li data-i18n="helpStep6"></li>
     </ol>
     <h3 data-i18n="helpUses"></h3>
