@@ -38,7 +38,8 @@
       <p class="hand-formula">f(x) = s + a₁x (mod 13)</p>
       <p data-i18n="linearField"></p>
       <div class="settings-grid"><label><span>n</span><select id="linear-n"></select></label></div>
-      <details id="linear-dealer"><summary data-i18n="linearDealer"></summary><p data-i18n="linearDealerHelp"></p>
+      <p id="linear-threshold" role="status"></p>
+      <details id="linear-dealer"><summary data-i18n="linearDealer"></summary><p data-i18n="linearDealerSet"></p><p data-i18n="linearDealerHelp"></p>
         <div class="settings-grid"><label><span>s = f(0)</span><input id="linear-secret" type="number" min="0" max="12" value="5" inputmode="numeric"></label>
           <label><span>a₁</span><input id="linear-slope" type="number" min="0" max="12" value="4" inputmode="numeric"></label></div>
         <button id="linear-reset" type="button" data-i18n="reset"></button><p id="linear-status" role="status"></p>

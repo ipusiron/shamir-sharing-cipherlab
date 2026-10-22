@@ -20,6 +20,7 @@
   }
   function render() {
     $('linear-n').value=String(state.n);
+    $('linear-threshold').textContent=format('linearThreshold',{n:state.n});
     $('linear-secret').value=String(state.secret);
     $('linear-slope').value=String(state.slope);
     $('linear-picks').replaceChildren(...shares().map(([x,y])=>{
