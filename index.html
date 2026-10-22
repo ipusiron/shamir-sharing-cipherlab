@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; connect-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Learn Shamir secret sharing with finite fields, interpolation and implementation pitfalls.">
+  <title>ShamirSharing CipherLab</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script src="sha256-core.js" defer></script>
+  <script src="gf-core.js" defer></script>
+  <script src="pitfalls.js" defer></script>
+  <script src="messages.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="page-header">
+    <div class="masthead"><div><p class="eyebrow">DAY123 · SPLIT / INTERPOLATE / PITFALLS</p><h1>ShamirSharing <span>CipherLab</span></h1></div>
+      <div class="header-tools"><button id="theme" class="icon-button" type="button" data-label="theme">◐</button>
+        <button id="language" class="icon-button" type="button" data-label="language">EN</button>
+        <button id="help" class="icon-button" type="button" data-label="help" aria-haspopup="dialog">?</button></div></div>
+    <p class="tagline" data-i18n="tagline"></p>
+  </header>
+  <main>
+    <aside class="notice" data-i18n="educational"></aside>
+    <div class="tabs" role="tablist" aria-label="Learning steps" data-label="tablist">
+      <button id="tab-hand" role="tab" type="button" aria-controls="panel-hand" aria-selected="true" tabindex="0" data-i18n="hand"></button>
+      <button id="tab-bytes" role="tab" type="button" aria-controls="panel-bytes" aria-selected="false" tabindex="-1" data-i18n="bytes"></button>
+      <button id="tab-pitfalls" role="tab" type="button" aria-controls="panel-pitfalls" aria-selected="false" tabindex="-1" data-i18n="pitfalls"></button>
+    </div>
+    <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand"><h2 data-i18n="hand"></h2><p data-i18n="handIntro"></p></section>
+    <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden><h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p></section>
+    <section id="panel-pitfalls" class="panel" role="tabpanel" aria-labelledby="tab-pitfalls" hidden><h2 data-i18n="pitfalls"></h2><p data-i18n="pitfallsIntro"></p></section>
+    <details class="panel"><summary data-i18n="theory"></summary><p data-i18n="theoryIntro"></p></details>
+  </main>
+  <footer><p data-i18n="privacy"></p><a href="https://github.com/ipusiron/shamir-sharing-cipherlab" data-i18n="source"></a></footer>
+  <dialog id="help-dialog" aria-labelledby="help-title"><h2 id="help-title" data-i18n="help"></h2><p data-i18n="helpText"></p><button id="close-help" type="button" data-i18n="close"></button></dialog>
+</body>
+</html>
