@@ -227,7 +227,7 @@
   const $ = id => document.getElementById(id), G = ShamirGF, P = ShamirPitfalls;
   const t = key => ShamirMessages[document.documentElement.lang][key] || key;
   const E = (tag, value, cls) => { const el=document.createElement(tag);if(value!==undefined)el.textContent=String(value);if(cls)el.className=cls;return el; };
-  const state = { message:'MEET AT DAWN', k:3, n:5, shares:[], coefficients:[], column:0, selected:[1,2,3], error:'', composing:false };
+  const state = { message:'MEET AT DAWN', k:3, n:5, shares:[], coefficients:[], column:0, selected:[], error:'', composing:false };
   const toHex = value => value.toString(16).toUpperCase().padStart(2,'0');
   const format = (key,values) => t(key).replace(/\{([a-z]+)\}/gi,(_,name)=>String(values[name]));
   function choices(id, from, to, value) { $(id).replaceChildren(...Array.from({length:to-from+1},(_,i)=>{const o=E('option',from+i);o.value=String(from+i);o.selected=from+i===value;return o;})); }
@@ -242,7 +242,7 @@
     state.coefficients=[];
     try { state.shares=G.split256(bytes,state.k,state.n,count=>{const out=new Uint8Array(count);crypto.getRandomValues(out);state.coefficients.push(out);return out;}); }
     catch (_) { state.error='byteRandomError';state.shares=[];state.coefficients=[]; }
-    state.selected=Array.from({length:state.k},(_,i)=>i+1);renderBytes();
+    state.selected=[];renderBytes();
   }
   function readable(bytes) {
     try { const decoded=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
@@ -252,7 +252,7 @@
   function renderBytes(){
     $('byte-error').textContent=state.error?t(state.error):'';
     $('byte-calculation-intro').textContent=format('byteCalculationIntro',{k:state.k,n:state.n});
-    if(!state.shares.length){$('byte-table').replaceChildren();$('byte-secret-hex').textContent='';$('byte-column').replaceChildren();$('byte-coefficient-source').textContent='';$('byte-formula').textContent='';$('byte-calculation').replaceChildren();$('byte-first-example').textContent='';$('byte-picks').replaceChildren();$('byte-weights').replaceChildren();$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';return;}
+    if(!state.shares.length){$('byte-table').replaceChildren();$('byte-secret-hex').textContent='';$('byte-column').replaceChildren();$('byte-coefficient-source').textContent='';$('byte-formula').textContent='';$('byte-calculation').replaceChildren();$('byte-first-example').textContent='';$('byte-picks').replaceChildren();$('byte-selection-status').textContent='';$('byte-pending-equations').replaceChildren();$('byte-weights-intro').textContent='';$('byte-weights').replaceChildren();$('byte-weights').hidden=true;$('byte-recovery-example').textContent='';$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';return;}
     const secret=new TextEncoder().encode(state.message),head=['x',...Array.from({length:secret.length},(_,i)=>String(i))];
     const rows=[[t('byteSecret'),...Array.from(secret,toHex)],...state.shares.map(share=>[`#${share.x}`,...Array.from(share.y,toHex)])];
     table($('byte-table'),head,rows);
@@ -261,9 +261,47 @@
     $('byte-column').replaceChildren(...Array.from(secret,(_,index)=>{const option=E('option',`${index}: ${toHex(secret[index])}`);option.value=String(index);option.selected=index===state.column;return option;}));
     renderByteCalculation(secret);
     $('byte-picks').replaceChildren(...state.shares.map(share=>{const button=E('button',`#${share.x}`);button.type='button';button.dataset.bytePick=String(share.x);button.setAttribute('aria-pressed',String(state.selected.includes(share.x)));return button;}));
-    if(state.selected.length<state.k){$('byte-weights').replaceChildren();$('byte-restored-hex').textContent=`${t('needShares')}: ${state.k-state.selected.length}`;$('byte-restored-text').textContent='';return;}
-    const chosen=state.selected.map(x=>state.shares[x-1]),result=G.combine256(chosen,state.k);
-    table($('byte-weights'),[t('byteShare'),t('byteWeight')],result.terms.map(row=>[`#${row.x}`,toHex(row.lambda)]));
+    renderByteRecovery();
+  }
+  function renderByteRecovery(){
+    const chosen=state.selected.map(x=>state.shares[x-1]),count=chosen.length;
+    $('byte-selection-status').textContent=format('byteSelectionStatus',{
+      count,k:state.k,shares:chosen.length?chosen.map(share=>`#${share.x}`).join(document.documentElement.lang==='ja'?'、':', '):t('byteNoSelection')
+    });
+    $('byte-pending-equations').replaceChildren();
+    $('byte-weights-intro').textContent='';$('byte-weights').replaceChildren();$('byte-weights').hidden=true;
+    $('byte-recovery-example').textContent='';$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';
+    if(count<state.k){
+      if(!count){$('byte-pending-equations').append(E('p',t('byteSelectFirst')));return;}
+      const subs='₀₁₂₃₄₅₆₇₈₉',sup='⁰¹²³⁴⁵⁶⁷⁸⁹';
+      const unknowns=['s₀',...Array.from({length:state.k-1},(_,degree)=>`a${subs[degree+1]},₀`)];
+      $('byte-pending-equations').append(E('p',format('bytePendingWhy',{
+        unknowns:unknowns.join(document.documentElement.lang==='ja'?'、':', '),k:state.k,count
+      })));
+      chosen.forEach(share=>{
+        const x=toHex(share.x),terms=unknowns.slice(1).map((name,degree)=>`${name}·${x}${degree?sup[degree+1]:''}`);
+        $('byte-pending-equations').append(E('p',`F₀(${x}) = ${unknowns[0]} ⊕ ${terms.join(' ⊕ ')} = ${toHex(share.y[0])}`));
+      });
+      return;
+    }
+    const result=G.combine256(chosen,state.k);
+    $('byte-weights-intro').textContent=t('byteWeightsIntro');
+    const products=[];
+    const rows=chosen.map((share,i)=>{
+      const term=result.terms[i],others=chosen.filter(other=>other.x!==share.x);
+      const numerator=others.map(other=>toHex(other.x)).join('×');
+      const denominator=others.map(other=>toHex(share.x^other.x)).join('×');
+      const product=G.mul256(term.lambda,share.y[0]);products.push(toHex(product));
+      return [`#${share.x}`,toHex(share.x),toHex(share.y[0]),
+        `${numerator}=${toHex(term.numerator)}`,`${denominator}=${toHex(term.denominator)}`,
+        toHex(term.inverse),toHex(term.lambda),`${toHex(term.lambda)}×${toHex(share.y[0])}=${toHex(product)}`];
+    });
+    table($('byte-weights'),[t('byteCalcShare'),'X',t('byteRecoveryValue'),
+      'Nᵢ','Dᵢ','Dᵢ⁻¹',t('byteWeight'),t('byteRecoveryProduct')],rows);
+    $('byte-weights').hidden=false;
+    $('byte-recovery-example').textContent=format('byteRecoveryExample',{
+      terms:products.join(' ⊕ '),result:toHex(result.out[0])
+    });
     $('byte-restored-hex').textContent=`${t('restoredHex')}: ${P.hex(result.out)}`;
     $('byte-restored-text').textContent=`${t('restoredText')}: ${readable(result.out)}`;
   }
@@ -279,11 +317,11 @@
       n:state.n,last:toHex(state.n)
     });
     $('byte-formula').textContent=`F${sub}(X) = ${symbolic} = ${numeric}  (GF(2⁸))`;
-    const headings=[t('byteCalcShare'),'X',t('byteCalcResult'),t('byteCalcSecret'),...coefficients.slice(1).map((_,degree)=>`${name(degree+1)}·X${degree?sup[degree+1]:''}`)];
+    const headings=[t('byteCalcShare'),'X',t('byteCalcSecret'),...coefficients.slice(1).map((_,degree)=>`${name(degree+1)}·X${degree?sup[degree+1]:''}`),t('byteCalcResult')];
     const rows=state.shares.map(share=>{
       let power=1,value=coefficients[0];
       const terms=coefficients.slice(1).map(coefficient=>{power=G.mul256(power,share.x);const product=G.mul256(coefficient,power);value^=product;return `${toHex(coefficient)}×${toHex(power)}=${toHex(product)}`;});
-      return [`#${share.x}`,toHex(share.x),toHex(value),toHex(coefficients[0]),...terms];
+      return [`#${share.x}`,toHex(share.x),toHex(coefficients[0]),...terms,toHex(value)];
     });
     table($('byte-calculation'),headings,rows);
     const first=state.shares[0],terms=coefficients.slice(1).map((coefficient,degree)=>({
