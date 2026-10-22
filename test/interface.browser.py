@@ -33,13 +33,13 @@ def test_hand_primer(page):
     primer = page.locator("#panel-hand .hand-primer")
     assert primer.is_visible()
     assert primer.bounding_box()["y"] < page.locator("#panel-hand .settings-grid").first.bounding_box()["y"]
-    assert "(n,k)" in primer.inner_text()
+    assert "(n,k) は n 個の共有情報を作り、そのうち k 個以上を揃えることで秘密を復元する設定を意味します。" in primer.inner_text()
     assert "k=3" in primer.inner_text()
     assert "ラグランジュ補間" in primer.inner_text()
     assert page.locator(".hand-formula").inner_text() == "f(x) = f(0) + a₁x + a₂x² (mod p)"
     assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     page.locator("#language").click()
-    assert "number of shares created" in primer.inner_text()
+    assert "at least k of them are needed" in primer.inner_text()
     assert "Lagrange interpolation" in primer.inner_text()
     assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     page.locator("#theme").click()
