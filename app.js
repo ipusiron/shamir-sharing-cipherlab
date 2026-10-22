@@ -252,7 +252,7 @@
   function renderBytes(){
     $('byte-error').textContent=state.error?t(state.error):'';
     $('byte-calculation-intro').textContent=format('byteCalculationIntro',{k:state.k,n:state.n});
-    if(!state.shares.length){$('byte-table').replaceChildren();$('byte-secret-hex').textContent='';$('byte-column').replaceChildren();$('byte-formula').textContent='';$('byte-calculation').replaceChildren();$('byte-picks').replaceChildren();$('byte-weights').replaceChildren();$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';return;}
+    if(!state.shares.length){$('byte-table').replaceChildren();$('byte-secret-hex').textContent='';$('byte-column').replaceChildren();$('byte-coefficient-source').textContent='';$('byte-formula').textContent='';$('byte-calculation').replaceChildren();$('byte-first-example').textContent='';$('byte-picks').replaceChildren();$('byte-weights').replaceChildren();$('byte-restored-hex').textContent='';$('byte-restored-text').textContent='';return;}
     const secret=new TextEncoder().encode(state.message),head=['x',...Array.from({length:secret.length},(_,i)=>String(i))];
     const rows=[[t('byteSecret'),...Array.from(secret,toHex)],...state.shares.map(share=>[`#${share.x}`,...Array.from(share.y,toHex)])];
     table($('byte-table'),head,rows);
@@ -268,16 +268,31 @@
     $('byte-restored-text').textContent=`${t('restoredText')}: ${readable(result.out)}`;
   }
   function renderByteCalculation(secret){
-    const index=state.column,sub=String(index).replace(/[0-9]/g,d=>'₀₁₂₃₄₅₆₇₈₉'[Number(d)]),sup='⁰¹²³⁴⁵⁶⁷⁸⁹';
+    const index=state.column,digits='₀₁₂₃₄₅₆₇₈₉',sub=String(index).replace(/[0-9]/g,d=>digits[Number(d)]),sup='⁰¹²³⁴⁵⁶⁷⁸⁹';
     const coefficients=[secret[index],...state.coefficients[index]];
-    $('byte-formula').textContent=`F${sub}(X) = ${coefficients.map((value,degree)=>`{${toHex(value)}}${degree?`·X${degree===1?'':sup[degree]}`:''}`).join(' ⊕ ')}  (GF(2⁸))`;
-    const headings=[t('byteCalcShare'),'X',t('byteCalcResult'),t('byteCalcSecret'),...coefficients.slice(1).map((_,degree)=>`a${'₀₁₂₃₄₅₆₇₈₉'[degree+1]}·X${degree?'⁰¹²³⁴⁵⁶⁷⁸⁹'[degree+1]:''}`)];
+    const name=degree=>`a${digits[degree]},${sub}`;
+    const symbolic=coefficients.map((_,degree)=>degree?`${name(degree)}·X${degree===1?'':sup[degree]}`:`s${sub}`).join(' ⊕ ');
+    const numeric=coefficients.map((value,degree)=>`{${toHex(value)}}${degree?`·X${degree===1?'':sup[degree]}`:''}`).join(' ⊕ ');
+    $('byte-coefficient-source').textContent=format('byteCoefficientSource',{
+      position:index,sub,secret:toHex(secret[index]),
+      coefficients:coefficients.slice(1).map((value,degree)=>`${name(degree+1)}=${toHex(value)}`).join(document.documentElement.lang==='ja'?'、':', '),
+      n:state.n,last:toHex(state.n)
+    });
+    $('byte-formula').textContent=`F${sub}(X) = ${symbolic} = ${numeric}  (GF(2⁸))`;
+    const headings=[t('byteCalcShare'),'X',t('byteCalcResult'),t('byteCalcSecret'),...coefficients.slice(1).map((_,degree)=>`${name(degree+1)}·X${degree?sup[degree+1]:''}`)];
     const rows=state.shares.map(share=>{
       let power=1,value=coefficients[0];
       const terms=coefficients.slice(1).map(coefficient=>{power=G.mul256(power,share.x);const product=G.mul256(coefficient,power);value^=product;return `${toHex(coefficient)}×${toHex(power)}=${toHex(product)}`;});
       return [`#${share.x}`,toHex(share.x),toHex(value),toHex(coefficients[0]),...terms];
     });
     table($('byte-calculation'),headings,rows);
+    const first=state.shares[0],terms=coefficients.slice(1).map((coefficient,degree)=>({
+      input:`(${toHex(coefficient)}×${toHex(first.x)}${degree?sup[degree+1]:''})`,
+      product:toHex(G.mul256(coefficient,G.pow256(first.x,degree+1)))
+    }));
+    $('byte-first-example').textContent=format('byteFirstExample',{
+      expression:`F${sub}(${toHex(first.x)}) = ${toHex(coefficients[0])} ⊕ ${terms.map(term=>term.input).join(' ⊕ ')} = ${toHex(coefficients[0])} ⊕ ${terms.map(term=>term.product).join(' ⊕ ')} = ${toHex(first.y[index])}`
+    });
   }
   function multiplication(){let a=0x57,b=0x13,result=0;const rows=[];
     for(let step=0;step<8;step++){const added=b&1?a:0;result^=added;const carry=a>>>7;
