@@ -234,22 +234,21 @@ def test_distributed_share_data(page):
     assert page.locator("[data-i18n='termValues']").inner_text() == "計算式"
     assert page.locator("#distribution-table tr").first.locator("td").nth(1).inner_text() == "f(1)=5+4×1+2×1²=5+4+2"
     assert page.locator("#distribution-table tr").nth(1).locator("td").nth(1).inner_text() == "f(2)=5+4×2+2×2²=5+8+8"
-    assert "v₁ = f(1) = 11" in lines.first.inner_text()
-    assert "復元用の組： (1,v₁) = (1,f(1)) = (1,(5 + 4×1 + 2×1²) mod 13) = (1,11)" in lines.first.inner_text()
+    assert page.locator("[data-i18n='sharePairsHeading']").inner_text() == "復元用の組（シェア番号, シェア値）"
+    assert [line.inner_text() for line in lines.all()] == ["#1： (1,11)", "#2： (2,8)", "#3： (3,9)", "#4： (4,1)", "#5： (5,10)"]
     assert page.locator("#share-data").bounding_box()["y"] > page.locator("#distribution-table").bounding_box()["y"]
     page.locator("#share-count").select_option("7")
     assert lines.count() == 7
-    assert lines.last.inner_text().startswith("#7 のシェア： v₇ = f(7) =")
-    assert "(7,(5 + 4×7 + 2×7²) mod 13)" in lines.last.inner_text()
+    assert lines.last.inner_text() == "#7： (7,1)"
     page.locator("[data-coefficient='1']").fill("6")
     page.locator("[data-coefficient='1']").dispatch_event("change")
-    assert lines.first.inner_text().endswith("(1,(5 + 6×1 + 2×1²) mod 13) = (1,0)")
+    assert lines.first.inner_text() == "#1： (1,0)"
     page.locator("#prime").select_option("17")
-    assert lines.first.inner_text().endswith("mod 17) = (1,13)")
+    assert lines.first.inner_text() == "#1： (1,13)"
     page.locator("#threshold").select_option("1")
-    assert lines.first.inner_text().endswith("(1,(5) mod 17) = (1,5)")
+    assert lines.first.inner_text() == "#1： (1,5)"
     page.locator("#language").click()
-    assert lines.first.inner_text().startswith("Share #1: v₁ = f(1) = 5")
+    assert lines.first.inner_text() == "Share #1: (1,5)"
     page.locator("#language").click()
     page.locator("#reset-hand").click()
 
