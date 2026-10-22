@@ -29,6 +29,25 @@ def first_y(page):
     return page.locator("#distribution-table tr").first.locator("td").last.inner_text()
 
 
+def test_hand_primer(page):
+    primer = page.locator("#panel-hand .hand-primer")
+    assert primer.is_visible()
+    assert primer.bounding_box()["y"] < page.locator("#panel-hand .settings-grid").first.bounding_box()["y"]
+    assert "(n,k)" in primer.inner_text()
+    assert "k=3" in primer.inner_text()
+    assert "ラグランジュ補間" in primer.inner_text()
+    assert page.locator(".hand-formula").inner_text() == "f(x) = f(0) + a₁x + a₂x² (mod p)"
+    assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
+    page.locator("#language").click()
+    assert "number of shares created" in primer.inner_text()
+    assert "Lagrange interpolation" in primer.inner_text()
+    assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
+    page.locator("#theme").click()
+    assert primer.is_visible()
+    page.locator("#theme").click()
+    page.locator("#language").click()
+
+
 def test_interactions(page):
     assert first_y(page) == "11"
     assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
@@ -186,6 +205,7 @@ def main():
                 assert large["grid"] > large["gridFrame"] if width == 320 else True
                 page.locator("#reset-hand").click()
                 normal = geometry(page, width)
+                test_hand_primer(page)
                 if width == 320:
                     assert page.locator("#field-grid").get_attribute("width") == "260"
                     assert normal["grid"] == normal["gridFrame"], normal

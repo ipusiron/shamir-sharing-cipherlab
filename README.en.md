@@ -43,6 +43,8 @@ The same four states in Japanese appear in the [Japanese README](README.md).
 | Bytes | Split a short UTF-8 phrase in GF(2⁸) and recover with k shares | XOR, eight shift/reduce steps, and a display-only log/exp table |
 | Pitfalls | Compare tampering, x=0, and too few shares | The differences among no check, CRC-32, and an embedded fingerprint |
 
+In `(n,k)`, n is the number of shares created and k is the number needed to reconstruct the secret. With the default `k=3`, the shares come from `f(x)=f(0)+a₁x+a₂x² (mod p)`, and Lagrange interpolation recovers `f(0)` from three selected points.
+
 The default GF(13) example is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its shares are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the reconstruction weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes the candidate `S=1`.
 
 Coefficients are allowed to be zero, so the polynomial has degree *at most* k−1. With `k=1`, every share is simply the secret: copying instead of splitting.

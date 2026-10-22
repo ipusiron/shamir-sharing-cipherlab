@@ -26,6 +26,9 @@ h1 span { color:var(--blue); }
 .tabs button[aria-selected="true"] { color:var(--blue); border-bottom:3px solid var(--blue); font-weight:700; }
 .panel { padding:1rem; margin:1rem 0; min-width:0; }
 .panel h2 { margin-top:0; }
+.hand-primer { margin:.75rem 0 1rem; padding:.55rem .75rem; border-left:3px solid var(--blue); background:var(--bg); }
+.hand-primer p { margin:.3rem 0; }
+.hand-formula { font-weight:700; overflow-wrap:anywhere; }
 summary { cursor:pointer; font-weight:700; }
 footer { padding:1rem 0 3rem; }
 dialog { max-width:min(90vw,34rem); color:var(--ink); background:var(--paper); border:2px solid var(--blue); border-radius:8px; }
