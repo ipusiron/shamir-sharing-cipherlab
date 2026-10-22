@@ -99,6 +99,32 @@
     for(const [x,label] of [[0,'x=0'],[s.n,`x=${s.n}`]]){
       const text=S('text',{x:X(x),y:295,'text-anchor':'middle',class:'hand-graph-label'});text.textContent=label;svg.append(text);
     }
+    // A real-valued drawing aid. Only integer x coordinates are field elements.
+    // Break the path before each reduction from p-1 to 0 instead of joining it vertically.
+    if(s.k===2||s.k===3){
+      const ordered=[...candidates].sort((a,b)=>(a.secret===activeSecret)-(b.secret===activeSecret));
+      for(const item of ordered){
+        const raw=x=>item.coefficients.reduce((sum,c,i)=>sum+c*x**i,0);
+        const maximum=raw(s.n),parts=[];
+        const root=value=>{
+          if(value<=raw(0))return 0;
+          if(value>=maximum)return s.n;
+          let low=0,high=s.n;
+          for(let i=0;i<40;i++){const middle=(low+high)/2;if(raw(middle)<value)low=middle;else high=middle;}
+          return (low+high)/2;
+        };
+        for(let band=Math.floor(raw(0)/s.p);band<=Math.floor(maximum/s.p);band++){
+          const begin=root(band*s.p),end=root(band*s.p+s.p-1);
+          if(end<begin)continue;
+          const steps=Math.max(1,Math.ceil((end-begin)*20));
+          const xs=Array.from({length:steps+1},(_,i)=>begin+(end-begin)*i/steps);
+          for(let x=Math.ceil(begin);x<=Math.floor(end);x++)xs.push(x);
+          xs.sort((a,b)=>a-b);
+          parts.push(xs.map((x,i)=>`${i?'L':'M'}${X(x).toFixed(2)},${Y(Math.max(0,Math.min(s.p-1,raw(x)-band*s.p))).toFixed(2)}`).join(' '));
+        }
+        svg.append(S('path',{d:parts.join(' '),class:`hand-graph-guide${item.secret===activeSecret?' hand-graph-guide-active':''}`}));
+      }
+    }
     for(const item of candidates)for(let x=0;x<=s.n;x++){
       const y=G.evalP(item.coefficients,x,s.p);
       svg.append(S('circle',{cx:X(x),cy:Y(y),r:item.secret===activeSecret?4:2.8,
@@ -117,12 +143,16 @@
     }
   }
   function renderRecoveryGraphs(){
+    const guideShape=coefficients=>t(coefficients[2]?'handQuadraticShape':coefficients[1]?'handLineShape':'handFlatShape');
     if(s.fewer.length===s.k-1){
       const all=s.k===1?Array.from({length:s.p},(_,secret)=>({secret,coefficients:[secret]})):G.candidatesP(fewPoints(),s.k,s.p);
       const sample=[0,Math.floor(s.p/2),s.p-1,s.candidate];
       const shown=s.all?all:all.filter(r=>sample.includes(r.secret));
       recoveryGraph('hand-few-graph',s.fewer,shown,s.candidate);
-      $('hand-few-graph-caption').textContent=format('handFewGraphCaption',{count:s.fewer.length});
+      $('hand-few-graph-caption').textContent=s.k<=3&&s.k>1
+        ?format('handFewGuideCaption',{count:s.fewer.length,k:s.k,degree:s.k-1,
+          shape:guideShape(all.find(item=>item.secret===s.candidate).coefficients)})
+        :format('handFewGraphCaption',{count:s.fewer.length});
     }else{
       recoveryGraph('hand-few-graph',s.fewer,[],null);
       $('hand-few-graph-caption').textContent=format('handFewPending',{missing:s.k-1-s.fewer.length});
@@ -130,7 +160,9 @@
     if(s.selected.length===s.k){
       const coefficients=G.polynomialP(points(),s.p),secret=coefficients[0];
       recoveryGraph('hand-enough-graph',s.selected,[{coefficients,secret}],secret);
-      $('hand-enough-graph-caption').textContent=format('handEnoughGraphCaption',{max:s.n,secret});
+      $('hand-enough-graph-caption').textContent=s.k<=3&&s.k>1
+        ?format('handEnoughGuideCaption',{max:s.n,secret,k:s.k,degree:s.k-1,shape:guideShape(coefficients)})
+        :format('handEnoughGraphCaption',{max:s.n,secret});
     }else{
       recoveryGraph('hand-enough-graph',s.selected,[],null);
       $('hand-enough-graph-caption').textContent=format('handEnoughPending',{missing:s.k-s.selected.length});
