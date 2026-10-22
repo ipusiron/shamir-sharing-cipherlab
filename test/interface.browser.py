@@ -1,5 +1,6 @@
 """Local file:// browser checks. Run: python test/interface.browser.py"""
 from pathlib import Path
+import re
 
 from playwright.sync_api import sync_playwright
 
@@ -467,8 +468,19 @@ def test_tabs_and_localization(page):
     assert "0x11B" in page.locator("[data-i18n='fieldRule']").inner_text()
     assert "シェアを作る式Fⱼ(X)" in page.locator("[data-i18n='byteFieldReason']").inner_text()
     formula = page.locator("#byte-formula")
-    assert formula.inner_text().startswith("F₀(X) = {4D} ⊕ ")
+    assert formula.inner_text().startswith("F₀(X) = s₀ ⊕ a₁,₀·X ⊕ a₂,₀·X² = {4D} ⊕ ")
     assert "X²" in formula.inner_text()
+    values = re.findall(r"\{([0-9A-F]{2})\}", formula.inner_text())
+    assert len(values) == 3
+    assert values[0] == "4D"
+    source = page.locator("#byte-coefficient-source").inner_text()
+    assert f"a₁,₀={values[1]}" in source and f"a₂,₀={values[2]}" in source
+    assert "元のバイトとは独立に暗号学的乱数" in source
+    assert "#1専用という意味ではありません" in source
+    headings = page.locator("#byte-calculation thead th").all_inner_texts()
+    assert headings[4:] == ["a₁,₀·X", "a₂,₀·X²"]
+    first_result = page.locator("#byte-calculation tbody tr").first.locator("td").nth(2).inner_text()
+    assert f"F₀(01) = 4D ⊕ ({values[1]}×01) ⊕ ({values[2]}×01²) = 4D ⊕ {values[1]} ⊕ {values[2]} = {first_result}" in page.locator("#byte-first-example").inner_text()
     for share_number, row in enumerate(page.locator("#byte-calculation tbody tr").all(), 1):
         cells = row.locator("td").all_inner_texts()
         total = int(cells[3], 16)
@@ -477,12 +489,15 @@ def test_tabs_and_localization(page):
         assert total == int(cells[2], 16)
         assert cells[2] == page.locator(f"#byte-table tbody tr:nth-child({share_number + 1}) td:nth-child(2)").inner_text()
     page.locator("#byte-column").select_option("1")
-    assert formula.inner_text().startswith("F₁(X) = {45} ⊕ ")
+    assert formula.inner_text().startswith("F₁(X) = s₁ ⊕ a₁,₁·X ⊕ a₂,₁·X² = {45} ⊕ ")
+    assert page.locator("#byte-calculation thead th").all_inner_texts()[4:] == ["a₁,₁·X", "a₂,₁·X²"]
     page.locator("#byte-column").select_option("0")
+    assert re.findall(r"\{([0-9A-F]{2})\}", formula.inner_text()) == values
     page.locator("#byte-k").select_option("2")
     assert "X²" not in formula.inner_text()
     page.locator("#byte-k").select_option("4")
     assert "X³" in formula.inner_text()
+    assert "a₃,₀·X³" in page.locator("#byte-calculation thead").inner_text()
     page.locator("#byte-k").select_option("3")
     before = page.locator("#byte-secret-hex").inner_text()
     page.locator("#byte-message").evaluate("el => {el.dispatchEvent(new CompositionEvent('compositionstart')); el.value='あ'; el.dispatchEvent(new Event('input',{bubbles:true}));}")
@@ -494,6 +509,8 @@ def test_tabs_and_localization(page):
     page.locator("#byte-message").fill("A" * 33)
     assert page.locator("#byte-error").inner_text()
     assert not page.locator("#byte-table tbody tr").count()
+    assert not page.locator("#byte-coefficient-source").inner_text()
+    assert not page.locator("#byte-first-example").inner_text()
     page.locator("#byte-message").fill("MEET AT DAWN")
     page.locator("#tab-pitfalls").click()
     assert page.locator("#panel-pitfalls").is_visible()
@@ -517,6 +534,11 @@ def test_tabs_and_localization(page):
     assert page.locator("#tab-hand").inner_text() == "Trace (k, n) by hand"
     assert page.locator("#real-comparison-graph").get_attribute("aria-label") == "Real-number curve for the selected candidate coefficients"
     assert page.locator("#panel-pitfalls").is_visible()
+    page.locator("#tab-bytes").click()
+    assert "cryptographic random source" in page.locator("#byte-coefficient-source").inner_text()
+    assert "does not mean “for share #1”" in page.locator("#byte-coefficient-source").inner_text()
+    assert page.locator("#byte-calculation thead th").all_inner_texts()[4:] == ["a₁,₀·X", "a₂,₀·X²"]
+    page.locator("#tab-pitfalls").click()
     page.locator("#theme").click()
     assert page.locator("html").get_attribute("data-theme") == "dark"
     page.locator("#help").click()
