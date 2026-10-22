@@ -75,19 +75,26 @@ def test_help(page, width):
     theory = page.locator("#help-theory")
     assert theory.get_attribute("open") is None
     assert page.locator("#lessons .lesson-card").count() == 8
-    assert dialog.evaluate("el => el.scrollHeight > el.clientHeight")
-    assert dialog.evaluate("el => el.scrollWidth <= el.clientWidth")
+    help_body = page.locator(".help-body")
+    assert help_body.evaluate("el => el.scrollHeight > el.clientHeight")
+    assert help_body.evaluate("el => el.scrollWidth <= el.clientWidth")
     box = dialog.bounding_box()
     assert box["x"] >= 0 and box["x"] + box["width"] <= width
     theory.locator("summary").click()
     assert theory.get_attribute("open") is not None
     assert page.locator("#lessons .source-links a").first.is_visible()
-    dialog.evaluate("el => el.scrollTop = el.scrollHeight")
+    assert page.locator("#lessons table").count() == 0
+    assert "λ=(3,10,1)" in page.locator("#lessons .lesson-card").nth(1).inner_text()
+    help_body.evaluate("el => el.scrollTop = el.scrollHeight")
+    header_box = page.locator(".help-header").bounding_box()
+    body_box = help_body.bounding_box()
+    assert body_box["y"] >= header_box["y"] + header_box["height"] - 1
+    assert page.locator("#help-title").is_visible()
     page.locator("#close-help").click()
     assert not dialog.is_visible()
     assert page.locator("#help").evaluate("el => document.activeElement === el")
     page.locator("#help").click()
-    assert dialog.evaluate("el => el.scrollTop") == 0
+    assert help_body.evaluate("el => el.scrollTop") == 0
     page.locator("#close-help").click()
     page.locator("#language").click()
     assert page.locator("footer").inner_text() == "GitHub repository"
@@ -262,6 +269,8 @@ def test_tabs_and_localization(page):
     page.locator("#byte-message").fill("MEET AT DAWN")
     page.locator("#tab-pitfalls").click()
     assert page.locator("#panel-pitfalls").is_visible()
+    assert "わかったこと" in page.locator("#tamper-output").inner_text()
+    assert "分かったこと" not in page.locator("#panel-pitfalls").inner_text()
     page.locator("#tamper-layer").select_option("crc")
     assert "FD0D0F13" in page.locator("#tamper-output").inner_text()
     page.locator("#tamper-layer").select_option("fingerprint")
