@@ -370,11 +370,21 @@ def test_hand_recovery_stages(page):
     assert [b.get_attribute("data-pick") for b in page.locator("#share-picks [aria-pressed='true']").all()] == ["1", "2", "3"]
     assert page.locator("#hand-few-graph .hand-graph-value").count() >= 3
     assert page.locator("#hand-enough-graph .hand-graph-value").count() == 6
-    assert page.locator("#hand-few-graph path, #hand-enough-graph path").count() == 0
+    assert page.locator("#hand-few-graph .hand-graph-guide").count() == 4
+    assert page.locator("#hand-enough-graph .hand-graph-guide-active").count() == 1
+    assert page.locator("#hand-few-graph .hand-graph-guide-active").get_attribute("d").count("M") > 1
+    assert "2次曲線" in page.locator("#hand-few-graph-caption").inner_text()
+    for graph_id in ("hand-few-graph", "hand-enough-graph"):
+        graph = page.locator("#" + graph_id)
+        curve = graph.locator(".hand-graph-guide-active").get_attribute("d")
+        for point in graph.locator(".hand-graph-share").all():
+            coordinate = f"{float(point.get_attribute('cx')):.2f},{float(point.get_attribute('cy')):.2f}"
+            assert coordinate in curve, (graph_id, coordinate)
     assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
     page.locator('#hand-few-picks [data-few-pick="2"]').click()
     assert page.locator("#candidate-section").is_hidden()
     assert page.locator("#hand-few-graph .hand-graph-value").count() == 0
+    assert page.locator("#hand-few-graph path").count() == 0
     page.locator('#hand-few-picks [data-few-pick="4"]').click()
     assert page.locator("#candidate-section").is_visible()
     assert [b.get_attribute("data-pick") for b in page.locator("#share-picks [aria-pressed='true']").all()] == ["1", "2", "4"]
@@ -401,15 +411,26 @@ def test_real_comparison(page):
     assert 's=6' in page.locator('#real-comparison-graph').text_content()
     page.locator('#previous-candidate').click()
     assert page.locator('#real-comparison-graph path').count() == 1
-    assert page.locator('#hand-few-graph path').count() == 0
+    assert page.locator('#hand-few-graph .hand-graph-guide').count() == 4
+    page.locator('#all-candidates').click()
+    assert page.locator('#hand-few-graph .hand-graph-guide').count() == 13
+    page.locator('#all-candidates').click()
     page.locator('#hand-few-picks [data-few-pick="2"]').click()
     assert page.locator('#real-comparison').is_hidden()
     page.locator('#hand-few-picks [data-few-pick="2"]').click()
     assert page.locator('#real-comparison').is_visible()
     page.locator('#threshold').select_option('2')
     assert '高々1次' in page.locator('#real-comparison-caption').inner_text()
+    assert '直線' in page.locator('#hand-few-graph-caption').inner_text()
+    assert page.locator('#hand-enough-graph .hand-graph-guide-active').count() == 1
     page.locator('#threshold').select_option('4')
     assert '高々3次' in page.locator('#real-comparison-caption').inner_text()
+    assert page.locator('#hand-few-graph path, #hand-enough-graph path').count() == 0
+    page.locator('#threshold').select_option('3')
+    page.locator('#coefficient-inputs [data-coefficient="2"]').fill('0')
+    page.locator('#coefficient-inputs [data-coefficient="2"]').press('Tab')
+    assert '高々2次' in page.locator('#hand-few-graph-caption').inner_text()
+    assert '青い直線' in page.locator('#hand-few-graph-caption').inner_text()
     page.locator('#reset-hand').click()
 
 
