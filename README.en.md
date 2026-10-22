@@ -51,7 +51,7 @@ Coefficients are allowed to be zero, so the polynomial has degree *at most* k−
 
 1. In “Trace by hand”, vary `p, k, n, S, a₁…` and read the distribution and reconstruction tables. Enter coefficients or draw them with cryptographic randomness.
 2. Select `k−1 shares`. Advance one candidate at a time or overlay all of them. Toggle the red nonzero-leading-coefficient switch to see a candidate vanish.
-3. Drag a grid point, or select it and tap another cell in the same column. Up and down arrow keys move one cell. With k shares, the table and `ΔS=λᵢ·Δ (mod p)` update together.
+3. Drag a grid point, or select it and tap another cell in the same column. Clicking a point focuses it, and up and down arrow keys move it one cell. With k shares, the table and `ΔS=λᵢ·Δ (mod p)` update together. With fewer than k−1 shares, the curve is not unique; faint points show one example from the current polynomial.
 4. Drag points on the real-number curve to change its y-intercept. With k−1 points, you can move the intercept and still pass through them. Ordinary integers and real numbers leak remainders; compare with the finite-field grid.
 5. In “Bytes”, enter up to 32 UTF-8 bytes. Split with `2≤k≤n≤8`, select k shares, and recover. Hex is always shown; text appears only for valid UTF-8, with controls escaped.
 6. In “Pitfalls”, switch the checking layer. All three cards use fixed `MEET AT DAWN` data rather than your input.
