@@ -59,6 +59,7 @@ th { background:var(--bg); }
 #field-grid { display:block; max-width:none; touch-action:none; }
 #linear-grid { display:block; max-width:none; }
 #linear-dealer { margin:1rem 0; padding:.65rem .8rem; border:1px solid var(--line); }
+.linear-step-heading { font-size:1.1rem; }
 .linear-candidate-label { display:grid; gap:.2rem; min-width:5rem; }
 @media (max-width:600px) { .linear-candidate-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); } .linear-candidate-controls .linear-candidate-label { grid-column:1/-1; } }
 .linear-possible { fill:none; stroke:var(--red); stroke-width:2; opacity:.8; }
