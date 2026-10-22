@@ -146,7 +146,7 @@
   const field=$('field-grid');
   const coordinateTooltip=$('grid-coordinate-tooltip');
   const hideCoordinates=()=>{coordinateTooltip.hidden=true;};
-  for(const svg of [field,$('linear-grid')]){
+  for(const svg of [field]){
     svg.addEventListener('pointermove',event=>{
       if(event.pointerType==='touch'){hideCoordinates();return;}
       const box=svg.getBoundingClientRect(),size=svg===field?s.p:13;

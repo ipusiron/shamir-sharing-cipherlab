@@ -2,39 +2,67 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id), G = ShamirGF, p = 13;
-  const state = { n:5, secret:5, slope:4, selected:[1], candidate:0 };
+  const state = { n:5, secret:5, slope:4, selected:[3], candidate:0 };
   const t = key => ShamirMessages[document.documentElement.lang][key] || key;
   const format = (key, values) => t(key).replace(/\{([a-z0-9]+)\}/gi, (_, name) => String(values[name]));
   const E = (tag, value) => { const el=document.createElement(tag);if(value!==undefined)el.textContent=String(value);return el; };
   const S = (tag, attrs) => { const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));return el; };
   const shares = () => G.splitP([state.secret,state.slope],state.n,p);
   const points = () => state.selected.map(x => shares()[x-1]);
-  function grid(values, secret) {
-    const svg=$('linear-grid'), d=20;
-    svg.replaceChildren();
-    for(let x=0;x<p;x++)for(let y=0;y<p;y++)svg.append(S('rect',{x:d*x,y:d*(p-1-y),width:d,height:d,class:'field-cell'}));
-    if(state.selected.length===1)for(let y=0;y<p;y++)svg.append(S('circle',{cx:d*.5,cy:d*(p-y-.5),r:6,class:'linear-possible'}));
-    for(let x=0;x<p;x++)svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-values[x]-.5),r:4,class:'linear-candidate-dot'}));
-    svg.append(S('circle',{cx:d*.5,cy:d*(p-secret-.5),r:8,class:'linear-secret-dot'}));
-    for(const [x,y] of points())svg.append(S('circle',{cx:d*(x+.5),cy:d*(p-y-.5),r:8,class:'linear-selected-dot'}));
-  }
-  function analogy([x,y]){
-    const svg=$('linear-analogy'),x0=64,x1=220,Y=value=>32+(12-value)*18;
-    svg.replaceChildren(S('line',{x1:x0,y1:24,x2:x0,y2:260,class:'linear-analogy-axis'}),
-      S('line',{x1:x0,y1:260,x2:265,y2:260,class:'linear-analogy-axis'}));
+  function analogy([x,y],candidateSecret){
+    const svg=$('linear-analogy'),x0=54,x12=270,y0=252,unit=18;
+    const X=value=>x0+value*unit,Y=value=>y0-value*unit;
+    const lines=[];
+    const segment=secret=>{
+      const slope=(y-secret)/x;
+      let left=0,right=12;
+      if(slope>0){left=Math.max(left,-secret/slope);right=Math.min(right,(12-secret)/slope);}
+      if(slope<0){left=Math.max(left,(12-secret)/slope);right=Math.min(right,-secret/slope);}
+      return {x1:X(left),y1:Y(secret+slope*left),x2:X(right),y2:Y(secret+slope*right)};
+    };
+    svg.replaceChildren(S('line',{x1:x0,y1:26,x2:x0,y2:y0,class:'linear-analogy-axis'}),
+      S('line',{x1:x0,y1:y0,x2:x12,y2:y0,class:'linear-analogy-axis'}));
     for(const [index,secret] of [0,5,12].entries()){
-      svg.append(S('line',{x1:x0,y1:Y(secret),x2:x1,y2:Y(y),class:`linear-analogy-line linear-analogy-${index}`}));
-      const label=S('text',{x:5,y:Y(secret)+4,class:'linear-analogy-label'});
+      const line=segment(secret);
+      lines.push(line);
+      svg.append(S('line',{...line,class:`linear-analogy-line linear-analogy-${index}`}));
+      const label=S('text',{x:5,y:Y(secret)+4,class:`linear-analogy-label${secret===candidateSecret?' linear-analogy-active-label':''}`});
       label.textContent=`s=${secret}`;svg.append(label);
     }
-    svg.append(S('circle',{cx:x1,cy:Y(y),r:6,class:'linear-analogy-point'}));
-    for(const [labelX,label] of [[x0,'x=0'],[x1,`x=${x}`]]){
+    const active=segment(candidateSecret);
+    lines.push(active);
+    svg.append(S('line',{...active,class:'linear-analogy-line linear-analogy-active'}));
+    if(![0,5,12].includes(candidateSecret)){
+      const label=S('text',{x:5,y:Y(candidateSecret)+4,class:'linear-analogy-label linear-analogy-active-label'});
+      label.textContent=`s=${candidateSecret}`;svg.append(label);
+    }
+    const pointX=X(x),pointY=Y(y);
+    svg.append(S('circle',{cx:pointX,cy:pointY,r:6,class:'linear-analogy-point'}));
+    for(const [labelX,label] of [[x0,'x=0'],[x12,'x=12']]){
       const text=S('text',{x:labelX,y:283,class:'linear-analogy-axis-label','text-anchor':'middle'});
       text.textContent=label;svg.append(text);
     }
-    const pointLabel=S('text',{x:231,y:Y(y)+4,class:'linear-analogy-label'});
+    const pointLabel=S('text',{class:'linear-analogy-label linear-analogy-point-label'});
     pointLabel.textContent=`(${x},${y})`;svg.append(pointLabel);
-    $('linear-analogy-caption').textContent=format('linearAnalogyCaption',{x,y});
+    const crosses=(box,line)=>{
+      const left=Math.max(box.x-3,line.x1),right=Math.min(box.x+box.width+3,line.x2);
+      if(left>right)return false;
+      const at=value=>line.y1+(value-line.x1)*(line.y2-line.y1)/(line.x2-line.x1);
+      return Math.min(at(left),at(right))<=box.y+box.height+3 && Math.max(at(left),at(right))>=box.y-3;
+    };
+    const positions=[];
+    for(const dx of [30,45,60,75,90,18])for(const dy of [-9,27,-23,41,-37,55,-51,69,-65,83,-79])positions.push([dx,dy]);
+    let placed=false;
+    for(const [dx,dy] of positions){
+      pointLabel.setAttribute('x',String(pointX+dx));pointLabel.setAttribute('y',String(pointY+dy));
+      const box=pointLabel.getBBox();
+      if(box.x>=x0+8 && box.x+box.width<=318 && box.y>=2 && box.y+box.height<y0-4 && !lines.some(line=>crosses(box,line))){placed=true;break;}
+    }
+    if(!placed){
+      pointLabel.setAttribute('x','275');
+      pointLabel.setAttribute('y',String(Math.max(18,Math.min(240,pointY-10))));
+    }
+    $('linear-analogy-caption').textContent=format('linearAnalogyCaption',{x,y,secret:candidateSecret});
   }
   function render() {
     const allShares=shares(), subscript='₀₁₂₃₄₅₆₇₈₉';
@@ -50,10 +78,11 @@
       button.type='button';button.dataset.linearPick=String(x);button.setAttribute('aria-pressed',String(selected));return button;
     }));
     const selected=points(),one=selected.length===1;
-    $('linear-one').hidden=!one;$('linear-two').hidden=one;
-    if(one){
-      const [x,y]=selected[0],candidates=G.candidatesP(selected,2,p),candidate=candidates[state.candidate];
-      $('linear-selected').textContent=format('linearSelectedOne',{x,y});
+    $('linear-two').hidden=one;
+    {
+      const [x,y]=selected[0],candidates=G.candidatesP([[x,y]],2,p),candidate=candidates[state.candidate];
+      if(one)$('linear-selected').textContent=format('linearSelectedOne',{x,y});
+      $('linear-one-focus').textContent=format('linearOneFocus',{x,y});
       $('linear-one-result').textContent=format('linearOneResult',{x,y});
       $('linear-distinct').textContent=format('linearDistinct',{
         x,y,a0:candidates[0].coefficients[1],a5:candidates[5].coefficients[1]
@@ -62,13 +91,12 @@
       $('linear-candidate-result').textContent=format('linearCandidateResult',{
         x,y,secret:state.candidate,slope:candidate.coefficients[1],y0:candidate.values[0],y1:candidate.values[1],y2:candidate.values[2]
       });
-      analogy([x,y]);
-      grid(candidate.values,state.candidate);
-    }else{
+      analogy([x,y],state.candidate);
+    }
+    if(!one){
       const [[x1,y1],[x2,y2]]=selected,coefficients=G.polynomialP(selected,p),secret=G.lagrangeP(selected,2,p).secret;
       $('linear-selected').textContent=format('linearSelectedTwo',{x1,y1,x2,y2});
       $('linear-two-result').textContent=format('linearTwoResult',{x1,y1,x2,y2,secret,slope:coefficients[1]});
-      grid(Array.from({length:p},(_,x)=>G.evalP(coefficients,x,p)),secret);
     }
   }
   $('linear-n').replaceChildren(...Array.from({length:7},(_,i)=>{const option=E('option',i+2);option.value=String(i+2);return option;}));
@@ -77,19 +105,21 @@
   for(const [id,key] of [['linear-secret','secret'],['linear-slope','slope']])$(id).addEventListener('change',()=>{
     const value=Number($(id).value);
     if(!Number.isInteger(value)||value<0||value>=p){$('linear-status').textContent=t('invalidInput');$(id).value=String(state[key]);return;}
-    state[key]=value;state.selected=[1];state.candidate=0;$('linear-status').textContent='';render();
+    state[key]=value;state.selected=[Math.min(3,state.n)];state.candidate=0;$('linear-status').textContent='';render();
   });
-  $('linear-reset').addEventListener('click',()=>{Object.assign(state,{n:5,secret:5,slope:4,selected:[1],candidate:0});$('linear-status').textContent='';render();});
+  $('linear-reset').addEventListener('click',()=>{Object.assign(state,{n:5,secret:5,slope:4,selected:[3],candidate:0});$('linear-status').textContent='';render();});
   $('linear-picks').addEventListener('click',event=>{
     const button=event.target.closest('[data-linear-pick]');if(!button)return;
     const x=Number(button.dataset.linearPick),current=state.selected;
     if(current.includes(x)){if(current.length===2)state.selected=current.filter(value=>value!==x);}
-    else state.selected=(current.length===1?[...current,x]:[current[0],x]).sort((a,b)=>a-b);
+    else {
+      state.selected=(current.length===1?[...current,x]:[current[0],x]).sort((a,b)=>a-b);
+      state.candidate=G.lagrangeP(points(),2,p).secret;
+    }
     render();
   });
   $('linear-candidate').addEventListener('change',()=>{state.candidate=Number($('linear-candidate').value);render();});
   for(const [id,delta] of [['linear-previous',-1],['linear-next',1]])$(id).addEventListener('click',()=>{state.candidate=G.mod(state.candidate+delta,p);render();});
-  $('linear-to-hand').addEventListener('click',()=>{$('tab-hand').click();$('tab-hand').focus();});
   window.renderShamirIntro=render;
   render();
 }());
