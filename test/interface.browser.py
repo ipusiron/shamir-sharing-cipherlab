@@ -34,6 +34,7 @@ def test_linear_intro(page, width):
     assert not page.locator("#panel-hand").is_visible()
     assert page.locator("#tab-linear").get_attribute("aria-selected") == "true"
     assert page.locator("#linear-dealer").get_attribute("open") is None
+    assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
     assert "13本" in page.locator("#linear-one-result").inner_text()
     assert "(1,9)" in page.locator("#linear-selected").inner_text()
     assert page.locator("#linear-grid circle.linear-possible").count() == 13
@@ -50,6 +51,8 @@ def test_linear_intro(page, width):
     page.locator('[data-linear-pick="3"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
     page.locator("#linear-dealer summary").click()
+    assert page.locator("#linear-dealer [data-i18n='linearDealerSet']").inner_text() == "秘密情報sと乱数a₁を決めます。"
+    assert "本ツールでは仕組みを試すために値を変えられます。" in page.locator("#linear-dealer [data-i18n='linearDealerHelp']").inner_text()
     page.locator("#linear-secret").fill("7")
     page.locator("#linear-secret").press("Tab")
     page.locator("#linear-slope").fill("2")
@@ -59,10 +62,12 @@ def test_linear_intro(page, width):
     assert "s=7" in page.locator("#linear-two-result").inner_text()
     page.locator("#linear-n").select_option("7")
     assert page.locator("#linear-picks button").count() == 7
+    assert page.locator("#linear-threshold").inner_text().startswith("7人のうち2人")
     page.locator("#linear-reset").click()
     assert page.locator("#linear-picks button").count() == 5
     page.locator("#language").click()
     assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
+    assert page.locator("#linear-threshold").inner_text().startswith("When two of the 5 participants")
     assert "Thirteen polynomials of degree at most one" in page.locator("#linear-one-result").inner_text()
     page.locator("#language").click()
     page.locator("#linear-to-hand").click()
