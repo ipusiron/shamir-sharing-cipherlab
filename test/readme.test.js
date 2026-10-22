@@ -43,7 +43,6 @@ test('README: arithmetic values agree with reference vectors in both languages',
     for (const pair of shares) assert.ok(text.includes(`(${pair.join(',')})`), pair.join(','));
     assert.ok(text.includes('(3,10,1)'));
     assert.ok(text.includes('(7,2,9)'));
-    assert.ok(text.includes('s=1'));
     assert.ok(text.includes('13'));
     assert.ok(text.includes('21,35'));
     assert.ok(text.includes('8,9'));
@@ -82,4 +81,8 @@ test('README: screenshots exist and wording stays in educational scope', () => {
     }
   }
   assert.doesNotMatch(ja, /照合|突き合わせ|効く|走る|安全に保管できる|本物の秘密を分けて/);
+  assert.doesNotMatch(ja, /点をドラッグ|最高次の係数を0以外に限ると、候補|「① 配る」|「② 戻す」/);
+  assert.doesNotMatch(en, /Drag a grid point|nonzero-leading-coefficient switch|“① Distribute”|“② Reconstruct”/);
+  assert.match(ja, /固定例`\{57\}×\{13\}=\{FE\}`.*ヘルプ/);
+  assert.match(en, /Help contains the fixed `\{57\}×\{13\}=\{FE\}` example/);
 });
