@@ -230,16 +230,20 @@ def test_linear_intro(page, width):
 def test_distributed_share_data(page):
     lines = page.locator("#share-data p")
     assert lines.count() == 5
+    assert page.locator("#polynomial").inner_text() == "f(x) = 5 + 4x + 2x² (mod 13)"
+    assert page.locator("[data-i18n='termValues']").inner_text() == "計算式"
+    assert page.locator("#distribution-table tr").first.locator("td").nth(1).inner_text() == "f(1)=5+4×1+2×1²=5+4+2"
+    assert page.locator("#distribution-table tr").nth(1).locator("td").nth(1).inner_text() == "f(2)=5+4×2+2×2²=5+8+8"
     assert "v₁ = f(1) = 11" in lines.first.inner_text()
-    assert "復元用の組： (1,v₁) = (1,f(1)) = (1,(5 + 4×1 + 2×1^2) mod 13) = (1,11)" in lines.first.inner_text()
+    assert "復元用の組： (1,v₁) = (1,f(1)) = (1,(5 + 4×1 + 2×1²) mod 13) = (1,11)" in lines.first.inner_text()
     assert page.locator("#share-data").bounding_box()["y"] > page.locator("#distribution-table").bounding_box()["y"]
     page.locator("#share-count").select_option("7")
     assert lines.count() == 7
     assert lines.last.inner_text().startswith("#7 のシェア： v₇ = f(7) =")
-    assert "(7,(5 + 4×7 + 2×7^2) mod 13)" in lines.last.inner_text()
+    assert "(7,(5 + 4×7 + 2×7²) mod 13)" in lines.last.inner_text()
     page.locator("[data-coefficient='1']").fill("6")
     page.locator("[data-coefficient='1']").dispatch_event("change")
-    assert lines.first.inner_text().endswith("(1,(5 + 6×1 + 2×1^2) mod 13) = (1,0)")
+    assert lines.first.inner_text().endswith("(1,(5 + 6×1 + 2×1²) mod 13) = (1,0)")
     page.locator("#prime").select_option("17")
     assert lines.first.inner_text().endswith("mod 17) = (1,13)")
     page.locator("#threshold").select_option("1")
