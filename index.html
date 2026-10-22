@@ -33,11 +33,9 @@
       <button id="tab-pitfalls" role="tab" type="button" aria-controls="panel-pitfalls" aria-selected="false" tabindex="-1" data-i18n="pitfalls"></button>
     </div>
     <section id="panel-linear" class="panel" role="tabpanel" aria-labelledby="tab-linear">
-      <h2 data-i18n="linear"></h2>
-      <h3 data-i18n="linearDistributionTitle"></h3>
-      <p data-i18n="linearIntro"></p>
-      <section class="field-primer" aria-labelledby="gf13-title">
-        <h4 id="gf13-title" data-i18n="gf13Title"></h4>
+      <section class="stage-card field-primer" aria-labelledby="linear-prerequisite-title">
+        <h2 id="linear-prerequisite-title" data-i18n="prerequisiteTitle"></h2>
+        <h3 data-i18n="gf13Title"></h3>
         <p data-i18n="gf13Definition"></p>
         <h4 data-i18n="gf13ExamplesTitle"></h4>
         <ul><li data-i18n="gf13Addition"></li><li data-i18n="gf13Multiplication"></li><li data-i18n="gf13Division"></li></ul>
@@ -46,6 +44,9 @@
         <h4 data-i18n="gf13RoleTitle"></h4>
         <p data-i18n="gf13Shares"></p><p data-i18n="gf13IntegerLeak"></p><p data-i18n="gf13FieldContrast"></p>
       </section>
+      <section class="stage-card" aria-labelledby="linear-distribute-title">
+      <h2 id="linear-distribute-title" data-i18n="linearDistributionTitle"></h2>
+      <p data-i18n="linearIntro"></p>
       <p class="linear-formula"><span data-i18n="linearFieldSetup"></span><strong>f(x) = s + a₁x (mod 13)</strong><span data-i18n="linearFormulaEnd"></span></p>
       <p data-i18n="linearField"></p>
       <div class="settings-grid"><label><span>n</span><select id="linear-n"></select></label></div>
@@ -57,7 +58,9 @@
         <button id="linear-reset" type="button" data-i18n="reset"></button><p id="linear-status" role="status"></p>
         <p data-i18n="linearDistributionHelp"></p><div id="linear-distribution" class="share-data"></div>
       </details>
-      <h3 data-i18n="linearRecoveryTitle"></h3><p data-i18n="linearRecoveryIntro"></p>
+      </section>
+      <section class="stage-card" aria-labelledby="linear-recover-title">
+      <h2 id="linear-recover-title" data-i18n="linearRecoveryTitle"></h2><p data-i18n="linearRecoveryIntro"></p>
       <p data-i18n="linearPairMeaning"></p>
       <h4 class="linear-step-heading" data-i18n="linearGridTitle"></h4><p data-i18n="linearGridIntro"></p>
       <div id="linear-one-picks" class="actions" role="group" data-label="linearOnePickLabel"></div>
@@ -77,9 +80,11 @@
         <p id="linear-two-graph-caption"></p>
         <svg id="linear-two-graph" viewBox="0 0 320 292" role="img" data-label="linearTwoGraphLabel"></svg>
       </div>
+      </section>
     </section>
     <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand" hidden>
-      <h2 data-i18n="hand"></h2><p data-i18n="handIntro"></p>
+      <section class="stage-card" aria-labelledby="hand-distribute-title">
+      <h2 id="hand-distribute-title" data-i18n="distribute"></h2><p data-i18n="handIntro"></p>
       <div class="hand-primer">
         <p data-i18n="handParameters"></p>
         <p data-i18n="thresholdCondition1"></p>
@@ -99,10 +104,12 @@
       <p data-i18n="handCoefficientHelp"></p>
       <div class="actions"><button id="random-coefficients" type="button" data-i18n="randomCoefficients"></button><button id="reset-hand" type="button" data-i18n="reset"></button></div>
       <p id="hand-status" role="status"></p>
-      <h3 data-i18n="distribute"></h3><p id="polynomial"></p>
+      <p id="polynomial"></p>
       <div class="table-frame"><table><thead><tr><th>x</th><th data-i18n="termValues"></th><th data-i18n="sum"></th><th>mod p</th></tr></thead><tbody id="distribution-table"></tbody></table></div>
       <div id="share-data" class="share-data"></div>
-      <h3 data-i18n="reconstruct"></h3><p id="share-notation" data-i18n="shareNotation"></p>
+      </section>
+      <section class="stage-card" aria-labelledby="hand-recover-title">
+      <h2 id="hand-recover-title" data-i18n="reconstruct"></h2><p id="share-notation" data-i18n="shareNotation"></p>
       <h4 class="linear-step-heading" data-i18n="handFewTitle"></h4><p id="hand-few-intro" data-i18n="handFewIntro"></p>
       <div id="hand-few-picks" class="actions" role="group" data-label="handFewPickLabel"></div><p id="hand-few-selected" class="result" role="status"></p>
       <div id="candidate-section"><h5 data-i18n="candidateTitle"></h5><p id="candidate-result"></p>
@@ -123,12 +130,14 @@
       <p id="real-result" class="result"></p><div id="real-picks" class="actions"></div>
       <h3 data-i18n="integerTitle"></h3><p data-i18n="integerIntro"></p><div class="table-frame"><table><thead><tr><th>x</th><th>f(x) ℤ</th><th>f(x) mod x</th></tr></thead><tbody id="integer-table"></tbody></table></div><p id="integer-result"></p>
       </details>
+      </section>
     </section>
     <section id="panel-bytes" class="panel" role="tabpanel" aria-labelledby="tab-bytes" hidden>
-      <h2 data-i18n="bytes"></h2><p data-i18n="bytesIntro"></p><p data-i18n="byteFieldBridge"></p><p data-i18n="byteMethod"></p>
+      <section class="stage-card" aria-labelledby="byte-distribute-title">
+      <h2 id="byte-distribute-title" data-i18n="byteDistribute"></h2>
+      <p data-i18n="bytesIntro"></p><p data-i18n="byteFieldBridge"></p><p data-i18n="byteMethod"></p>
       <p data-i18n="fieldRule"></p>
       <p data-i18n="byteFieldReason"></p>
-      <h3 data-i18n="byteDistribute"></h3>
       <div class="settings-grid"><label><span data-i18n="byteInput"></span><input id="byte-message" type="text" value="MEET AT DAWN" autocomplete="off" spellcheck="false"></label>
         <label><span>k</span><select id="byte-k"></select></label><label><span>n</span><select id="byte-n"></select></label></div>
       <p id="byte-error" role="status"></p>
@@ -137,16 +146,19 @@
       <label class="byte-column-label"><span data-i18n="byteColumnLabel"></span><select id="byte-column"></select></label>
       <p id="byte-formula" class="result"></p><div id="byte-calculation" class="table-frame"></div>
       <div id="byte-table-frame" class="table-frame"><table id="byte-table"></table></div>
-      <h3 data-i18n="byteRestore"></h3><p data-i18n="byteRestoreHelp"></p><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
+      </section>
+      <section class="stage-card" aria-labelledby="byte-recover-title">
+      <h2 id="byte-recover-title" data-i18n="byteRestore"></h2><p data-i18n="byteRestoreHelp"></p><div id="byte-picks" class="actions"></div><div id="byte-weights" class="table-frame"></div>
       <p id="byte-restored-hex" class="result"></p><p id="byte-restored-text" class="result"></p><p data-i18n="byteOutputHelp"></p>
       <h3 data-i18n="multiplication"></h3><p data-i18n="multiplyIntro"></p><div id="multiply-steps" class="table-frame"></div>
       <p id="multiply-log"></p>
+      </section>
     </section>
     <section id="panel-pitfalls" class="panel" role="tabpanel" aria-labelledby="tab-pitfalls" hidden>
-      <h2 data-i18n="pitfalls"></h2><p data-i18n="pitfallsIntro"></p><p data-i18n="demoOnly"></p>
-      <div class="pitfall-card"><h3 data-i18n="tamperTitle"></h3><label><span data-i18n="checkLayer"></span><select id="tamper-layer"><option value="none" data-i18n="noCheck"></option><option value="crc" data-i18n="crcCheck"></option><option value="fingerprint" data-i18n="fingerprintCheck"></option></select></label><div id="tamper-output"></div></div>
-      <div class="pitfall-card"><h3 data-i18n="zeroTitle"></h3><div id="zero-output"></div></div>
-      <div class="pitfall-card"><h3 data-i18n="shortTitle"></h3><div id="short-output"></div></div>
+      <p data-i18n="pitfallsIntro"></p><p data-i18n="demoOnly"></p>
+      <div class="pitfall-card"><h2 data-i18n="tamperTitle"></h2><label><span data-i18n="checkLayer"></span><select id="tamper-layer"><option value="none" data-i18n="noCheck"></option><option value="crc" data-i18n="crcCheck"></option><option value="fingerprint" data-i18n="fingerprintCheck"></option></select></label><div id="tamper-output"></div></div>
+      <div class="pitfall-card"><h2 data-i18n="zeroTitle"></h2><div id="zero-output"></div></div>
+      <div class="pitfall-card"><h2 data-i18n="shortTitle"></h2><div id="short-output"></div></div>
     </section>
   </main>
   <footer><a href="https://github.com/ipusiron/shamir-sharing-cipherlab" data-i18n="source"></a></footer>

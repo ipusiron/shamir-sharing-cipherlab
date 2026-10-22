@@ -65,10 +65,15 @@
   function resetReal(){ s.realY={};for(let x=1;x<=s.n;x++)s.realY[x]=s.c.reduce((sum,c,i)=>sum+c*x**i,0);s.realZero=s.c[0]; }
   function table(id, rows) { const body=$(id);body.replaceChildren();for(const cells of rows){const row=E('tr');for(const value of cells)row.append(E('td',value));body.append(row);} }
   function renderTables(){
-    $('polynomial').textContent=`f(x) = ${s.c.map((c,i)=>i?` + ${c}x${i>1?`^${i}`:''}`:String(c)).join('')} (mod ${s.p})`;
-    table('distribution-table',shares().map(([x,y])=>{const terms=s.c.map((c,i)=>c*x**i);return [x,terms.join(' + '),terms.reduce((a,b)=>a+b,0),y];}));
+    const exponent=i=>i>1?'⁰¹²³⁴⁵⁶⁷⁸⁹'[i]:'';
+    $('polynomial').textContent=`f(x) = ${s.c.map((c,i)=>i?` + ${c}x${exponent(i)}`:String(c)).join('')} (mod ${s.p})`;
+    table('distribution-table',shares().map(([x,y])=>{
+      const terms=s.c.map((c,i)=>c*x**i);
+      const substitution=s.c.map((c,i)=>i?`${c}×${x}${exponent(i)}`:String(c)).join('+');
+      return [x,`f(${x})=${substitution}=${terms.join('+')}`,terms.reduce((a,b)=>a+b,0),y];
+    }));
     $('share-data').replaceChildren(...shares().map(([x,y])=>{
-      const expression=s.c.map((c,i)=>i?`${c}×${x}${i>1?`^${i}`:''}`:String(c)).join(' + ');
+      const expression=s.c.map((c,i)=>i?`${c}×${x}${exponent(i)}`:String(c)).join(' + ');
       const vi=`v${'₀₁₂₃₄₅₆₇₈₉'[x]}`;
       const line=E('p');
       line.append(E('strong',t('shareData').replace('{i}',x)),E('span',` ${vi} = f(${x}) = ${y}`),E('br'),
