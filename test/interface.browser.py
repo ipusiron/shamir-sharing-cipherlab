@@ -51,6 +51,9 @@ def test_linear_intro(page, width):
     assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
     assert "13本" in page.locator("#linear-one-result").inner_text()
     assert "(1,9)" in page.locator("#linear-selected").inner_text()
+    pair_meaning = page.locator("#panel-linear [data-i18n='linearPairMeaning']")
+    assert "(1,9) は、管理人番号1（＝#1）とシェア9のセット" in pair_meaning.inner_text()
+    assert pair_meaning.bounding_box()["y"] < page.locator("#linear-picks").bounding_box()["y"]
     assert page.locator("#linear-grid circle.linear-possible").count() == 13
     assert page.locator("#linear-grid").get_attribute("width") == "260"
     assert page.locator("#linear-grid").bounding_box()["width"] <= width
@@ -90,6 +93,7 @@ def test_linear_intro(page, width):
     assert rows.count() == 5
     page.locator("#language").click()
     assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
+    assert "(1,9) means custodian number 1 (#1) and share value 9" in pair_meaning.inner_text()
     assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("Distribution")
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("Reconstruction")
     assert "What is GF(13)?" in primer.inner_text()

@@ -67,7 +67,7 @@ GF(13) is a finite field with 13 values, 0–12. Add, subtract, and multiply mod
 
 The first tab starts with `p=13, n=5, s=5, a₁=4` and makes shares from `f(x)=5+4x (mod 13)`. During “Distribution”, dealer `D` calculates `vᵢ=f(i)` and gives one share to each custodian. Open the disclosure to follow the calculations and recipients, from `v₁=f(1)=(5+4×1) mod 13=9` to `v₅=f(5)=(5+4×5) mod 13=12`.
 
-During “Reconstruction”, start with custodian #1’s share `(1,9)`. With this one point, the alternative `s=0, a₁=9` also fits. Every candidate `s=0…12` has a corresponding polynomial. Uniformly chosen coefficients leave all candidates equally likely. Add custodian #2’s `(2,0)` and the polynomial is uniquely `f(x)=5+4x (mod 13)`, recovering `s=f(0)=5`.
+During “Reconstruction”, start with custodian #1’s share. A share itself is the value `vᵢ`. For reconstruction, pair custodian number `i` (shown as `#i`) with share value `vᵢ` and write `(i,vᵢ)`. In the default example, `(1,9)` means custodian number 1 (`#1`) and share value 9. With this one point, the alternative `s=0, a₁=9` also fits. Every candidate `s=0…12` has a corresponding polynomial. Uniformly chosen coefficients leave all candidates equally likely. Add custodian #2’s `(2,0)` and the polynomial is uniquely `f(x)=5+4x (mod 13)`, recovering `s=f(0)=5`.
 
 The dealer can change `s` and `a₁` inside a collapsed section. A participant with one share should be considered unaware of those settings. The grid shows finite-field points, so it does not connect them as a continuous real-number line.
 
