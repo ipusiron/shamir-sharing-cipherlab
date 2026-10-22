@@ -45,6 +45,8 @@ The same four states in Japanese appear in the [Japanese README](README.md).
 
 In `(n,k)`, n shares are created, and at least k of them are needed to reconstruct the secret. `p` is the prime used for arithmetic. Lagrange interpolation of k shares gives a polynomial of degree at most k−1: degree 0 for k=1, degree 1 for k=2, and degree 2 for k=3. With the default `k=3`, the shares come from `f(x)=f(0)+a₁x+a₂x² (mod p)`, and interpolation recovers `f(0)` from three selected points.
 
+On a share button labeled `#i (x,y)`, `#i` is the share number and `(x,y)` is its point. Here `x=i` and `y=f(x)` is the share value. The earlier `(n,k)` gives the total number of shares and the reconstruction threshold, not point coordinates.
+
 The default GF(13) example is `p=13, k=3, n=5, f(x)=5+4x+2x²`. Its shares are `(1,11), (2,8), (3,9), (4,1), (5,10)`. For {1,2,3}, the reconstruction weights are `(3,10,1)`, the weighted terms are `(7,2,9)`, and the secret is `5`. Two shares leave 13 candidates. Forcing the highest coefficient to be nonzero removes the candidate `S=1`.
 
 Coefficients are allowed to be zero, so the polynomial has degree *at most* k−1. With `k=1`, every share is simply the secret: copying instead of splitting.
