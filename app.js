@@ -144,6 +144,24 @@
   $('previous-candidate').addEventListener('click',()=>nextCandidate(-1));$('next-candidate').addEventListener('click',()=>nextCandidate(1));
   $('all-candidates').addEventListener('click',()=>{s.all=!s.all;render();});$('leading-only').addEventListener('change',()=>{s.leading=$('leading-only').checked;render();});
   const field=$('field-grid');
+  const coordinateTooltip=$('grid-coordinate-tooltip');
+  const hideCoordinates=()=>{coordinateTooltip.hidden=true;};
+  for(const svg of [field,$('linear-grid')]){
+    svg.addEventListener('pointermove',event=>{
+      if(event.pointerType==='touch'){hideCoordinates();return;}
+      const box=svg.getBoundingClientRect(),size=svg===field?s.p:13;
+      const x=Math.floor((event.clientX-box.left)*size/box.width);
+      const y=size-1-Math.floor((event.clientY-box.top)*size/box.height);
+      if(x<0||x>=size||y<0||y>=size){hideCoordinates();return;}
+      coordinateTooltip.textContent=`(${x}, ${y})`;
+      coordinateTooltip.hidden=false;
+      coordinateTooltip.style.left=`${Math.max(8,Math.min(event.clientX+12,innerWidth-coordinateTooltip.offsetWidth-8))}px`;
+      coordinateTooltip.style.top=`${event.clientY+14+coordinateTooltip.offsetHeight<innerHeight?event.clientY+14:event.clientY-coordinateTooltip.offsetHeight-14}px`;
+    });
+    svg.addEventListener('pointerleave',hideCoordinates);
+    svg.addEventListener('pointercancel',hideCoordinates);
+  }
+  window.addEventListener('wheel',hideCoordinates,{passive:true});
   field.addEventListener('click',e=>{const point=e.target.closest('[data-share-x]'),cell=e.target.closest('[data-cell-x]');if(point){s.activeX=Number(point.dataset.shareX);return;}if(cell&&s.activeX!==null&&Number(cell.dataset.cellX)===s.activeX)move(s.activeX,Number(cell.dataset.cellY));});
   field.addEventListener('pointerdown',e=>{const point=e.target.closest('[data-share-x]');if(point){s.gridDrag=Number(point.dataset.shareX);s.activeX=s.gridDrag;point.focus();field.setPointerCapture(e.pointerId);}});
   field.addEventListener('pointerup',e=>{if(s.gridDrag===undefined)return;const x=s.gridDrag;s.gridDrag=undefined;const r=field.getBoundingClientRect(),d=r.width/s.p,col=Math.floor((e.clientX-r.left)/d),y=s.p-1-Math.floor((e.clientY-r.top)/d);

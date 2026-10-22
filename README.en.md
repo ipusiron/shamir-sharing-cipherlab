@@ -69,7 +69,9 @@ The first tab starts with `p=13, n=5, s=5, a₁=4` and makes shares from `f(x)=5
 
 During “Reconstruction”, start with custodian #1’s share. A share itself is the value `vᵢ`. For reconstruction, pair custodian number `i` (shown as `#i`) with share value `vᵢ` and write `(i,vᵢ)`. In the default example, `(1,9)` means custodian number 1 (`#1`) and share value 9. With this one point, the alternative `s=0, a₁=9` also fits. Every candidate `s=0…12` has a corresponding polynomial. Uniformly chosen coefficients leave all candidates equally likely. Add custodian #2’s `(2,0)` and the polynomial is uniquely `f(x)=5+4x (mod 13)`, recovering `s=f(0)=5`.
 
-The dealer can change `s` and `a₁` inside a collapsed section. A participant with one share should be considered unaware of those settings. The grid shows finite-field points, so it does not connect them as a continuous real-number line.
+The dealer can change `s` and `a₁` inside a collapsed section. A participant with one share should be considered unaware of those settings. Both grids start at zero: the bottom-left cell is `(0,0)`, with `x` increasing to the right and `y` increasing upward. Hover over a cell or point to see its `(x,y)` coordinates. The grids show finite-field points, so they do not connect them as a continuous real-number line.
+
+Under “② Compare what one and two points determine”, three straight lines through `(1,9)` first appear in an ordinary coordinate plane. They have different values, `0`, `5`, and `12`, at `x=0`, showing that one point does not determine a line. This is an illustration of the idea. Next, choose a candidate secret `s` in GF(13) and calculate `a₁=(y−s)÷x (mod 13)`. With the default point `(1,9)` and `s=0`, `a₁=9` and `f(x)=9x (mod 13)`. Substitution at `x=0,1,2` gives `0,9,5`; continue through `x=12` to place the blue dots. Red rings at `x=0` mark the 13 remaining candidate secrets. The real-number straight lines and finite-field points appear in separate figures.
 
 ## 📚 Follow 『暗号技術のすべて』 alongside the tool
 

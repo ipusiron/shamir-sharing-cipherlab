@@ -50,6 +50,14 @@ def test_linear_intro(page, width):
     assert page.locator("#linear-dealer").get_attribute("open") is None
     assert page.locator("#linear-threshold").inner_text() == "5人のうち2人が揃ってシェアを出せば秘密情報sを復元できることになります。"
     assert "13本" in page.locator("#linear-one-result").inner_text()
+    assert "1点と2点で式の決まり方" in page.locator("[data-i18n='linearGridTitle']").inner_text()
+    assert "縦がシェア値 y" in page.locator("[data-i18n='linearGridHelp']").inner_text()
+    lines = page.locator("#linear-analogy .linear-analogy-line")
+    assert lines.count() == 3
+    assert len({line.get_attribute("y1") for line in lines.all()}) == 3
+    assert len({line.get_attribute("y2") for line in lines.all()}) == 1
+    assert "普通の座標平面" in page.locator("#linear-analogy-caption").inner_text()
+    assert "x=0,1,2 での値は 0,9,5" in page.locator("#linear-candidate-result").inner_text()
     assert "(1,9)" in page.locator("#linear-selected").inner_text()
     pair_meaning = page.locator("#panel-linear [data-i18n='linearPairMeaning']")
     assert "(1,9) は、管理人番号1（＝#1）とシェア9のセット" in pair_meaning.inner_text()
@@ -57,11 +65,21 @@ def test_linear_intro(page, width):
     assert page.locator("#linear-grid circle.linear-possible").count() == 13
     assert page.locator("#linear-grid").get_attribute("width") == "260"
     assert page.locator("#linear-grid").bounding_box()["width"] <= width
+    assert "左下のマスが (0,0)" in page.locator("[data-i18n='linearGridHelp']").inner_text()
+    page.locator("#linear-grid circle.linear-selected-dot").hover()
+    tooltip = page.locator("#grid-coordinate-tooltip")
+    assert tooltip.is_visible() and tooltip.inner_text() == "(1, 9)"
+    origin = page.locator("#linear-grid rect.field-cell").first.bounding_box()
+    page.mouse.move(origin["x"] + origin["width"] / 2, origin["y"] + origin["height"] / 2)
+    assert tooltip.inner_text() == "(0, 0)"
+    page.mouse.move(0, 0)
+    assert not tooltip.is_visible()
     page.locator("#linear-candidate").select_option("5")
-    assert "a₁=4" in page.locator("#linear-candidate-result").inner_text()
+    assert "a₁=(9−5)÷1≡4" in page.locator("#linear-candidate-result").inner_text()
     assert "(mod 13)" in page.locator("#linear-candidate-result").inner_text()
     page.locator('[data-linear-pick="2"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
+    assert not page.locator("#linear-analogy").is_visible()
     assert page.locator("#linear-grid circle.linear-possible").count() == 0
     page.locator('[data-linear-pick="2"]').click()
     assert "13本" in page.locator("#linear-one-result").inner_text()
@@ -97,6 +115,8 @@ def test_linear_intro(page, width):
     assert page.locator("#panel-linear [data-i18n='linearDistributionTitle']").inner_text().startswith("Distribution")
     assert page.locator("#panel-linear [data-i18n='linearRecoveryTitle']").inner_text().startswith("Reconstruction")
     assert "What is GF(13)?" in primer.inner_text()
+    assert "share value" in page.locator("[data-i18n='linearGridHelp']").inner_text()
+    assert "ordinary coordinate plane" in page.locator("#linear-analogy-caption").inner_text()
     assert "2×7 = 14 ≡ 1" in primer.inner_text()
     assert "D computes v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()
     assert page.locator("#linear-threshold").inner_text().startswith("When two of the 5 participants")
@@ -239,6 +259,15 @@ def test_hand_primer(page):
 
 def test_interactions(page):
     assert first_y(page) == "11"
+    assert "左下のマスが (0,0)" in page.locator("[data-i18n='gridHint']").inner_text()
+    page.locator('#field-grid [data-share-x="1"]').hover()
+    tooltip = page.locator("#grid-coordinate-tooltip")
+    assert tooltip.is_visible() and tooltip.inner_text() == "(1, 11)"
+    origin = page.locator('#field-grid [data-cell-x="0"][data-cell-y="0"]').bounding_box()
+    page.mouse.move(origin["x"] + origin["width"] / 2, origin["y"] + origin["height"] / 2)
+    assert tooltip.inner_text() == "(0, 0)"
+    page.mouse.move(0, 0)
+    assert not tooltip.is_visible()
     assert "≡ 5" in page.locator("#reconstruction-result").inner_text()
     for method in ("keyboard", "tap", "drag"):
         page.locator("#reset-hand").click()
@@ -319,6 +348,7 @@ def test_single_selected_share(page):
     page.locator('[data-pick="2"]').click()
     point = page.locator('#field-grid [data-share-x="3"]')
     cell = page.locator('#field-grid [data-cell-x="3"][data-cell-y="10"]')
+    point.scroll_into_view_if_needed()
     start, end = point.bounding_box(), cell.bounding_box()
     page.mouse.move(start["x"] + start["width"] / 2, start["y"] + start["height"] / 2)
     page.mouse.down()
@@ -413,6 +443,11 @@ def main():
                 page.goto(URL)
                 test_linear_intro(page, width)
                 page.locator("#prime").select_option("23")
+                page.locator('#field-grid [data-cell-x="22"][data-cell-y="22"]').hover()
+                tooltip = page.locator("#grid-coordinate-tooltip")
+                assert tooltip.is_visible() and tooltip.inner_text() == "(22, 22)"
+                tip_box = tooltip.bounding_box()
+                assert 0 <= tip_box["x"] and tip_box["x"] + tip_box["width"] <= width
                 large = geometry(page, width)
                 assert large["grid"] > large["gridFrame"] if width == 320 else True
                 page.locator("#reset-hand").click()

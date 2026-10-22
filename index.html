@@ -61,12 +61,16 @@
       <h4 class="linear-step-heading" data-i18n="linearShares"></h4><p data-i18n="linearShareHint"></p>
       <p data-i18n="linearPairMeaning"></p><div id="linear-picks" class="actions"></div>
       <p id="linear-selected" class="result" role="status"></p>
-      <h4 class="linear-step-heading" data-i18n="linearGridTitle"></h4><p data-i18n="linearGridHelp"></p>
-      <div class="grid-frame"><svg id="linear-grid" width="260" height="260" viewBox="0 0 260 260" role="img" data-label="linearGridLabel"></svg></div>
-      <div id="linear-one"><p id="linear-one-result"></p><div class="actions linear-candidate-controls"><button id="linear-previous" type="button" data-i18n="previous"></button>
+      <h4 class="linear-step-heading" data-i18n="linearGridTitle"></h4><p data-i18n="linearGridIntro"></p>
+      <div id="linear-one"><p id="linear-one-result"></p>
+        <h5 data-i18n="linearAnalogyTitle"></h5><p id="linear-analogy-caption"></p>
+        <svg id="linear-analogy" viewBox="0 0 300 292" role="img" data-label="linearAnalogyLabel"></svg>
+        <p data-i18n="linearCandidateHow"></p><div class="actions linear-candidate-controls"><button id="linear-previous" type="button" data-i18n="previous"></button>
         <button id="linear-next" type="button" data-i18n="next"></button>
         <label class="linear-candidate-label"><span data-i18n="linearCandidateLabel"></span><select id="linear-candidate"></select></label></div><p id="linear-candidate-result" class="result"></p></div>
       <div id="linear-two" hidden><p id="linear-two-result" class="result"></p></div>
+      <p data-i18n="linearGridHelp"></p><p data-i18n="linearGridPoints"></p>
+      <div class="grid-frame"><svg id="linear-grid" width="260" height="260" viewBox="0 0 260 260" role="img" data-label="linearGridLabel"></svg></div>
       <button id="linear-to-hand" type="button" data-i18n="linearToHand"></button>
     </section>
     <section id="panel-hand" class="panel" role="tabpanel" aria-labelledby="tab-hand" hidden>
@@ -100,7 +104,7 @@
           <button id="all-candidates" type="button" aria-pressed="false" data-i18n="showAll"></button></div>
         <label class="check"><input id="leading-only" type="checkbox"><span data-i18n="leadingOnly"></span></label>
       </div>
-      <h3 data-i18n="gridTitle"></h3><p data-i18n="gridHint"></p><p id="grid-range" class="muted"></p><div id="grid-frame" class="grid-frame"><svg id="field-grid" role="group" data-label="gridLabel"></svg></div>
+      <h3 data-i18n="gridTitle"></h3><p data-i18n="gridHint"></p><p data-i18n="gridInteractionHint"></p><p id="grid-range" class="muted"></p><div id="grid-frame" class="grid-frame"><svg id="field-grid" role="group" data-label="gridLabel"></svg></div>
       <p id="tweak-result" class="result"></p>
       <h3 data-i18n="realTitle"></h3><p data-i18n="realWarning"></p><div class="grid-frame"><svg id="real-graph" role="img" data-label="realLabel" viewBox="0 0 600 300"></svg></div>
       <p id="real-result" class="result"></p><div id="real-picks" class="actions"></div>
@@ -126,6 +130,7 @@
     </section>
   </main>
   <footer><a href="https://github.com/ipusiron/shamir-sharing-cipherlab" data-i18n="source"></a></footer>
+  <div id="grid-coordinate-tooltip" class="grid-coordinate-tooltip" hidden aria-hidden="true"></div>
   <dialog id="help-dialog" aria-labelledby="help-title">
     <div class="help-header"><h2 id="help-title" data-i18n="help"></h2><button id="close-help" type="button" data-i18n="close"></button></div>
     <div class="help-body">
