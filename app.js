@@ -319,10 +319,11 @@
   function renderPitfalls(){const layer=$('tamper-layer').value;
     const original=demo.originalCrcs[1].toString(16).toUpperCase().padStart(8,'0'),changed=demo.changedCrc.toString(16).toUpperCase().padStart(8,'0');
     const guarded=layer==='none'?t('tamperNone'):layer==='crc'?`${t('tamperCrc')} ${original} → ${changed}`:`${t('tamperDigest')} ${P.hex(demo.reconstructed.slice(-4))} ≠ ${P.hex(P.fingerprint(demo.reconstructed.slice(0,-4)))}`;
-    demoCard('tamper-output',[['what',`${t('tamperWhat')} E=${P.hex(demo.error)}; λ₂=${toHex(G.combine256(demo.shares.slice(0,3),3).terms[1].lambda)}`],
-      ['unsafe',`${t('tamperUnsafe')} ${P.hex(demo.changed.y)}; {2,4,5} → ${P.hex(demo.reconstructed245.slice(0,12))}`],['guarded',guarded],['lesson',t('tamperLesson')]]);
-    demoCard('zero-output',[['what',t('zeroWhat')],['unsafe',t('zeroUnsafe')],['guarded',t('zeroGuard')],['lesson',t('zeroLesson')]]);
-    demoCard('short-output',[['what',t('shortWhat')],['unsafe',`${t('shortUnsafe')} ${P.hex(demo.missing)}`],['guarded',t('shortGuard')],['lesson',t('shortLesson')]]);
+    demoCard('tamper-output',[['what',t('tamperWhat')],['unsafe',t('tamperUnsafe')],['guarded',guarded],['lesson',t('tamperLesson')]]);
+    demoCard('zero-output',[['what',t('zeroWhat')],['unsafe',t('zeroUnsafe')],['guardedSafe',t('zeroGuard')],['lesson',t('zeroLesson')]]);
+    demoCard('short-output',[['what',t('shortWhat')],['unsafe',t('shortUnsafe')],['guardedSafe',t('shortGuard')],['lesson',t('shortLesson')]]);
+    $('tamper-calculation').textContent=t('tamperMath').replace('{error}',P.hex(demo.error)).replace('{lambda}',toHex(G.combine256(demo.shares.slice(0,3),3).terms[1].lambda)).replace('{share}',P.hex(demo.changed.y)).replace('{other}',P.hex(demo.reconstructed245.slice(0,12)));
+    $('short-calculation').textContent=t('shortMath').replace('{bytes}',P.hex(demo.missing));
   }
   const sources=[
     [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf'],['primary','https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf']],

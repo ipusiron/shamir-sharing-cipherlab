@@ -125,5 +125,8 @@ th { background:var(--bg); }
 .demo-step { padding:.55rem .7rem; margin:.6rem 0; background:var(--bg); border:1px solid var(--grid); }
 .demo-step p { margin:.2rem 0; overflow-wrap:anywhere; }
 .demo-step:nth-child(2) { border-left:3px dashed var(--red); }
+.demo-details { margin-top:1rem; }
+.demo-details summary { cursor:pointer; color:var(--blue); }
+.demo-details p { overflow-wrap:anywhere; }
 .source-links a { margin-right:.4rem; }
 @media (max-width:600px) { .pitfall-card, .lesson-card { padding:.65rem; } }
