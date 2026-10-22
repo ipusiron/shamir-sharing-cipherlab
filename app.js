@@ -6,8 +6,8 @@
   let language = stored('language') === 'en' ? 'en' : 'ja';
   let theme = stored('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   const t = key => ShamirMessages[language][key] || key;
-  const tabs = ['hand', 'bytes', 'pitfalls'];
-  let active = 'hand';
+  const tabs = ['linear', 'hand', 'bytes', 'pitfalls'];
+  let active = 'linear';
   function save() { try { localStorage.setItem('shamir-sharing-cipherlab.language', language); localStorage.setItem('shamir-sharing-cipherlab.theme', theme); } catch (_) { /* storage can be unavailable */ } }
   function render() {
     document.documentElement.lang = language;
@@ -21,6 +21,7 @@
       $('tab-' + name).tabIndex = selected ? 0 : -1;
       $('panel-' + name).hidden = !selected;
     }
+    window.renderShamirIntro?.();
     window.renderShamirHand?.();
     window.renderShamirExtra?.();
   }

@@ -29,6 +29,47 @@ def first_y(page):
     return page.locator("#distribution-table tr").first.locator("td").last.inner_text()
 
 
+def test_linear_intro(page, width):
+    assert page.locator("#panel-linear").is_visible()
+    assert not page.locator("#panel-hand").is_visible()
+    assert page.locator("#tab-linear").get_attribute("aria-selected") == "true"
+    assert page.locator("#linear-dealer").get_attribute("open") is None
+    assert "13本" in page.locator("#linear-one-result").inner_text()
+    assert "(1,9)" in page.locator("#linear-selected").inner_text()
+    assert page.locator("#linear-grid circle.linear-possible").count() == 13
+    assert page.locator("#linear-grid").get_attribute("width") == "260"
+    assert page.locator("#linear-grid").bounding_box()["width"] <= width
+    page.locator("#linear-candidate").select_option("5")
+    assert "a₁=4" in page.locator("#linear-candidate-result").inner_text()
+    assert "(mod 13)" in page.locator("#linear-candidate-result").inner_text()
+    page.locator('[data-linear-pick="2"]').click()
+    assert "s=5" in page.locator("#linear-two-result").inner_text()
+    assert page.locator("#linear-grid circle.linear-possible").count() == 0
+    page.locator('[data-linear-pick="2"]').click()
+    assert "13本" in page.locator("#linear-one-result").inner_text()
+    page.locator('[data-linear-pick="3"]').click()
+    assert "s=5" in page.locator("#linear-two-result").inner_text()
+    page.locator("#linear-dealer summary").click()
+    page.locator("#linear-secret").fill("7")
+    page.locator("#linear-secret").press("Tab")
+    page.locator("#linear-slope").fill("2")
+    page.locator("#linear-slope").press("Tab")
+    assert "(1,9)" in page.locator("#linear-selected").inner_text()
+    page.locator('[data-linear-pick="2"]').click()
+    assert "s=7" in page.locator("#linear-two-result").inner_text()
+    page.locator("#linear-n").select_option("7")
+    assert page.locator("#linear-picks button").count() == 7
+    page.locator("#linear-reset").click()
+    assert page.locator("#linear-picks button").count() == 5
+    page.locator("#language").click()
+    assert page.locator("#tab-linear").inner_text() == "Visualize (2, n)"
+    assert "Thirteen polynomials of degree at most one" in page.locator("#linear-one-result").inner_text()
+    page.locator("#language").click()
+    page.locator("#linear-to-hand").click()
+    assert page.locator("#panel-hand").is_visible()
+    assert page.locator("#tab-hand").evaluate("el => document.activeElement === el")
+
+
 def test_distributed_share_data(page):
     lines = page.locator("#share-data p")
     assert lines.count() == 5
@@ -67,7 +108,7 @@ def test_help(page, width):
     dialog = page.locator("#help-dialog")
     assert dialog.is_visible()
     assert page.locator("#help-title").inner_text() == "ヘルプ"
-    assert page.locator("#help-dialog ol.help-list li").count() == 6
+    assert page.locator("#help-dialog ol.help-list li").count() == 7
     assert page.locator("#help-dialog ul.help-list li").count() == 6
     assert page.locator("#help-dialog [data-i18n='helpUses']").inner_text() == "活用例"
     assert "実際に使っているパスワード、シードフレーズ、鍵" in dialog.inner_text()
@@ -124,7 +165,7 @@ def test_hand_primer(page):
     assert "k=1：0次、k=2：1次、k=3：2次" in primer.inner_text()
     assert "k=3" in primer.inner_text()
     assert "ラグランジュ補間" in primer.inner_text()
-    assert page.locator(".hand-formula").inner_text() == "f(x) = s + a₁x + a₂x² (mod p)"
+    assert page.locator("#panel-hand .hand-formula").inner_text() == "f(x) = s + a₁x + a₂x² (mod p)"
     assert primer.evaluate("el => el.scrollWidth <= el.clientWidth")
     notation = page.locator("#share-notation")
     assert notation.is_visible()
@@ -306,7 +347,7 @@ def test_tabs_and_localization(page):
     assert "8739EBE2" in page.locator("#tamper-output").inner_text()
     page.locator("#language").click()
     assert page.locator("html").get_attribute("lang") == "en"
-    assert page.locator("#tab-hand").inner_text() == "Trace by hand"
+    assert page.locator("#tab-hand").inner_text() == "Trace (k, n) by hand"
     assert page.locator("#field-grid").get_attribute("aria-label") == "Finite field grid of shares and candidates"
     assert page.locator("#real-graph").get_attribute("aria-label") == "Real-number interpolation curve"
     assert page.locator("#panel-pitfalls").is_visible()
@@ -328,6 +369,7 @@ def main():
                 page.on("pageerror", lambda error: failures.append(str(error)))
                 page.on("console", lambda message: failures.append(message.text) if message.type == "error" else None)
                 page.goto(URL)
+                test_linear_intro(page, width)
                 page.locator("#prime").select_option("23")
                 large = geometry(page, width)
                 assert large["grid"] > large["gridFrame"] if width == 320 else True
