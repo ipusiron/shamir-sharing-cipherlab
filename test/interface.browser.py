@@ -125,8 +125,17 @@ def test_linear_intro(page, width):
     assert "もう1人" in page.locator("#linear-two-result").inner_text()
     assert graph.locator(".linear-two-branch").count() == 0
     assert graph.locator(".linear-two-share").count() == 1
+    assert graph.locator(".linear-analogy-line").count() == 3
+    assert all(f"s={candidate}" in graph.text_content() for candidate in (0, 5, 12))
+    assert graph.locator(".linear-two-secret").count() == 0
+    assert page.locator("#linear-two-graph-title").inner_text() == "1点を通る直線を図で見る"
+    assert "点 (2,0) を通る秘密候補" in page.locator("#linear-two-graph-caption").inner_text()
+    assert graph.get_attribute("aria-label") == "選んだ1点を通る秘密候補の直線3本"
     page.locator('#linear-two-picks [data-linear-pick="1"]').click()
     assert "s=5" in page.locator("#linear-two-result").inner_text()
+    assert graph.locator(".linear-analogy-line").count() == 0
+    assert graph.locator(".linear-two-branch").count() > 0
+    assert page.locator("#linear-two-graph-title").inner_text() == "2点から決まる式を図で見る"
     page.locator('#linear-two-picks [data-linear-pick="4"]').click()
     assert "(2,0)" in page.locator("#linear-two-selected").inner_text()
     assert "(4,8)" in page.locator("#linear-two-selected").inner_text()
@@ -203,6 +212,10 @@ def test_linear_intro(page, width):
     assert "ordinary coordinate plane" in page.locator("#linear-analogy-caption").inner_text()
     assert "Each y-intercept is f(0)" in page.locator("#linear-analogy-caption").inner_text()
     assert "segments represent the same polynomial" in page.locator("#linear-two-graph-caption").inner_text()
+    page.locator('#linear-two-picks [data-linear-pick="1"]').click()
+    assert page.locator("#linear-two-graph-title").inner_text() == "See lines through one point"
+    assert "all 13 secrets" in page.locator("#linear-two-graph-caption").inner_text()
+    assert graph.locator(".linear-analogy-line").count() == 3
     assert "distinct polynomials" in distinct.inner_text()
     assert "2×7 = 14 ≡ 1" in primer.inner_text()
     assert "D computes v₁=f(1)=(5+4×1) mod 13=9" in rows.first.inner_text()
