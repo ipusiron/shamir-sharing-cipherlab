@@ -38,13 +38,25 @@ Open it in a browser, or open the HTML directly with `file://`. Computation and 
 
 These screenshots show light mode. Use the “◐” button at the top right to switch to dark mode.
 
-| View | Screenshot |
-|---|---|
-| Visualize (2, n) | ![One share and candidate secrets, English](assets/en/light/intro.png) |
-| Trace (k, n) by hand | ![Hand calculation, English](assets/en/light/hand.png) |
-| k−1 candidates | ![Candidate coordinate plane, English](assets/en/light/candidates.png) |
-| Bytes | ![Byte table, English](assets/en/light/bytes.png) |
-| Pitfalls | ![Pitfall cards, English](assets/en/light/pitfalls.png) |
+**Visualize (2, n)**
+
+![One share and candidate secrets, English](assets/en/light/intro.png)
+
+**Trace (k, n) by hand**
+
+![Hand calculation, English](assets/en/light/hand.png)
+
+**k−1 candidates**
+
+![Candidate coordinate plane, English](assets/en/light/candidates.png)
+
+**Bytes**
+
+![Byte table, English](assets/en/light/bytes.png)
+
+**Pitfalls**
+
+![Pitfall cards, English](assets/en/light/pitfalls.png)
 
 The same five states in Japanese appear in the [Japanese README](README.md).
 The byte table shows one set of coefficients used for the screenshots. Opening “Bytes” again draws new random coefficients and changes the share values.

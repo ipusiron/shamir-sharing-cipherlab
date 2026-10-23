@@ -65,13 +65,25 @@ Shamirの`(k,n)`しきい値法では、秘密情報`s`から`n`個のシェア�
 
 以下はライトモードの画面です。画面右上の「◐」ボタンでダークモードに切り替えられます。
 
-| 画面 | スクリーンショット |
-|---|---|
-| (2, n)を可視化する | ![1個のシェアと秘密候補・日本語](assets/ja/light/intro.png) |
-| (k, n)を手で追う | ![手計算・日本語](assets/ja/light/hand.png) |
-| k−1個の候補 | ![候補の座標平面・日本語](assets/ja/light/candidates.png) |
-| バイトで見る | ![バイト表・日本語](assets/ja/light/bytes.png) |
-| 確かめる | ![落とし穴・日本語](assets/ja/light/pitfalls.png) |
+**(2, n)を可視化する**
+
+![1個のシェアと秘密候補・日本語](assets/ja/light/intro.png)
+
+**(k, n)を手で追う**
+
+![手計算・日本語](assets/ja/light/hand.png)
+
+**k−1個の候補**
+
+![候補の座標平面・日本語](assets/ja/light/candidates.png)
+
+**バイトで見る**
+
+![バイト表・日本語](assets/ja/light/bytes.png)
+
+**確かめる**
+
+![落とし穴・日本語](assets/ja/light/pitfalls.png)
 
 英語の同じ5状態は[English README](README.en.md)に掲載しています。
 スクリーンショットのバイト表は撮影時の係数で計算した一例です。実際に「バイトで見る」を開くたび、乱数係数とシェア値は変わります。
