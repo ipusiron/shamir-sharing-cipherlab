@@ -12,7 +12,9 @@ English · [日本語](README.md)
 
 ShamirSharing CipherLab is a teaching tool for trying Shamir secret sharing on coordinate planes and in byte tables. Begin with “Visualize (2, n)” to compare one share with two, then calculate a general threshold scheme in “Trace (k, n) by hand”. “Bytes” applies it to a short string, and “Pitfalls” examines invalid inputs and changed shares.
 
-Shamir and Blakley independently proposed secret sharing schemes in 1979. This tool implements Shamir’s polynomial construction. Lagrange interpolation is its reconstruction calculation. Blakley’s geometric construction is outside the scope of the tool.
+Shamir and Blakley independently proposed secret sharing schemes in 1979. This tool implements Shamir’s polynomial construction. Lagrange interpolation is its reconstruction calculation. Blakley’s geometric construction is outside the scope of the tool.[^blakley-visual]
+
+[^blakley-visual]: [Blakley's 1979 scheme](https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf) treats each share as a hyperplane and recovers the secret from the intersection of enough hyperplanes. The earlier [Day070 VisualCryptography CipherLab](https://github.com/ipusiron/visual-cryptography-cipherlab) implements [Naor and Shamir's 1994 visual cryptography](https://www.wisdom.weizmann.ac.il/~naor/PAPERS/vis.pdf): image shares are superimposed to reveal the image by eye. Both use multiple shares, but they are different constructions.
 
 In Shamir’s (k,n) threshold scheme, n shares are made from secret s and given to n participants, one each. It has two conditions.
 

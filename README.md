@@ -39,7 +39,9 @@ hub: true
 
 ShamirSharing CipherLabは、Shamirの秘密分散を座標平面とバイト表で試す教材です。まず「(2, n)を可視化する」で1個と2個のシェアを比べ、次に「(k, n)を手で追う」で一般のしきい値法を計算します。「バイトで見る」は文字列をバイトに変換して分け、「確かめる」は不正な入力やシェアの変更を調べます。
 
-ShamirとBlakleyは1979年に秘密分散方式を独立に提案しました。本ツールが扱うのは、Shamirの多項式による方式です。ラグランジュ補間はその復元計算に使います。Blakleyの幾何学的な方式は扱いません。
+ShamirとBlakleyは1979年に秘密分散方式を独立に提案しました。本ツールが扱うのは、Shamirの多項式による方式です。ラグランジュ補間はその復元計算に使います。Blakleyの幾何学的な方式は扱いません。[^blakley-visual]
+
+[^blakley-visual]: [Blakleyの方式（1979）](https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf)は、各シェアを超平面とし、所定数の超平面の交点から秘密を求めます。以前の[Day070 VisualCryptography CipherLab](https://github.com/ipusiron/visual-cryptography-cipherlab)は、[NaorとShamirの視覚暗号（1994）](https://www.wisdom.weizmann.ac.il/~naor/PAPERS/vis.pdf)を使い、画像のシェアを重ねて目で復元します。複数のシェアを使う点は共通ですが、Blakley方式とは別の構成です。
 
 Shamirの`(k,n)`しきい値法では、秘密情報`s`から`n`個のシェアを作り、`n`人に1個ずつ渡します。次の二つが条件です。
 
