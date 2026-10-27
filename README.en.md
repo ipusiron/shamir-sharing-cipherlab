@@ -216,6 +216,7 @@ The text after `#` explains each file. The local `.work/` directory is excluded 
 |-- package.json # Test command
 |-- index.html # Four-tab interface and CSP
 |-- style.css # Coordinate-plane styling and layout
+|-- theme-init.js # Sets the theme before the first paint
 |-- messages.js # Japanese and English dictionary
 |-- app.js # DOM, reconstruction table, candidate diagrams and real-number curve
 |-- intro.js # (2,n) line and candidate diagrams
@@ -224,6 +225,7 @@ The text after `#` explains each file. The local `.work/` directory is excluded 
 |-- sha256-core.js # SHA-256 copy from Day118
 |-- test/core.test.js # Known-value and arithmetic tests
 |-- test/structure.test.js # CSP and dictionary static tests
+|-- test/theme-init.test.js # Initial theme choice and load position tests
 |-- test/readme.test.js # Bilingual README and file list tests
 |-- test/interface.browser.py # file:// and UI browser tests
 |-- test/vectors.json # Expected values copied from the reference

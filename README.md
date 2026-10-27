@@ -243,6 +243,7 @@ Node.js 22以上で`npm test`を実行します。依存パッケージは不要
 |-- package.json # テストコマンド
 |-- index.html # 4タブの画面とCSP
 |-- style.css # 座標平面と画面の配色・レイアウト
+|-- theme-init.js # 最初の描画の前に明暗を決める
 |-- messages.js # 日英の辞書
 |-- app.js # DOM、復元表、候補図と実数曲線
 |-- intro.js # (2,n)の一次式と秘密候補の直線図
@@ -251,6 +252,7 @@ Node.js 22以上で`npm test`を実行します。依存パッケージは不要
 |-- sha256-core.js # Day118由来の指紋用SHA-256
 |-- test/core.test.js # 既知値と計算のテスト
 |-- test/structure.test.js # CSPと辞書などの静的テスト
+|-- test/theme-init.test.js # 明暗の初期判定と読み込み位置のテスト
 |-- test/readme.test.js # 日英READMEとファイル一覧のテスト
 |-- test/interface.browser.py # file://と画面操作のブラウザーテスト
 |-- test/vectors.json # 参照実装から写した期待値

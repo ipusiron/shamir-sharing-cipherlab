@@ -4,7 +4,8 @@
   const $ = id => document.getElementById(id);
   const stored = key => { try { return localStorage.getItem('shamir-sharing-cipherlab.' + key); } catch (_) { return null; } };
   let language = stored('language') === 'en' ? 'en' : 'ja';
-  let theme = stored('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  // theme-init.js sets data-theme in <head> before the first paint; keep that value here.
+  let theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
   const t = key => ShamirMessages[language][key] || key;
   const tabs = ['linear', 'hand', 'bytes', 'pitfalls'];
   let active = 'linear';
