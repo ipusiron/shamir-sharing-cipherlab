@@ -14,7 +14,7 @@ ShamirSharing CipherLab is a teaching tool for trying Shamir secret sharing on c
 
 Shamir and Blakley independently proposed secret sharing schemes in 1979. This tool implements Shamir’s polynomial construction. Lagrange interpolation is its reconstruction calculation. Blakley’s geometric construction is outside the scope of the tool.[^blakley-visual] Blakley’s scheme can be tried in [Day126 BlakleySharing CipherLab](https://github.com/ipusiron/blakley-sharing-cipherlab), which uses the same examples as this tool.
 
-[^blakley-visual]: [Blakley's 1979 scheme](https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf) treats each share as a hyperplane and recovers the secret from the intersection of enough hyperplanes. The earlier [Day070 VisualCryptography CipherLab](https://github.com/ipusiron/visual-cryptography-cipherlab) implements [Naor and Shamir's 1994 visual cryptography](https://www.wisdom.weizmann.ac.il/~naor/PAPERS/vis.pdf): image shares are superimposed to reveal the image by eye. Both use multiple shares, but they are different constructions.
+[^blakley-visual]: [Blakley's 1979 scheme](https://doi.org/10.1109/MARK.1979.8817296) treats each share as a hyperplane and recovers the secret from the intersection of enough hyperplanes. The earlier [Day070 VisualCryptography CipherLab](https://github.com/ipusiron/visual-cryptography-cipherlab) implements [Naor and Shamir's 1994 visual cryptography](https://www.wisdom.weizmann.ac.il/~naor/PAPERS/vis.pdf): image shares are superimposed to reveal the image by eye. Both use multiple shares, but they are different constructions.
 
 In Shamir’s (k,n) threshold scheme, n shares are made from secret s and given to n participants, one each. It has two conditions.
 
@@ -150,7 +150,7 @@ Actual splitting and reconstruction use eight shifts and masks, without table lo
 
 CRC-32 detects transcription errors, but a participant who changes a share can recompute its CRC. A four-byte prefix of SHA-256 included in the shared secret detects an incorrect reconstruction with high probability, but cannot identify the bad share. Without knowing the original secret, a cheater can choose an offset but cannot target an arbitrary replacement phrase. The model can show `DAWN→DUSK` because the original phrase is visible to the audience.
 
-Each theory section in the interface separates primary and secondary sources. Shamir’s paper appeared in *Communications of the ACM* 22(11), 612–613 (1979), [DOI:10.1145/359168.359176](https://doi.org/10.1145/359168.359176). Blakley’s original paper is [*Safeguarding Cryptographic Keys* (1979)](https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf). For interpolation, see [HAC 12.71](https://cacr.uwaterloo.ca/hac/about/chap12.pdf) and IPUSIRON’s Japanese-language book 『暗号技術のすべて』, section 9.2 (pp. 652–661). Tompa and Woll’s full text was not checked; bibliographies disagree between 1988 1(2) and 1989 1(3).
+Each theory section in the interface separates primary and secondary sources. Shamir’s paper appeared in *Communications of the ACM* 22(11), 612–613 (1979), [DOI:10.1145/359168.359176](https://doi.org/10.1145/359168.359176). Blakley’s original paper is *Safeguarding Cryptographic Keys* (1979), [DOI:10.1109/MARK.1979.8817296](https://doi.org/10.1109/MARK.1979.8817296). For interpolation, see [HAC 12.71](https://cacr.uwaterloo.ca/hac/about/chap12.pdf) and IPUSIRON’s Japanese-language book 『暗号技術のすべて』, section 9.2 (pp. 652–661). Tompa and Woll’s full text was not checked; bibliographies disagree between 1988 1(2) and 1989 1(3).
 
 ## 🔄 Day070 and prior work
 
