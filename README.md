@@ -41,7 +41,7 @@ ShamirSharing CipherLabは、Shamirの秘密分散を座標平面とバイト表
 
 ShamirとBlakleyは1979年に秘密分散方式を独立に提案しました。本ツールが扱うのは、Shamirの多項式による方式です。ラグランジュ補間はその復元計算に使います。Blakleyの幾何学的な方式は扱いません。[^blakley-visual]Blakleyの方式は、[Day126 BlakleySharing CipherLab](https://github.com/ipusiron/blakley-sharing-cipherlab)で、本ツールと同じ例を使って試せます。
 
-[^blakley-visual]: [Blakleyの方式（1979）](https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf)は、各シェアを超平面とし、所定数の超平面の交点から秘密を求めます。以前の[Day070 VisualCryptography CipherLab](https://github.com/ipusiron/visual-cryptography-cipherlab)は、[NaorとShamirの視覚暗号（1994）](https://www.wisdom.weizmann.ac.il/~naor/PAPERS/vis.pdf)を使い、画像のシェアを重ねて目で復元します。複数のシェアを使う点は共通ですが、Blakley方式とは別の構成です。
+[^blakley-visual]: [Blakleyの方式（1979）](https://doi.org/10.1109/MARK.1979.8817296)は、各シェアを超平面とし、所定数の超平面の交点から秘密を求めます。以前の[Day070 VisualCryptography CipherLab](https://github.com/ipusiron/visual-cryptography-cipherlab)は、[NaorとShamirの視覚暗号（1994）](https://www.wisdom.weizmann.ac.il/~naor/PAPERS/vis.pdf)を使い、画像のシェアを重ねて目で復元します。複数のシェアを使う点は共通ですが、Blakley方式とは別の構成です。
 
 Shamirの`(k,n)`しきい値法では、秘密情報`s`から`n`個のシェアを作り、`n`人に1個ずつ渡します。次の二つが条件です。
 
@@ -177,7 +177,7 @@ GF(p)では`λᵢ(0) = Πⱼ≠ᵢ xⱼ/(xⱼ−xᵢ)`、`s = Σᵢ λᵢ(0)yᵢ
 
 CRC-32は書き写しの誤りを見つけられますが、書き換えた人がCRCを再計算すれば通ります。秘密に付けたSHA-256の先頭4バイトは、戻った値の不一致を高い確率で見つけますが、悪いシェアの持ち主を特定しません。改ざん者は元の秘密を知らないため、任意の文を狙って復元させることはできず、ずらす量だけを決められます。この模型で`DAWN→DUSK`を見せられるのは、観客に元の秘密が見えているためです。
 
-座学の出典は画面の各節に一次資料・二次資料を分けて示しました。Shamirの原論文は *Communications of the ACM* 22(11), 612–613 (1979), [DOI:10.1145/359168.359176](https://doi.org/10.1145/359168.359176)です。Blakleyの原論文は *Safeguarding Cryptographic Keys*（1979）で、[本文](https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf)を確認しました。ラグランジュ補間は[HAC 12.71](https://cacr.uwaterloo.ca/hac/about/chap12.pdf)と、IPUSIRON『暗号技術のすべて』9.2節（P652–661）をあわせて参照できます。Tompa & Wollの本文は未確認で、書誌の年・号は資料間で1988年1(2)と1989年1(3)に割れています。
+座学の出典は画面の各節に一次資料・二次資料を分けて示しました。Shamirの原論文は *Communications of the ACM* 22(11), 612–613 (1979), [DOI:10.1145/359168.359176](https://doi.org/10.1145/359168.359176)です。Blakleyの原論文は *Safeguarding Cryptographic Keys*（1979）, [DOI:10.1109/MARK.1979.8817296](https://doi.org/10.1109/MARK.1979.8817296)で、本文を確認しました。ラグランジュ補間は[HAC 12.71](https://cacr.uwaterloo.ca/hac/about/chap12.pdf)と、IPUSIRON『暗号技術のすべて』9.2節（P652–661）をあわせて参照できます。Tompa & Wollの本文は未確認で、書誌の年・号は資料間で1988年1(2)と1989年1(3)に割れています。
 
 ## 🔄 Day070と先行例との関係
 
