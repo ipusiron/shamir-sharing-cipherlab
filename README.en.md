@@ -182,6 +182,8 @@ Ways of using this tool in particular:
 
 It also works as a companion to section 9.2 (pp. 652–661) of 『暗号技術のすべて』, a comparison with Day070’s visual cryptography, an entry to fingerprinting through [Day118 SHA-256 Byte Inspector](https://github.com/ipusiron/sha256-byte-inspector), and a bridge to information-theoretic secrecy in [Day029 OTP Animation](https://github.com/ipusiron/otp-animation).
 
+To split a real secret and store it on paper, use [Day124 Scatter Seeds](https://github.com/ipusiron/scatter-seeds). It creates paper shares with Shamir’s scheme and checks recovery from every threshold subset before printing.
+
 ## 🔒 Inputs and implementation cautions
 
 - Storage: Only language and theme are saved. Phrases and coefficients never go into localStorage or the URL.
