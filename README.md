@@ -209,6 +209,8 @@ CRC-32は書き写しの誤りを見つけられますが、書き換えた人�
 
 ほかに、『暗号技術のすべて』9.2節（P652–661）の副読、Day070の視覚暗号との比較、[Day118 SHA-256 Byte Inspector](https://github.com/ipusiron/sha256-byte-inspector)で指紋の仕組みの学習、[Day029 OTP Animation](https://github.com/ipusiron/otp-animation)と情報理論的安全性を比べる教材にも使えます。
 
+本物の秘密を紙に分けて保管するときは、[Day124 Scatter Seeds](https://github.com/ipusiron/scatter-seeds)を使えます。Shamir方式で紙のシェアを作り、すべての組み合わせで復元を検査してから印刷します。
+
 ## 🔒 入力と実装上の注意
 
 - 保存：言語と明暗のみ。入力した文や係数をlocalStorageやURLに置かない。

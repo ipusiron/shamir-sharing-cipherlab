@@ -353,14 +353,14 @@
     $('short-calculation').textContent=t('shortMath').replace('{bytes}',P.hex(demo.missing));
   }
   const sources=[
-    [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf'],['primary','https://pages.cs.wisc.edu/~cs812-1/Blakley1979.pdf']],
+    [['primary','https://doi.org/10.1145/359168.359176'],['primary','https://doi.org/10.1109/MARK.1979.8817296']],
     [['secondary','https://cacr.uwaterloo.ca/hac/about/chap12.pdf']],
-    [['primary','https://web.mit.edu/6.857/OldStuff/Fall03/ref/Shamir-HowToShareASecret.pdf'],['secondary','https://cacr.uwaterloo.ca/hac/about/chap12.pdf']],
+    [['primary','https://doi.org/10.1145/359168.359176'],['secondary','https://cacr.uwaterloo.ca/hac/about/chap12.pdf']],
     [['primary','https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf'],['primary','https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf']],
-    [['primary','https://research.ibm.com/publications/how-to-share-a-secret-with-cheaters'],['primary','https://www.cs.umd.edu/~gasarch/TOPICS/secretsharing/feldmanVSS.pdf'],['primary','https://www.cs.cornell.edu/courses/cs754/2001fa/129.PDF']],
+    [['primary','https://research.ibm.com/publications/how-to-share-a-secret-with-cheaters'],['primary','https://doi.org/10.1109/SFCS.1987.4'],['primary','https://doi.org/10.1007/3-540-46766-1_9']],
     [['primary','https://osv.dev/vulnerability/GO-2023-1709'],['primary','https://www.ledger.com/blog/extracting-seeds'],['secondary','https://en.bitcoin.it/wiki/Shamir_Secret_Snakeoil'],['primary','https://github.com/bitcoin/bips/blob/master/bip-0093.mediawiki']],
     [['primary','https://github.com/satoshilabs/slips/blob/master/slip-0039.md'],['primary','https://github.com/bitcoin/bips/blob/master/bip-0093.mediawiki']],
-    [['primary','https://github.com/ipusiron/visual-cryptography-cipherlab'],['primary','https://github.com/ipusiron/sha256-byte-inspector'],['primary','https://github.com/ipusiron/otp-animation']]
+    [['primary','https://github.com/ipusiron/visual-cryptography-cipherlab'],['primary','https://github.com/ipusiron/scatter-seeds'],['primary','https://github.com/ipusiron/sha256-byte-inspector'],['primary','https://github.com/ipusiron/otp-animation']]
   ];
   function lessons(){const holder=$('lessons');holder.replaceChildren();for(let i=1;i<=8;i++){
     const section=E('section',undefined,'lesson-card');section.append(E('h3',t(`lesson${i}`)));
